@@ -23,7 +23,7 @@ public class FileCumulator {
     private static final String SCREEN_USAGE = "ScreenUsage";
     private static final String MISC = "Misc";
 
-    private IOUtility ioUtility;                                    // to perform IO Operations
+    private IOUtility ioUtility;    // to perform IO Operations
 
 
     private static final String BASE_ADDRESS = "Result" + FileSystems.getDefault().getSeparator();
@@ -32,7 +32,7 @@ public class FileCumulator {
     public File activityFile, activFitFile, batterySensorFile, bluetoothFile, errorFile, heartRateFile, lightSensorFile, screenUsageFile, miscFile;
     private ArrayList<File> files = new ArrayList<>();
 
-    FileCumulator(IOUtility ioUtility) {
+    public FileCumulator(IOUtility ioUtility) {
         this.ioUtility = ioUtility;
         ioUtility.createDirectory(BASE_ADDRESS);
         activFitFile = ioUtility.createEmptyFile(BASE_ADDRESS + ACTIV_FIT + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
@@ -62,7 +62,7 @@ public class FileCumulator {
      * @param inputFile given file
      * @return the cumulative data file
      */
-    File determineFileCategoryAndGet(File inputFile) {
+    public File determineFileCategoryAndGet(File inputFile) {
         if (inputFile.getPath().contains(ACTIVITY)) {
             return activityFile;
         } else if (inputFile.getPath().contains(ACTIV_FIT)) {
