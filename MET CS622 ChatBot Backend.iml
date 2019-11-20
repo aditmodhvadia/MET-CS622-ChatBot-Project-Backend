@@ -20,5 +20,9 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Java EE 6-Java EE 6" level="project" />
+    <orderEntry type="library" name="com.google.code.gson:gson:2.8.6" level="project" />
+    <orderEntry type="library" name="org.apache.lucene:lucene-core:8.3.0" level="project" />
+    <orderEntry type="library" name="org.apache.lucene:lucene-queryparser:8.3.0" level="project" />
+    <orderEntry type="library" name="org.mongodb:mongodb-driver-sync:3.11.2" level="project" />
   </component>
 </module>
