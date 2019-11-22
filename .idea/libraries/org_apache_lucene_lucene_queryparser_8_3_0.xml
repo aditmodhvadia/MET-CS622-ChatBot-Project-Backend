@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="org.apache.lucene:lucene-queryparser:8.3.0" type="repository">
+    <properties maven-id="org.apache.lucene:lucene-queryparser:8.3.0" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-queryparser/8.3.0/lucene-queryparser-8.3.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-core/8.3.0/lucene-core-8.3.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-queries/8.3.0/lucene-queries-8.3.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-sandbox/8.3.0/lucene-sandbox-8.3.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
