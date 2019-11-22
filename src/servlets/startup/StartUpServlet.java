@@ -36,7 +36,7 @@ public class StartUpServlet extends HttpServlet {
 
 //        TODO: Add check if files already unzipped and if data already present in MongoDB, then don't unzip it and store in MongoDB
 
-        try {
+        /*try {
             String absoluteDiskPath = getServletContext().getRealPath(sourceFileName);
 //                start unzipping the datasource
             unZipper.unzip(absoluteDiskPath, destinationFolder, new ListenerClass());  // unzip source file
@@ -46,12 +46,12 @@ public class StartUpServlet extends HttpServlet {
             System.out.println("File already exists hence ignored");
         } catch (Exception ex) {
             ex.printStackTrace();   // some error occurred
-        }
+        }*/
 //            Unzipping complete
         System.out.println("\n\n*************** Unzipping complete***************\n\n");
 
 //        Now store all data into MongoDB
-        storeDataInMongoDB();   // store JSON data into mongoDB
+//        storeDataInMongoDB();   // store JSON data into mongoDB
 
 //        TODO: Lucene remaining
 
