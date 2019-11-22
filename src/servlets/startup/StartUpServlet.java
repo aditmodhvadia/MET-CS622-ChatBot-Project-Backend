@@ -56,6 +56,8 @@ public class StartUpServlet extends HttpServlet {
 //        TODO: Lucene remaining
 //        TODO: Store it in MySQL
 
+
+
     }
 
     /**
@@ -95,6 +97,8 @@ public class StartUpServlet extends HttpServlet {
                 ActivitySensorData activitySensorData = g.fromJson(fileLine, ActivitySensorData.class);
 //                insert the new document into mongodb
                 MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activitySensorDataMongoCollection, activitySensorData);
+
+
             } catch (Exception e) {
 //                e.printStackTrace();
                 System.out.println("Incorrect JSON format");    // don't store data in mongodb

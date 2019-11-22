@@ -14,10 +14,20 @@
         <servlet-class>servlets.startup.StartUpServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    <servlet>
+        <servlet-name>Bye</servlet-name>
+        <servlet-class>servlets.bye.ByeWorldServlet</servlet-class>
+    </servlet>
+
+
     
     <servlet-mapping>
         <servlet-name>HiWorldServlet</servlet-name>
         <url-pattern>/hi</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Bye</servlet-name>
+        <url-pattern>/bye</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>StartUpServlet</servlet-name>
