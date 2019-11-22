@@ -54,6 +54,7 @@ public class StartUpServlet extends HttpServlet {
 //        storeDataInMongoDB();   // store JSON data into mongoDB
 
 //        TODO: Lucene remaining
+//        TODO: Store it in MySQL
 
     }
 
