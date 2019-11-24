@@ -9,16 +9,59 @@
         <servlet-class>servlets.hi.HiWorldServlet</servlet-class>
     </servlet>
 
+    <!--    MongoDB Query resolver Servlet-->
+    <servlet>
+        <servlet-name>MongoDBServlet</servlet-name>
+        <servlet-class>servlets.mongodb.MongoDBServlet</servlet-class>
+    </servlet>
+    <!--    Lucene Query resolver Servlet-->
+    <servlet>
+        <servlet-name>LuceneServlet</servlet-name>
+        <servlet-class>servlets.lucene.LuceneServlet</servlet-class>
+    </servlet>
+    <!--    Brute Force Query resolver Servlet-->
+    <servlet>
+        <servlet-name>BruteForceServlet</servlet-name>
+        <servlet-class>servlets.bruteforce.BruteForceServlet</servlet-class>
+    </servlet>
+    <!--    MySQL Query resolver Servlet-->
+    <servlet>
+        <servlet-name>MySQLServlet</servlet-name>
+        <servlet-class>servlets.mysql.MySQLServlet</servlet-class>
+    </servlet>
+
+    <!--    Startup Servlet, runs on startup-->
     <servlet>
         <servlet-name>StartUpServlet</servlet-name>
         <servlet-class>servlets.startup.StartUpServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
-    
+
     <servlet-mapping>
         <servlet-name>HiWorldServlet</servlet-name>
         <url-pattern>/hi</url-pattern>
     </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>MongoDBServlet</servlet-name>
+        <url-pattern>/mongodb</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>LuceneServlet</servlet-name>
+        <url-pattern>/lucene</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BruteForceServlet</servlet-name>
+        <url-pattern>/bruteforce</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>MySQLServlet</servlet-name>
+        <url-pattern>/mysql</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>StartUpServlet</servlet-name>
         <url-pattern>/</url-pattern>

@@ -1,4 +1,4 @@
-package servlets.hi;
+package servlets.mongodb;
 
 import com.google.gson.Gson;
 import responsemodels.QueryResponseMessage;
@@ -9,13 +9,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class HiWorldServlet extends HttpServlet {
+public class MongoDBServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("Hi world servlet called");
         QueryResponseMessage msg = new QueryResponseMessage();
-        QueryResponseMessage.Data data = new QueryResponseMessage.Data("Hi world called");
+        QueryResponseMessage.Data data = new QueryResponseMessage.Data("MongoDB called");
         msg.setData(data);
         Gson g = new Gson();
         resp.getOutputStream().print(g.toJson(msg));
