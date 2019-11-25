@@ -1,6 +1,7 @@
 package utils;
 
 import com.google.gson.Gson;
+import com.mongodb.client.MongoCursor;
 import sensormodels.ActivFitSensorData;
 import sensormodels.HeartRateSensorData;
 import sensormodels.LightSensorData;
@@ -8,9 +9,7 @@ import sensormodels.LightSensorData;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.FileSystems;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class FileCumulator {
     private static final String ACTIV_FIT = "ActivFit";
@@ -29,7 +28,7 @@ public class FileCumulator {
     private static final String BASE_ADDRESS = "Result" + FileSystems.getDefault().getSeparator();
     private static final String DATA_FILE_NAME = "CumulativeData.txt";
 
-    public File activityFile, activFitFile, batterySensorFile, bluetoothFile, errorFile, heartRateFile, lightSensorFile, screenUsageFile, miscFile;
+    public static File activityFile, activFitFile, batterySensorFile, bluetoothFile, errorFile, heartRateFile, lightSensorFile, screenUsageFile, miscFile;
     private ArrayList<File> files = new ArrayList<>();
 
     public FileCumulator(IOUtility ioUtility) {
@@ -54,6 +53,46 @@ public class FileCumulator {
         files.add(heartRateFile);
         files.add(lightSensorFile);
         files.add(screenUsageFile);
+    }
+
+    /**
+     * Get the result from ActivFit Sensor Data for the given Date, if there is a running event for it
+     *
+     * @param date given Date
+     * @return List of ActivFitSensorData having running activity for the given Date
+     */
+    public static ArrayList<ActivFitSensorData> queryForRunningEvent(Date date) {
+//        get the next Day Date as well
+        Date nextDate = addDayToDate(date, 1);
+//        fetch all record from the collection
+        List<ActivFitSensorData> fileData = getActivFitFileContents(1000);
+        ArrayList<ActivFitSensorData> queryResult = new ArrayList<>();  // holds the result from the query
+        for (ActivFitSensorData nextData :
+                fileData) {
+            //            get startDate of the SensorData entry and then check if it lies between the user entered Date and the next day or not
+            Date startDate = new Date(nextData.getTimestamp().getStartTime());
+            if (startDate.after(date) && startDate.before(nextDate)) {  // check it lies within range
+                if (!nextData.getSensorData().getActivity().equals("unknown") && Objects.equals(nextData.getSensorData().getActivity(), "running")) {
+//                    SensorData entry lies between the dates and is for running, so add it to the result List
+                    queryResult.add(nextData);
+                }
+            }
+        }
+        return queryResult;
+    }
+
+    /**
+     * Use to add given number of days to the given Date
+     *
+     * @param userDate given Date
+     * @param days     given number of days
+     * @return Date after adding given number of days
+     */
+    private static Date addDayToDate(Date userDate, int days) {
+        Calendar cal = Calendar.getInstance();  // get Calendar Instance
+        cal.setTime(userDate);  // set Time to the given Date@param
+        cal.add(Calendar.DATE, days);   // add given number of days@param to the given Date@param
+        return cal.getTime();   // return the new Date
     }
 
     /**
@@ -174,9 +213,9 @@ public class FileCumulator {
      * @param numOfDays given number of days
      * @return list of ActivFitSensorData for the given number of days
      */
-    List<ActivFitSensorData> getActivFitFileContents(int numOfDays) {
+    static List<ActivFitSensorData> getActivFitFileContents(int numOfDays) {
         List<ActivFitSensorData> sensorDataList = new ArrayList<>();    // holds the sensor data
-        List<String> fileContents = ioUtility.getFileContentsLineByLine(activFitFile);  // holds all lines of the cumulativeFile for the sensor
+        List<String> fileContents = IOUtility.getFileContentsLineByLine(activFitFile);  // holds all lines of the cumulativeFile for the sensor
         String currentDate = "";    // will hold the value of current date
         for (String fileLine :
                 fileContents) {
