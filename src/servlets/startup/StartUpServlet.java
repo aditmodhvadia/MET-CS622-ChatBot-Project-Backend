@@ -2,6 +2,7 @@ package servlets.startup;
 
 import com.google.gson.Gson;
 import database.MongoDBManager;
+import database.MySqlManager;
 import listeners.FileListener;
 import sensormodels.*;
 import utils.FileCumulator;
@@ -33,6 +34,8 @@ public class StartUpServlet extends HttpServlet {
 
 //        init MongoDB to get references to Database and Collections
         MongoDBManager.init();
+
+        MySqlManager.init();
 
 //        TODO: Add check if files already unzipped and if data already present in MongoDB, then don't unzip it and store in MongoDB
 
