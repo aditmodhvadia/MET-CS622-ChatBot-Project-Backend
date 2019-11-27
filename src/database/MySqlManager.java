@@ -2,10 +2,7 @@ package database;
 
 import sensormodels.HeartRateSensorData;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class MySqlManager {
     // JDBC driver name and database URL
@@ -91,6 +88,21 @@ public class MySqlManager {
                     " min_elapsed DOUBLE , " +
                     " min_start_hour DOUBLE , " +
                     " min_end_hour DOUBLE ) ";
+
+            // the mysql insert statement
+            String sql1 = " insert into ActivitySensorData (timestamp , time_stamp, sensor_data, step_counts,step_delta,)"
+                    + " values (?, ?, ?, ?, ?)";
+
+            // create the mysql insert preparedstatement
+            PreparedStatement preparedStmt = connection.prepareStatement(sql1);
+            preparedStmt.setTimestamp (1, "");
+            preparedStmt.setTimestamp (2, "");
+            preparedStmt.setString   (3, );
+            preparedStmt.setInt(4, );
+            preparedStmt.setInt    (5, );
+
+            // execute the preparedstatement
+            preparedStmt.execute();
 
 
             // executing statements to created SenorData database tables
