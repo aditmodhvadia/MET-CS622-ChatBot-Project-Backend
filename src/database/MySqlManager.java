@@ -1,6 +1,7 @@
 package database;
 
 import sensormodels.ActivFitSensorData;
+import sensormodels.ActivitySensorData;
 
 import java.sql.*;
 
@@ -38,15 +39,14 @@ public class MySqlManager {
             stmt = connection.createStatement();
 
             String sql = "CREATE TABLE " + ACTIVITY_TABLE +
-                    "(timestamp TIME , " +
-                    " time_stamp TIMESTAMP , " +
-                    " sensor_data CHAR(5) , " +
+                    "(time_stamp TIMESTAMP , " +
+                    " sensor_name CHAR(25) , " +
                     " step_counts INTEGER, " +
                     " step_delta INTEGER, " +
-                    " PRIMARY KEY ( timestamp))";
+                    " PRIMARY KEY ( time_stamp))";
             // creating ActivFitSensorData table
+//            deleted timestamp column as it is not required
             String sql2 = "CREATE TABLE " + ACTIV_FIT_TABLE +
-                    "(timestamp TIME , " +
                     " start_time TIMESTAMP , " +
                     " end_time TIMESTAMP , " +
                     " duration INTEGER, " +
@@ -122,20 +122,24 @@ public class MySqlManager {
         System.out.println("Goodbye!");
     }//end main
 
-    public void insertIntoActivFitTable(ActivFitSensorData sensorData) {
+    /**
+     * Call to insert given data into ActivitySensorData table in MySQL
+     *
+     * @param sensorData given data
+     */
+    public static void insertIntoActivityTable(ActivitySensorData sensorData) {
         // the mysql insert statement
-        String sql1 = " insert into " + ACTIV_FIT_TABLE + " (timestamp , time_stamp, sensor_data, step_counts,step_delta,)"
-                + " values (?, ?, ?, ?, ?)";
+        String sql1 = " insert into " + ACTIV_FIT_TABLE + " (time_stamp, sensor_data, step_counts,step_delta,)"
+                + " values (?, ?, ?, ?)";
 
         // create the mysql insert preparedstatement
         PreparedStatement preparedStmt = null;
         try {
-//            preparedStmt = connection.prepareStatement(sql1);
-//            preparedStmt.setTimestamp(1, "");
-//            preparedStmt.setTimestamp(2, "");
-//            preparedStmt.setString(3, );
-//            preparedStmt.setInt(4, );
-//            preparedStmt.setInt(5, );
+            preparedStmt = connection.prepareStatement(sql1);
+            preparedStmt.setTimestamp(1, Timestamp.valueOf(sensorData.getTimestamp()));
+            preparedStmt.setString(2, sensorData.getSensorName());
+            preparedStmt.setInt(3, sensorData.getSensorData().getStepCounts());
+            preparedStmt.setInt(4, sensorData.getSensorData().getStepDelta());
 
             // execute the preparedstatement
             preparedStmt.execute();
