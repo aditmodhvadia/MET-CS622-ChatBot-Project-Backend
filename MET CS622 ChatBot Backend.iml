@@ -25,36 +25,6 @@
     <orderEntry type="library" name="org.mongodb:mongodb-driver-core:3.11.2" level="project" />
     <orderEntry type="library" name="org.mongodb:mongodb-driver-sync:3.11.2" level="project" />
     <orderEntry type="library" name="org.apache.lucene:lucene-queryparser:8.3.0" level="project" />
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://G:/mysql-connector-java-8.0.18/mysql-connector-java-8.0.18.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="file://G:/mysql-connector-java-8.0.18" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://G:/mysql-connector-java-8.0.18/src/build/java" />
-          <root url="file://G:/mysql-connector-java-8.0.18/src/demo/java" />
-          <root url="file://G:/mysql-connector-java-8.0.18/src/generated/java" />
-          <root url="file://G:/mysql-connector-java-8.0.18/src/legacy/java" />
-          <root url="file://G:/mysql-connector-java-8.0.18/src/main/core-api/java" />
-          <root url="file://G:/mysql-connector-java-8.0.18/src/main/core-impl/java" />
-          <root url="file://G:/mysql-connector-java-8.0.18/src/main/protocol-impl/java" />
-          <root url="file://G:/mysql-connector-java-8.0.18/src/main/user-api/java" />
-          <root url="file://G:/mysql-connector-java-8.0.18/src/main/user-impl/java" />
-          <root url="file://G:/mysql-connector-java-8.0.18/src/test/java" />
-        </SOURCES>
-        <jarDirectory url="file://G:/mysql-connector-java-8.0.18" recursive="false" />
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="mysql:mysql-connector-java:8.0.18" level="project" />
   </component>
 </module>
