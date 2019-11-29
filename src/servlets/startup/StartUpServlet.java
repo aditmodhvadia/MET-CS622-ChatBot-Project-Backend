@@ -54,11 +54,10 @@ public class StartUpServlet extends HttpServlet {
         System.out.println("\n\n*************** Unzipping complete***************\n\n");
 
 //        Now store all data into MongoDB
-//        storeDataInMongoDB();   // store JSON data into mongoDB
+        storeDataInMongoDB();   // store JSON data into mongoDB
 
 //        TODO: Lucene remaining
 //        TODO: Store it in MySQL
-
 
 
     }
@@ -73,17 +72,17 @@ public class StartUpServlet extends HttpServlet {
 
         storeActivitySensorDataInMongoDB();
 
-        storeActivFitSensorDataInMongoDB();
+//        storeActivFitSensorDataInMongoDB();
 
-        storeBatterySensorDataInMongoDB();
+//        storeBatterySensorDataInMongoDB();
 
-        storeBluetoothSensorDataInMongoDB();
+//        storeBluetoothSensorDataInMongoDB();
 
-        storeHeartRateSensorDataInMongoDB();
+//        storeHeartRateSensorDataInMongoDB();
 
-        storeLightSensorDataInMongoDB();
+//        storeLightSensorDataInMongoDB();
 
-        storeScreenUsageSensorDataInMongoDB();
+//        storeScreenUsageSensorDataInMongoDB();
     }
 
     /**
@@ -99,12 +98,14 @@ public class StartUpServlet extends HttpServlet {
 //                converts JSON string into POJO
                 ActivitySensorData activitySensorData = g.fromJson(fileLine, ActivitySensorData.class);
 //                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activitySensorDataMongoCollection, activitySensorData);
+//                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activitySensorDataMongoCollection, activitySensorData);
 
+//                use this space to insert data into MYSQL for each sensor
+                MySqlManager.insertIntoActivityTable(activitySensorData);
 
             } catch (Exception e) {
 //                e.printStackTrace();
-                System.out.println("Incorrect JSON format");    // don't store data in mongodb
+//                System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
     }
