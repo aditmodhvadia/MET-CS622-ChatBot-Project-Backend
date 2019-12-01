@@ -3,6 +3,7 @@ package utils;
 import com.google.gson.Gson;
 import com.mongodb.client.MongoCursor;
 import sensormodels.ActivFitSensorData;
+import sensormodels.ActivitySensorData;
 import sensormodels.HeartRateSensorData;
 import sensormodels.LightSensorData;
 
@@ -10,6 +11,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.FileSystems;
 import java.util.*;
+
+import static jdk.nashorn.internal.objects.Global.Infinity;
 
 public class FileCumulator {
     private static final String ACTIV_FIT = "ActivFit";
@@ -79,6 +82,59 @@ public class FileCumulator {
             }
         }
         return queryResult;
+    }
+
+    /**
+     * Called to query and fetch all days heart rate data to count the number of notifications user receives for the day
+     *
+     * @return HashMap containing key value pair of date and the corresponding count for the day
+     */
+    public static HashMap<String, Integer> queryHeartRatesForDay() {
+
+        List<HeartRateSensorData> sensorData = getHeartRateSensorFileContents(1000);
+        HashMap<String, Integer> heartRateCounter = new HashMap<>();
+        for (HeartRateSensorData data :
+                sensorData) {
+//            get the date and format it accordingly
+            Date sensorDate = new Date(data.getTimestamp());
+            String sensorFormattedDate = WebAppConstants.inputDateFormat.format(sensorDate);
+
+            if (heartRateCounter.containsKey(sensorFormattedDate)) {
+//                HashMap contains the count for the date
+                int count = heartRateCounter.get(sensorFormattedDate);
+//                increment the value of count for that day
+                heartRateCounter.replace(sensorFormattedDate, count++, count);
+            } else {
+//                sensor data not present, so put it in hashmap with counter set to
+                heartRateCounter.put(sensorFormattedDate, 1);
+            }
+        }
+        return heartRateCounter;
+    }
+
+    /**
+     * Called to query the number of steps user takes for the given day
+     *
+     * @param userDate given day
+     * @return step count for the given day
+     */
+    public static int queryForTotalStepsInDay(Date userDate) {
+        List<ActivitySensorData> activitySensorDataList = getActivityFileContents(1000);
+        int maxStepCount = (int) -Infinity;    // Max value of step count for the day
+        for (ActivitySensorData sensorData :
+                activitySensorDataList) {
+            Date sensorDate = new Date(sensorData.getTimestamp());
+            String sensorFormattedDate = WebAppConstants.inputDateFormat.format(sensorDate);
+            String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
+//            format both the user input date and the sensor date to compare if they are equal
+            if (sensorFormattedDate.equals(userFormattedDate)) {    // both dates are equal
+                if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
+//                    found a step count larger than the maxStepCount, so update it
+                    maxStepCount = sensorData.getSensorData().getStepCounts();
+                }
+            }
+        }
+        return maxStepCount;
     }
 
     /**
@@ -247,6 +303,45 @@ public class FileCumulator {
     }
 
     /**
+     * Call to get contents of ActivitySensorData for the given number of days
+     *
+     * @param numOfDays given number of days
+     * @return list of ActivitySensorData for the given number of days
+     */
+    static List<ActivitySensorData> getActivityFileContents(int numOfDays) {
+        List<ActivitySensorData> sensorDataList = new ArrayList<>();    // holds the sensor data
+        List<String> fileContents = IOUtility.getFileContentsLineByLine(activityFile);  // holds all lines of the cumulativeFile for the sensor
+        String currentDate = "";    // will hold the value of current date
+        for (String fileLine :
+                fileContents) {
+            Gson g = new Gson();
+            try {
+//                converts JSON string into POJO
+                ActivitySensorData activitySensorData = g.fromJson(fileLine, ActivitySensorData.class);
+//                get date of current sensor data to compare
+                String sensorFormattedDate = getFormattedDateFromTimeStamp(activitySensorData.getTimestamp());
+
+                if (sensorFormattedDate.equals(currentDate)) {
+//                    add sensor data to list as date is same as current date
+                    sensorDataList.add(activitySensorData);
+                } else {
+                    currentDate = sensorFormattedDate;  // update current date
+                    numOfDays--;    // decrement num of days left
+                    if (numOfDays == -1) {
+//                        found data for the specified number of days so return the sensor data list
+                        return sensorDataList;
+                    }
+                }
+            } catch (Exception e) {
+//                e.printStackTrace();
+//                System.out.println("Incorrect JSON format");    // don't store data in mongodb
+            }
+        }
+
+        return sensorDataList;
+    }
+
+    /**
      * Call to get contents of LightSensorData for the given number of days
      *
      * @param numOfDays given number of days
@@ -299,9 +394,9 @@ public class FileCumulator {
         return sensorDataList;
     }
 
-    List<HeartRateSensorData> getHeartRateSensorFileContents(int numOfDays) {
+    static List<HeartRateSensorData> getHeartRateSensorFileContents(int numOfDays) {
         List<HeartRateSensorData> sensorDataList = new ArrayList<>();    // holds the sensor data
-        List<String> fileContents = ioUtility.getFileContentsLineByLine(heartRateFile);  // holds all lines of the cumulativeFile for the sensor
+        List<String> fileContents = IOUtility.getFileContentsLineByLine(heartRateFile);  // holds all lines of the cumulativeFile for the sensor
         String currentDate = "";    // will hold the value of current date
         for (String fileLine :
                 fileContents) {
