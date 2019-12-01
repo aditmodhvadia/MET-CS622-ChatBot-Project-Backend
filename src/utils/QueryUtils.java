@@ -12,8 +12,10 @@ import java.util.regex.Pattern;
 import static jdk.nashorn.internal.objects.Global.Infinity;
 
 public class QueryUtils {
-    //    public static final String RUNNING_EVENT_REGEX = "/run(ning)?/igm";
-//    public static final String RUNNING_EVENT_REGEX = ".*([rR]un|[rR]unning).*";
+    //    public static final String RUNNING_EVENT_REGEX = ".run./i";
+    public static final String RUNNING_EVENT_REGEX = ".([rR]un|[rR]unning).";
+    public static final String STEP_COUNT_EVENT_REGEX = ".([sS]teps*|[wW]alk).";
+    public static final String HEART_RATE_EVENT_REGEX = ".([hH]eart|[hH]eartrate).";
 //    public static final String RUNNING_EVENT_REGEX = "run|Run";
 
     public static void determineQueryType(String query, OnQueryResolvedCallback callback) {
@@ -27,12 +29,11 @@ public class QueryUtils {
                 System.out.println(WebAppConstants.inputDateFormat.format(date));
 
 //                TODO: Resolve query type now and remove this
-                if (query.contains("run") || query.contains("Run") || query.contains("running") || query.contains("Running")) {
+                if (isMatching(RUNNING_EVENT_REGEX, query)) {
                     callback.onDisplayRunningEventSelected(date);
-                } else if (query.contains("steps") || query.contains("Steps") || query.contains("step")
-                        || query.contains("Step") || query.contains("walk")) {
+                } else if (isMatching(STEP_COUNT_EVENT_REGEX, query)) {
                     callback.onDisplayTotalStepsInDayEventSelected(date);
-                } else if (query.contains("heartrate") || query.contains("heart") || query.contains("Heart") || query.contains("Heartrate")) {
+                } else if (isMatching(HEART_RATE_EVENT_REGEX, query)) {
                     callback.onDisplayHeartRateEventSelected(date);
                 } else {
                     callback.onNoEventResolved();
@@ -46,6 +47,11 @@ public class QueryUtils {
             // Bad input
             callback.onDateNotParsed();
         }
+    }
+
+    private static boolean isMatching(String pattern, String query) {
+        Matcher m = Pattern.compile(pattern).matcher(query);
+        return m.find();
     }
 
     /**
