@@ -37,7 +37,7 @@ public class IOUtility {
      * @param inputFile given file
      * @return contents of file from given file path line by line
      */
-    public List<String> getFileContentsLineByLine(File inputFile) {
+    public static List<String> getFileContentsLineByLine(File inputFile) {
         BufferedReader br;      // Buffered reader for faster reads
         List<String> fileContents = new ArrayList<>();      // List which will hold the file contents line by line
         try {
