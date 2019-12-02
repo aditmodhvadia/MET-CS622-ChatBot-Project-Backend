@@ -36,7 +36,6 @@
         <servlet-class>servlets.startup.StartUpServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>HiWorldServlet</servlet-name>
         <url-pattern>/hi</url-pattern>
@@ -61,7 +60,6 @@
         <servlet-name>MySQLServlet</servlet-name>
         <url-pattern>/mysql</url-pattern>
     </servlet-mapping>
-
     <servlet-mapping>
         <servlet-name>StartUpServlet</servlet-name>
         <url-pattern>/</url-pattern>
