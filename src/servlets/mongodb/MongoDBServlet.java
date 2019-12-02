@@ -1,0 +1,97 @@
+package servlets.mongodb;
+
+import com.google.gson.Gson;
+import database.MongoDBManager;
+import requestmodel.MessageQueryRequestModel;
+import responsemodels.QueryResponseMessage;
+import sensormodels.ActivFitSensorData;
+import utils.QueryUtils;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.stream.Collectors;
+
+public class MongoDBServlet extends HttpServlet {
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("MongoDB POST request called");
+        Gson g = new Gson();
+        String requestHeaderString = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+        System.out.println(requestHeaderString);
+        MessageQueryRequestModel queryMessage = g.fromJson(requestHeaderString, MessageQueryRequestModel.class);
+
+        QueryResponseMessage msg = new QueryResponseMessage();
+
+        QueryUtils.determineQueryType(queryMessage.getQuery(), new QueryUtils.OnQueryResolvedCallback() {
+            @Override
+            public void onDisplayRunningEventSelected(Date date) {
+                ArrayList<ActivFitSensorData> queryResult = MongoDBManager.queryForRunningEvent(date);
+                String queryResultString = QueryUtils.getFormattedRunningResultData(queryResult);
+                QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
+                msg.setData(data);
+                try {
+                    resp.getOutputStream().print(g.toJson(msg));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onDisplayHeartRateEventSelected(Date date) {
+                String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, MongoDBManager.queryHeartRatesForDay());
+                QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
+                msg.setData(data);
+                try {
+                    resp.getOutputStream().print(g.toJson(msg));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onDisplayTotalStepsInDayEventSelected(Date date) {
+                int queryResult = MongoDBManager.queryForTotalStepsInDay(date);
+                String queryResultString = QueryUtils.getFormattedTotalStepsForTheDay(queryResult, date);
+                QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
+                msg.setData(data);
+                try {
+                    resp.getOutputStream().print(g.toJson(msg));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onDateNotParsed() {
+                QueryResponseMessage.Data data = new QueryResponseMessage.Data("Incorrect date, enter in this format: MM/dd/YYYY");
+                msg.setData(data);
+                try {
+                    resp.getOutputStream().print(g.toJson(msg));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onNoEventResolved() {
+                QueryResponseMessage.Data data = new QueryResponseMessage.Data("Could not recognise the query");
+                msg.setData(data);
+                try {
+                    resp.getOutputStream().print(g.toJson(msg));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+//        QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryMessage.getQuery());
+//        msg.setData(data);
+//        resp.getOutputStream().print(g.toJson(msg));
+    }
+}
