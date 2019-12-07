@@ -36,7 +36,7 @@ public class StartUpServlet extends HttpServlet {
 //        init MongoDB to get references to Database and Collections
 //        MongoDBManager.init();
 
-//        MySqlManager.init();
+        MySqlManager.init();
 
 //        TODO: Add check if files already unzipped and if data already present in MongoDB, then don't unzip it and store in MongoDB
 

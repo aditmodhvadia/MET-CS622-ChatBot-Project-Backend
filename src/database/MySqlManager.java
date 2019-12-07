@@ -1,8 +1,14 @@
 package database;
 
+import com.mongodb.client.MongoCursor;
 import sensormodels.*;
+import utils.WebAppConstants;
 
 import java.sql.*;
+import java.util.*;
+import java.util.Date;
+
+import static jdk.nashorn.internal.objects.Global.Infinity;
 
 public class MySqlManager {
     // JDBC driver name and database URL
@@ -378,6 +384,217 @@ public class MySqlManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    public static ArrayList<ActivFitSensorData> queryForRunningEvent(Date date) {
+        //        get the next Day Date as well
+        Date nextDate = addDayToDate(date, 1);
+//        fetch all record from the collection
+
+        ArrayList<ActivFitSensorData> sensorDataList = getActivFitSensorData();
+
+        ArrayList<ActivFitSensorData> queryResult = new ArrayList<>();  // holds the result from the query
+        for (ActivFitSensorData sensorData :
+                sensorDataList) {
+//            get startDate of the SensorData entry and then check if it lies between the user entered Date and the next day or not
+            Date startDate = new Date(sensorData.getTimestamp().getStartTime());
+            if (startDate.after(date) && startDate.before(nextDate)) {  // check it lies within range
+                if (!sensorData.getSensorData().getActivity().equals("unknown") && Objects.equals(sensorData.getSensorData().getActivity(), "running")) {
+//                    SensorData entry lies between the dates and is for running, so add it to the result List
+                    queryResult.add(sensorData);
+                }
+            }
+        }
+        return queryResult;
+    }
+
+    /**
+     * Called to query the number of steps user takes for the given day
+     *
+     * @param userDate given day
+     * @return step count for the given day
+     */
+    public static int queryForTotalStepsInDay(Date userDate) {
+//        fetch all documents from the collection
+        ArrayList<ActivitySensorData> sensorDataList = getActivitySensorData();
+        int maxStepCount = (int) -Infinity;    // Max value of step count for the day
+        for (ActivitySensorData sensorData : sensorDataList) {
+//            get the next Data
+            Date sensorDate = new Date(sensorData.getTimestamp());
+            String sensorFormattedDate = WebAppConstants.inputDateFormat.format(sensorDate);
+            String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
+//            format both the user input date and the sensor date to compare if they are equal
+            if (sensorFormattedDate.equals(userFormattedDate)) {    // both dates are equal
+                if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
+//                    found a step count larger than the maxStepCount, so update it
+                    maxStepCount = sensorData.getSensorData().getStepCounts();
+                }
+            }
+        }
+        return maxStepCount;
+    }
+
+    private static ArrayList<ActivitySensorData> getActivitySensorData() {
+        connection = getConnection();
+        // if you only need a few columns, specify them by name instead of using "*"
+        String query = "SELECT * FROM " + ACTIVITY_TABLE;
+
+        // create the java statement
+        Statement st = null;
+        try {
+            st = connection.createStatement();
+            ResultSet rs = st.executeQuery(query);
+
+            while (rs.next()) {
+                ActivitySensorData data = new ActivitySensorData();
+                data.setTimestamp(rs.getString("time_stamp"));
+                data.setTime_stamp(rs.getString("time_stamp"));
+                data.setSensorName(rs.getString("sensor_name"));
+                ActivitySensorData.SensorData sensorData = new ActivitySensorData.SensorData();
+                sensorData.setStepCounts(rs.getInt("step_counts"));
+                sensorData.setStepDelta(rs.getInt("step_delta"));
+                data.setSensorData(sensorData);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the query, and get a java resultset
+        return null;
+    }
+
+    private static ArrayList<ActivFitSensorData> getActivFitSensorData() {
+        connection = getConnection();
+        // if you only need a few columns, specify them by name instead of using "*"
+        String query = "SELECT * FROM " + ACTIV_FIT_TABLE;
+
+        // create the java statement
+        Statement st = null;
+        try {
+            st = connection.createStatement();
+            ResultSet rs = st.executeQuery(query);
+
+            while (rs.next()) {
+                ActivFitSensorData data = new ActivFitSensorData();
+                ActivFitSensorData.Timestamp timeStamp = new ActivFitSensorData.Timestamp();
+                timeStamp.setStartTime(rs.getString("start_time"));
+                timeStamp.setEndTime(rs.getString("end_time"));
+                data.setTimestamp(timeStamp);
+                ActivFitSensorData.SensorData sensorData = new ActivFitSensorData.SensorData();
+                sensorData.setActivity(rs.getString("activity"));
+                sensorData.setDuration(rs.getInt("duration"));
+                data.setSensorData(sensorData);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the query, and get a java resultset
+        return null;
+    }
+
+    private static ArrayList<HeartRateSensorData> getHeartRateSensorData() {
+        connection = getConnection();
+        ArrayList<HeartRateSensorData> results = new ArrayList<>();
+        // if you only need a few columns, specify them by name instead of using "*"
+        String query = "SELECT * FROM " + HEART_RATE_TABLE;
+
+        // create the java statement
+        Statement st = null;
+        try {
+            st = connection.createStatement();
+            ResultSet rs = st.executeQuery(query);
+
+            while (rs.next()) {
+//                HeartRateSensorData data = new HeartRateSensorData();
+                HeartRateSensorData heartRateSensorData = new HeartRateSensorData();
+                heartRateSensorData.setTimestamp(rs.getString("timestamp"));
+                heartRateSensorData.setSensorName(rs.getString("sensor_name"));
+                HeartRateSensorData.SensorData sensorData = new HeartRateSensorData.SensorData();
+                //sensorData.s(rs.getString("sensor_name"));
+                sensorData.setBpm(rs.getInt("bpm"));
+                heartRateSensorData.setSensorData(sensorData);
+                results.add(heartRateSensorData);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the query, and get a java resultset
+        return results;
+    }
+
+    private static ArrayList<BatterySensorData> getBatterySensorData() {
+        connection = getConnection();
+        ArrayList<BatterySensorData> results = new ArrayList<>();
+        // if you only need a few columns, specify them by name instead of using "*"
+        String query = "SELECT * FROM " + BATTERY_TABLE;
+
+        // create the java statement
+        Statement st = null;
+        try {
+            st = connection.createStatement();
+            ResultSet rs = st.executeQuery(query);
+
+            while (rs.next()) {
+                BatterySensorData batterySensor = new BatterySensorData();
+                batterySensor.setSensorName(rs.getString("sensor_name"));
+                batterySensor.setTimestamp(rs.getString("timestamp"));
+                batterySensor.setSensorName(rs.getString("sensor_data"));
+                BatterySensorData.SensorData sensorData = new BatterySensorData.SensorData();
+                sensorData.setPercent(rs.getInt("percent"));
+                sensorData.setCharging(rs.getBoolean("duration"));
+                batterySensor.setSensorData(sensorData);
+                results.add(batterySensor);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the query, and get a java resultset
+        return results;
+    }
+
+    /**
+     * Use to add given number of days to the given Date
+     *
+     * @param userDate given Date
+     * @param days     given number of days
+     * @return Date after adding given number of days
+     */
+    private static Date addDayToDate(Date userDate, int days) {
+        Calendar cal = Calendar.getInstance();  // get Calendar Instance
+        cal.setTime(userDate);  // set Time to the given Date@param
+        cal.add(Calendar.DATE, days);   // add given number of days@param to the given Date@param
+        return cal.getTime();   // return the new Date
+    }
+
+    public static HashMap<String, Integer> queryHeartRatesForDay() {
+        ArrayList<HeartRateSensorData> sensorDataList = getHeartRateSensorData();
+        HashMap<String, Integer> heartRateCounter = new HashMap<>();
+        for (HeartRateSensorData sensorData : sensorDataList) {
+            Date sensorDate = new Date(sensorData.getTimestamp());
+            String sensorFormattedDate = WebAppConstants.inputDateFormat.format(sensorDate);
+
+            if (heartRateCounter.containsKey(sensorFormattedDate)) {
+//                HashMap contains the count for the date
+                int count = heartRateCounter.get(sensorFormattedDate);
+//                increment the value of count for that day
+                heartRateCounter.replace(sensorFormattedDate, count++, count);
+            } else {
+//                sensor data not present, so put it in hashmap with counter set to
+                heartRateCounter.put(sensorFormattedDate, 1);
+            }
+        }
+        return heartRateCounter;
+    }
+
+    public static ArrayList<HeartRateSensorData> queryForHeartRateEvent(Date date) {
         return null;
     }
 }
