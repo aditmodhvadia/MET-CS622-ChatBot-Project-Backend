@@ -13,9 +13,9 @@ import static jdk.nashorn.internal.objects.Global.Infinity;
 
 public class QueryUtils {
     //    public static final String RUNNING_EVENT_REGEX = ".run./i";
-    public static final String RUNNING_EVENT_REGEX = ".([rR]un|[rR]unning).";
-    public static final String STEP_COUNT_EVENT_REGEX = ".([sS]teps*|[wW]alk).";
-    public static final String HEART_RATE_EVENT_REGEX = ".([hH]eart|[hH]eartrate).";
+    public static final String RUNNING_EVENT_REGEX = "([rR]un|[rR]unning)";
+    public static final String STEP_COUNT_EVENT_REGEX = "([sS]teps*|[wW]alk)";
+    public static final String HEART_RATE_EVENT_REGEX = "([hH]eart|[hH]eartrate)";
 //    public static final String RUNNING_EVENT_REGEX = "run|Run";
 
     public static void determineQueryType(String query, OnQueryResolvedCallback callback) {
