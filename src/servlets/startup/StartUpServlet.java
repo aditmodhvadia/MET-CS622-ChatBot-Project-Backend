@@ -53,7 +53,7 @@ public class StartUpServlet extends HttpServlet {
         System.out.println("\n\n*************** Unzipping complete***************\n\n");
 
 //        Now store all data into MongoDB, MySQL and Lucene
-//        storeDataInDatabases();   // store JSON data from file storage
+        storeDataInDatabases();   // store JSON data from file storage
     }
 
     /**
@@ -85,9 +85,11 @@ public class StartUpServlet extends HttpServlet {
             try {
 //                converts JSON string into POJO
                 ActivitySensorData activitySensorData = g.fromJson(fileLine, ActivitySensorData.class);
+                activitySensorData.setFormattedDate();
+                System.out.println(activitySensorData.getFormatted_date());
                 sensorDataList.add(activitySensorData);
 //                insert the new document into mongodb
-//                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activitySensorDataMongoCollection, activitySensorData);
+                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activitySensorDataMongoCollection, activitySensorData);
 //                removed for now for testing
 //                insert data into MYSQL for Activity sensor
                 MySqlManager.insertIntoActivityTable(activitySensorData);
@@ -113,6 +115,7 @@ public class StartUpServlet extends HttpServlet {
             try {
 //                converts JSON string into POJO
                 ActivFitSensorData activFitSensorData = g.fromJson(fileLine, ActivFitSensorData.class);
+                activFitSensorData.setFormattedDate();
                 sensorDataList.add(activFitSensorData);
 //                insert the new document into mongodb
                 MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activFitSensorDataMongoCollection, activFitSensorData);
@@ -137,6 +140,7 @@ public class StartUpServlet extends HttpServlet {
             try {
 //                converts JSON string into POJO
                 BatterySensorData batterySensorData = g.fromJson(fileLine, BatterySensorData.class);
+                batterySensorData.setFormattedDate();
 //                insert the new document into mongodb
                 MongoDBManager.insertDocumentIntoCollection(MongoDBManager.batterySensorDataMongoCollection, batterySensorData);
 
@@ -158,6 +162,7 @@ public class StartUpServlet extends HttpServlet {
             try {
 //                converts JSON string into POJO
                 BluetoothSensorData bluetoothSensorData = g.fromJson(fileLine, BluetoothSensorData.class);
+                bluetoothSensorData.setFormattedDate();
 //                insert the new document into mongodb
                 MongoDBManager.insertDocumentIntoCollection(MongoDBManager.bluetoothSensorDataMongoCollection, bluetoothSensorData);
 
@@ -180,6 +185,7 @@ public class StartUpServlet extends HttpServlet {
             try {
 //                converts JSON string into POJO
                 HeartRateSensorData heartRateSensorData = g.fromJson(fileLine, HeartRateSensorData.class);
+                heartRateSensorData.setFormattedDate();
                 sensorDataList.add(heartRateSensorData);
 //                insert the new document into mongodb
                 MongoDBManager.insertDocumentIntoCollection(MongoDBManager.heartRateSensorDataMongoCollection, heartRateSensorData);
@@ -202,6 +208,7 @@ public class StartUpServlet extends HttpServlet {
             try {
 //                converts JSON string into POJO
                 LightSensorData lightSensorData = g.fromJson(fileLine, LightSensorData.class);
+                lightSensorData.setFormattedDate();
 //                insert the new document into mongodb
                 MongoDBManager.insertDocumentIntoCollection(MongoDBManager.lightSensorDataMongoCollection, lightSensorData);
 
@@ -223,6 +230,7 @@ public class StartUpServlet extends HttpServlet {
             try {
 //                converts JSON string into POJO
                 ScreenUsageSensorData screenUsageSensorData = g.fromJson(fileLine, ScreenUsageSensorData.class);
+                screenUsageSensorData.setFormattedDate();
 //                insert the new document into mongodb
                 MongoDBManager.insertDocumentIntoCollection(MongoDBManager.screenUsageSensorDataMongoCollection, screenUsageSensorData);
 

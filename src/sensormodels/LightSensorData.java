@@ -2,6 +2,9 @@ package sensormodels;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import utils.WebAppConstants;
+
+import java.util.Date;
 
 /**
  * @author Adit Modhvadia
@@ -19,6 +22,8 @@ public class LightSensorData {
     private SensorData sensorData;
 
     private String luxValue;
+    @Expose
+    private String formatted_date;
 
     public String getLuxValue() {
         return luxValue;
@@ -50,6 +55,14 @@ public class LightSensorData {
 
     public void setSensorData(SensorData sensorData) {
         this.sensorData = sensorData;
+    }
+
+    public void setFormattedDate() {
+        this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+    }
+
+    public String getFormatted_date() {
+        return formatted_date;
     }
 
     public class SensorData {

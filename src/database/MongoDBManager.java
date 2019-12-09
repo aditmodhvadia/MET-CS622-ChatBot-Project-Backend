@@ -30,12 +30,15 @@ public class MongoDBManager {
     public static MongoCollection<ScreenUsageSensorData> screenUsageSensorDataMongoCollection;
     private static MongoClient mongoClient;
     private static MongoDatabase database;
+    private static boolean shouldInsert = false;
 
     /**
      * Use to initialise the MongoDB Database and Connections corresponding to the Sensors
      * Call only once per execution
      */
     public static void init() {
+        shouldInsert = true;
+
         CodecRegistry pojoCodecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
                 fromProviders(PojoCodecProvider.builder().automatic(true).build()));    // custom codec required to store POJO in MongoDB
 
@@ -67,8 +70,10 @@ public class MongoDBManager {
      * @param <TDocument> given type of document
      */
     public static <TDocument> void insertDocumentIntoCollection(MongoCollection<TDocument> collection, TDocument document) {
-        collection.insertOne(document);
-        System.out.println("MongoDB Log: Data Inserted");
+        if (shouldInsert) {
+            collection.insertOne(document);
+            System.out.println("MongoDB Log: Data Inserted");
+        }
     }
 
     /**
