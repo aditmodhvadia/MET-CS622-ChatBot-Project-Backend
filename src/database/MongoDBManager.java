@@ -6,6 +6,7 @@ import com.mongodb.client.*;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import sensormodels.*;
+import utils.QueryUtils;
 import utils.WebAppConstants;
 
 import java.util.*;
@@ -19,7 +20,6 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
  * @author Adit Modhvadia
  */
 public class MongoDBManager {
-
     public static final String DATABASE_NAME = "SensorData";
     public static MongoCollection<ActivitySensorData> activitySensorDataMongoCollection;
     public static MongoCollection<ActivFitSensorData> activFitSensorDataMongoCollection;
@@ -36,7 +36,6 @@ public class MongoDBManager {
      * Call only once per execution
      */
     public static void init() {
-
         CodecRegistry pojoCodecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
                 fromProviders(PojoCodecProvider.builder().automatic(true).build()));    // custom codec required to store POJO in MongoDB
 
@@ -46,7 +45,6 @@ public class MongoDBManager {
 //        create a connection to MongoDB Client
         mongoClient = MongoClients.create(settings);
         System.out.println("Connected to edu.bu.aditm.database successfully");
-
 
 //        fetch the edu.bu.aditm.database for MongoDB
         database = mongoClient.getDatabase(DATABASE_NAME);
@@ -81,7 +79,7 @@ public class MongoDBManager {
      */
     public static ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
 //        get the next Day Date as well
-        Date nextDate = addDayToDate(userDate, 1);
+        Date nextDate = QueryUtils.addDayToDate(userDate, 1);
 //        fetch all record from the collection
         MongoCursor<ActivFitSensorData> cursor = activFitSensorDataMongoCollection.find().cursor();
         ArrayList<ActivFitSensorData> queryResult = new ArrayList<>();  // holds the result from the query
@@ -124,20 +122,6 @@ public class MongoDBManager {
             }
         }
         return maxStepCount;
-    }
-
-    /**
-     * Use to add given number of days to the given Date
-     *
-     * @param userDate given Date
-     * @param days     given number of days
-     * @return Date after adding given number of days
-     */
-    private static Date addDayToDate(Date userDate, int days) {
-        Calendar cal = Calendar.getInstance();  // get Calendar Instance
-        cal.setTime(userDate);  // set Time to the given Date@param
-        cal.add(Calendar.DATE, days);   // add given number of days@param to the given Date@param
-        return cal.getTime();   // return the new Date
     }
 
     /**

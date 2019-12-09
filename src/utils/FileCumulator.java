@@ -66,7 +66,7 @@ public class FileCumulator {
      */
     public static ArrayList<ActivFitSensorData> queryForRunningEvent(Date date) {
 //        get the next Day Date as well
-        Date nextDate = addDayToDate(date, 1);
+        Date nextDate = QueryUtils.addDayToDate(date, 1);
 //        fetch all record from the collection
         List<ActivFitSensorData> fileData = getActivFitFileContents(1000);
         ArrayList<ActivFitSensorData> queryResult = new ArrayList<>();  // holds the result from the query
@@ -135,20 +135,6 @@ public class FileCumulator {
             }
         }
         return maxStepCount;
-    }
-
-    /**
-     * Use to add given number of days to the given Date
-     *
-     * @param userDate given Date
-     * @param days     given number of days
-     * @return Date after adding given number of days
-     */
-    private static Date addDayToDate(Date userDate, int days) {
-        Calendar cal = Calendar.getInstance();  // get Calendar Instance
-        cal.setTime(userDate);  // set Time to the given Date@param
-        cal.add(Calendar.DATE, days);   // add given number of days@param to the given Date@param
-        return cal.getTime();   // return the new Date
     }
 
     /**

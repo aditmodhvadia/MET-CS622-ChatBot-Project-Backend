@@ -4,6 +4,7 @@ import sensormodels.ActivFitSensorData;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -49,9 +50,30 @@ public class QueryUtils {
         }
     }
 
+    /**
+     * Call to check if the given query matches with given pattern
+     *
+     * @param pattern given pattern
+     * @param query   given query
+     * @return <code>true</code> if the pattern matches, else <code>false</code>
+     */
     private static boolean isMatching(String pattern, String query) {
         Matcher m = Pattern.compile(pattern).matcher(query);
         return m.find();
+    }
+
+    /**
+     * Use to add given number of days to the given Date
+     *
+     * @param userDate given Date
+     * @param days     given number of days
+     * @return Date after adding given number of days
+     */
+    public static Date addDayToDate(Date userDate, int days) {
+        Calendar cal = Calendar.getInstance();  // get Calendar Instance
+        cal.setTime(userDate);  // set Time to the given Date@param
+        cal.add(Calendar.DATE, days);   // add given number of days@param to the given Date@param
+        return cal.getTime();   // return the new Date
     }
 
     /**

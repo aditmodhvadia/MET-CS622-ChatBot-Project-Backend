@@ -89,9 +89,5 @@ public class MongoDBServlet extends HttpServlet {
                 }
             }
         });
-
-//        QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryMessage.getQuery());
-//        msg.setData(data);
-//        resp.getOutputStream().print(g.toJson(msg));
     }
 }
