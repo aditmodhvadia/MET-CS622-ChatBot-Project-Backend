@@ -1,7 +1,6 @@
 package servlets.startup;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import database.MongoDBManager;
 import database.MySqlManager;
 import listeners.FileListener;
@@ -33,15 +32,11 @@ public class StartUpServlet extends HttpServlet {
         System.out.println("--------#####--------");
         System.out.println("        Server started      ");
         System.out.println("--------#####--------");
-//        Execute work from here
-//        testing libs
 
 //        init MongoDB to get references to Database and Collections
 //        MongoDBManager.init();
 
         MySqlManager.init();
-
-//        TODO: Add check if files already unzipped and if data already present in MongoDB, then don't unzip it and store in MongoDB
 
         /*try {
             String absoluteDiskPath = getServletContext().getRealPath(sourceFileName);
@@ -57,11 +52,8 @@ public class StartUpServlet extends HttpServlet {
 //            Unzipping complete
         System.out.println("\n\n*************** Unzipping complete***************\n\n");
 
-//        Now store all data into MongoDB
-//        storeDataInMongoDB();   // store JSON data into mongoDB
-
-//        TODO: Lucene remaining
-
+//        Now store all data into MongoDB, MySQL and Lucene
+//        storeDataInDatabases();   // store JSON data from file storage
     }
 
     /**
@@ -69,28 +61,21 @@ public class StartUpServlet extends HttpServlet {
      *
      * @see MongoDBManager
      */
-    private static void storeDataInMongoDB() {
-        System.out.println("*****************Storing data into MongoDB******************");
-
-        storeActivitySensorDataInMongoDB();   // works
-
-        storeActivFitSensorDataInMongoDB(); //  works
-
-        storeBatterySensorDataInMongoDB();  //  works
-
-        storeBluetoothSensorDataInMongoDB();    //  works
-
-        storeHeartRateSensorDataInMongoDB();  //  works
-
-        storeLightSensorDataInMongoDB();    //  works
-
-        storeScreenUsageSensorDataInMongoDB();  //  works
+    private static void storeDataInDatabases() {
+        System.out.println("*****************Storing data into Databases******************");
+        storeActivitySensorData();   // works
+        storeActivFitSensorData(); //  works
+        storeBatterySensorData();  //  works
+        storeBluetoothSensorData();    //  works
+        storeHeartRateSensorData();  //  works
+        storeLightSensorData();    //  works
+        storeScreenUsageSensorData();  //  works
     }
 
     /**
      * Use to store Sensor Data into mongoDB
      */
-    private static void storeActivitySensorDataInMongoDB() {
+    private static void storeActivitySensorData() {
         // store Activity Sensor data into MongoDB
         File activityFile = fileCumulator.getActivityFile();
         List<ActivitySensorData> sensorDataList = new ArrayList<>();
@@ -118,7 +103,7 @@ public class StartUpServlet extends HttpServlet {
     /**
      * Use to store Sensor Data into mongoDB
      */
-    private static void storeActivFitSensorDataInMongoDB() {
+    private static void storeActivFitSensorData() {
         // store ActivityFit Sensor data into MongoDB
         File activFitFile = fileCumulator.getActivFitFile();
         List<ActivFitSensorData> sensorDataList = new ArrayList<>();
@@ -143,7 +128,7 @@ public class StartUpServlet extends HttpServlet {
         LuceneManager.storeActivFitSensorData(sensorDataList);
     }
 
-    private static void storeBatterySensorDataInMongoDB() {
+    private static void storeBatterySensorData() {
         // store Battery Sensor data into MongoDB
         File batterySensorFile = fileCumulator.getBatterySensorFile();
         for (String fileLine :
@@ -164,7 +149,7 @@ public class StartUpServlet extends HttpServlet {
         }
     }
 
-    private static void storeBluetoothSensorDataInMongoDB() {
+    private static void storeBluetoothSensorData() {
         // store Bluetooth Sensor data into MongoDB
         File bluetoothSensorFile = fileCumulator.getBluetoothFile();
         for (String fileLine :
@@ -185,7 +170,7 @@ public class StartUpServlet extends HttpServlet {
         }
     }
 
-    private static void storeHeartRateSensorDataInMongoDB() {
+    private static void storeHeartRateSensorData() {
         // store Heart Rate Sensor data into MongoDB
         File heartRateSensorFile = fileCumulator.getHeartRateFile();
         List<HeartRateSensorData> sensorDataList = new ArrayList<>();
@@ -208,7 +193,7 @@ public class StartUpServlet extends HttpServlet {
         LuceneManager.storeHeartRateSensorData(sensorDataList);
     }
 
-    private static void storeLightSensorDataInMongoDB() {
+    private static void storeLightSensorData() {
         // store Light Sensor data into MongoDB
         File lightSensorFile = fileCumulator.getLightSensorFile();
         for (String fileLine :
@@ -229,7 +214,7 @@ public class StartUpServlet extends HttpServlet {
         }
     }
 
-    private static void storeScreenUsageSensorDataInMongoDB() {
+    private static void storeScreenUsageSensorData() {
         // store Screen Usage Sensor data into MongoDB
         File screenUsageFile = fileCumulator.getScreenUsageFile();
         for (String fileLine :
