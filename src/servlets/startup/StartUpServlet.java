@@ -5,6 +5,7 @@ import com.google.gson.JsonSyntaxException;
 import database.MongoDBManager;
 import database.MySqlManager;
 import listeners.FileListener;
+import lucene.LuceneManager;
 import sensormodels.*;
 import utils.FileCumulator;
 import utils.IOUtility;
@@ -16,6 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StartUpServlet extends HttpServlet {
     private static final UnzipUtility unZipper = new UnzipUtility();    // unzips zip folder and files
@@ -90,27 +93,26 @@ public class StartUpServlet extends HttpServlet {
     private static void storeActivitySensorDataInMongoDB() {
         // store Activity Sensor data into MongoDB
         File activityFile = fileCumulator.getActivityFile();
+        List<ActivitySensorData> sensorDataList = new ArrayList<>();
         for (String fileLine :
                 ioUtility.getFileContentsLineByLine(activityFile)) {
             Gson g = new Gson();
             try {
 //                converts JSON string into POJO
                 ActivitySensorData activitySensorData = g.fromJson(fileLine, ActivitySensorData.class);
+                sensorDataList.add(activitySensorData);
 //                insert the new document into mongodb
 //                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activitySensorDataMongoCollection, activitySensorData);
 //                removed for now for testing
-
 //                insert data into MYSQL for Activity sensor
                 MySqlManager.insertIntoActivityTable(activitySensorData);
 
-            } catch (JsonSyntaxException e) {
-//                e.printStackTrace();  //  do nothing
-//                System.out.println("Incorrect JSON format");    // don't store data in mongodb
-            } catch (Exception e) {
-//                e.printStackTrace();
-//                System.out.println("Incorrect JSON format");    // don't store data in mongodb
+            } catch (Exception ignored) {
+//                ignore false entries
             }
         }
+//        store activity sensor data in lucene at once
+        LuceneManager.storeActivitySensorData(sensorDataList);
     }
 
     /**
@@ -119,12 +121,14 @@ public class StartUpServlet extends HttpServlet {
     private static void storeActivFitSensorDataInMongoDB() {
         // store ActivityFit Sensor data into MongoDB
         File activFitFile = fileCumulator.getActivFitFile();
+        List<ActivFitSensorData> sensorDataList = new ArrayList<>();
         for (String fileLine :
                 ioUtility.getFileContentsLineByLine(activFitFile)) {
             Gson g = new Gson();
             try {
 //                converts JSON string into POJO
                 ActivFitSensorData activFitSensorData = g.fromJson(fileLine, ActivFitSensorData.class);
+                sensorDataList.add(activFitSensorData);
 //                insert the new document into mongodb
                 MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activFitSensorDataMongoCollection, activFitSensorData);
 
@@ -135,6 +139,8 @@ public class StartUpServlet extends HttpServlet {
                 System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
+//        store data in lucene
+        LuceneManager.storeActivFitSensorData(sensorDataList);
     }
 
     private static void storeBatterySensorDataInMongoDB() {
@@ -182,15 +188,16 @@ public class StartUpServlet extends HttpServlet {
     private static void storeHeartRateSensorDataInMongoDB() {
         // store Heart Rate Sensor data into MongoDB
         File heartRateSensorFile = fileCumulator.getHeartRateFile();
+        List<HeartRateSensorData> sensorDataList = new ArrayList<>();
         for (String fileLine :
                 ioUtility.getFileContentsLineByLine(heartRateSensorFile)) {
             Gson g = new Gson();
             try {
 //                converts JSON string into POJO
                 HeartRateSensorData heartRateSensorData = g.fromJson(fileLine, HeartRateSensorData.class);
+                sensorDataList.add(heartRateSensorData);
 //                insert the new document into mongodb
                 MongoDBManager.insertDocumentIntoCollection(MongoDBManager.heartRateSensorDataMongoCollection, heartRateSensorData);
-
                 //insert data into MYSQL for Heart Rate sensor
                 MySqlManager.insertIntoHeartRateTable(heartRateSensorData);
             } catch (Exception e) {
@@ -198,6 +205,7 @@ public class StartUpServlet extends HttpServlet {
                 System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
+        LuceneManager.storeHeartRateSensorData(sensorDataList);
     }
 
     private static void storeLightSensorDataInMongoDB() {
