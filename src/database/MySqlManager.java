@@ -136,23 +136,18 @@ public class MySqlManager {
      */
     public static void insertIntoActivityTable(List<ActivitySensorData> sensorDataList) {
         connection = getConnection();
-        // the mysql insert statement
-        String sql1 = " insert into " + ACTIVITY_TABLE + " (time_stamp,formatted_date, sensor_name, step_counts,step_delta)"
-                + " values (?, ?, ?, ?, ?)";
-
         // create the mysql insert prepared statement
-        PreparedStatement preparedStmt = null;
+        PreparedStatement preparedStmt;
         try {
             for (ActivitySensorData sensorData :
                     sensorDataList) {
-                preparedStmt = connection.prepareStatement(sql1);
+                preparedStmt = connection.prepareStatement(MySQLQueries.insertIntoActivityTable);
                 preparedStmt.setString(1, sensorData.getTimestamp());
                 preparedStmt.setString(2, sensorData.getFormatted_date());
                 preparedStmt.setString(3, sensorData.getSensorName());
                 preparedStmt.setInt(4, sensorData.getSensorData().getStepCounts());
                 preparedStmt.setInt(5, sensorData.getSensorData().getStepDelta());
-
-                // execute the preparedstatement
+                // execute the prepared statement
                 preparedStmt.execute();
             }
         } catch (SQLException e) {
@@ -166,7 +161,6 @@ public class MySqlManager {
                 e.printStackTrace();
             }
         }
-
     }
 
     /**
@@ -176,22 +170,18 @@ public class MySqlManager {
      */
     public static void insertIntoActivFitTable(List<ActivFitSensorData> sensorDataList) {
         connection = getConnection();
-        // the mysql insert statement
-        String insertInActivFitTable = " insert into " + ACTIV_FIT_TABLE + " (start_time, end_time, formatted_date, duration, activity)"
-                + " values (?, ?, ?, ?, ?)";
-
-        // create the mysql insert preparedstatement
-        PreparedStatement preparedStmt = null;
+        // create the mysql insert prepared statement
+        PreparedStatement preparedStmt;
         try {
             for (ActivFitSensorData sensorData :
                     sensorDataList) {
-                preparedStmt = connection.prepareStatement(insertInActivFitTable);
+                preparedStmt = connection.prepareStatement(MySQLQueries.insertInActivFitTable);
                 preparedStmt.setString(1, sensorData.getTimestamp().getStartTime());
                 preparedStmt.setString(2, sensorData.getTimestamp().getEndTime());
                 preparedStmt.setString(3, sensorData.getFormatted_date());
                 preparedStmt.setInt(4, sensorData.getSensorData().getDuration());
                 preparedStmt.setString(5, sensorData.getSensorData().getActivity());
-                // execute the preparedstatement
+                // execute the prepared statement
                 preparedStmt.execute();
             }
         } catch (SQLException e) {
@@ -214,24 +204,19 @@ public class MySqlManager {
      */
     public static void insertIntoBatteryTable(List<BatterySensorData> sensorDataList) {
         connection = getConnection();
-        // the mysql insert statement
-        String sql3 = " insert into " + BATTERY_TABLE + " (timestamp,time_stamp, formatted_date, sensor_name,percent,charging)"
-                + " values (?, ?, ?, ?, ?,?)";
-
-
-        // create the mysql insert preparedstatement
-        PreparedStatement preparedStmt = null;
+        // create the mysql insert prepared statement
+        PreparedStatement preparedStmt;
         try {
             for (BatterySensorData sensorData :
                     sensorDataList) {
-                preparedStmt = connection.prepareStatement(sql3);
+                preparedStmt = connection.prepareStatement(MySQLQueries.insertInBatteryTable);
                 preparedStmt.setString(1, sensorData.getTimestamp());
                 preparedStmt.setString(2, sensorData.getTimestamp());
                 preparedStmt.setString(3, sensorData.getFormatted_date());
                 preparedStmt.setString(4, sensorData.getSensorName());
                 preparedStmt.setInt(5, sensorData.getSensorData().getPercent());
                 preparedStmt.setBoolean(6, sensorData.getSensorData().getCharging());
-                // execute the preparedstatement
+                // execute the prepared statement
                 preparedStmt.execute();
             }
         } catch (SQLException e) {
@@ -254,20 +239,17 @@ public class MySqlManager {
      */
     public static void insertIntoBluetoothTable(List<BluetoothSensorData> sensorDataList) {
         connection = getConnection();
-        // the mysql insert statement
-        String insertInBluetoothTable = " insert into " + BLUETOOTH_TABLE + " (timestamp,formatted_date,sensor_name,state)"
-                + " values (?, ?, ?, ?)";
-        // create the mysql insert preparedstatement
+        // create the mysql insert prepared statement
         PreparedStatement preparedStmt = null;
         try {
             for (BluetoothSensorData sensorData :
                     sensorDataList) {
-                preparedStmt = connection.prepareStatement(insertInBluetoothTable);
+                preparedStmt = connection.prepareStatement(MySQLQueries.insertInBluetoothTable);
                 preparedStmt.setString(1, sensorData.getTimestamp());
                 preparedStmt.setString(2, sensorData.getFormatted_date());
                 preparedStmt.setString(3, sensorData.getSensorName());
                 preparedStmt.setString(4, sensorData.getSensorData().getState());
-                // execute the preparedstatement
+                // execute the prepared statement
                 preparedStmt.execute();
             }
         } catch (SQLException e) {
@@ -290,20 +272,17 @@ public class MySqlManager {
      */
     public static void insertIntoHeartRateTable(List<HeartRateSensorData> sensorDataList) {
         connection = getConnection();
-        // the mysql insert statement
-        String insertInHeartRateTable = " insert into " + HEART_RATE_TABLE + " (timestamp, formatted_date, sensor_name,bpm)"
-                + " values (?, ?, ?, ?)";
-        // create the mysql insert preparedstatement
-        PreparedStatement preparedStmt = null;
+        // create the mysql insert prepared statement
+        PreparedStatement preparedStmt;
         try {
             for (HeartRateSensorData sensorData :
                     sensorDataList) {
-                preparedStmt = connection.prepareStatement(insertInHeartRateTable);
+                preparedStmt = connection.prepareStatement(MySQLQueries.insertInHeartRateTable);
                 preparedStmt.setString(1, sensorData.getTimestamp());
                 preparedStmt.setString(2, sensorData.getFormatted_date());
                 preparedStmt.setString(3, sensorData.getSensorName());
                 preparedStmt.setInt(4, sensorData.getSensorData().getBpm());
-                // execute the preparedstatement
+                // execute the prepared statement
                 preparedStmt.execute();
             }
         } catch (SQLException e) {
@@ -326,20 +305,17 @@ public class MySqlManager {
      */
     public static void insertIntoLightTable(List<LightSensorData> sensorDataList) {
         connection = getConnection();
-        // the mysql insert statement
-        String insertIntoLightTable = " insert into " + LIGHT_TABLE + " (timestamp, formatted_date, sensor_name,lux)"
-                + " values (?, ?, ?, ?)";
-        // create the mysql insert preparedstatement
+        // create the mysql insert prepared statement
         PreparedStatement preparedStmt = null;
         try {
             for (LightSensorData sensorData :
                     sensorDataList) {
-                preparedStmt = connection.prepareStatement(insertIntoLightTable);
+                preparedStmt = connection.prepareStatement(MySQLQueries.insertIntoLightTable);
                 preparedStmt.setString(1, sensorData.getTimestamp());
                 preparedStmt.setString(2, sensorData.getFormatted_date());
                 preparedStmt.setString(3, sensorData.getSensorName());
                 preparedStmt.setInt(4, sensorData.getSensorData().getLux());
-                // execute the preparedstatement
+                // execute the prepared statement
                 preparedStmt.execute();
             }
         } catch (SQLException e) {
@@ -357,15 +333,12 @@ public class MySqlManager {
 
     public static void insertIntoScreenUsageTable(List<ScreenUsageSensorData> sensorDataList) {
         connection = getConnection();
-        // the mysql insert statement
-        String sql7 = " insert into " + SCREEN_USAGE_TABLE + " (start_hour,end_hour,start_timestamp,end_timestamp, formatted_date, min_elapsed,min_start_hour,min_end_hour)"
-                + " values (?, ?, ?, ?, ?,?,?,?)";
         // create the mysql insert prepared statement
-        PreparedStatement preparedStmt = null;
+        PreparedStatement preparedStmt;
         try {
             for (ScreenUsageSensorData sensorData :
                     sensorDataList) {
-                preparedStmt = connection.prepareStatement(sql7);
+                preparedStmt = connection.prepareStatement(MySQLQueries.insertInScreenUsageTable);
                 preparedStmt.setString(1, sensorData.getStartHour());
                 preparedStmt.setString(2, sensorData.getEndHour());
                 preparedStmt.setString(3, sensorData.getStartTimestamp());
@@ -374,7 +347,7 @@ public class MySqlManager {
                 preparedStmt.setDouble(6, sensorData.getMinElapsed());
                 preparedStmt.setDouble(7, sensorData.getMinStartHour());
                 preparedStmt.setInt(8, sensorData.getMinEndHour());
-                // execute the preparedstatement
+                // execute the prepared statement
                 preparedStmt.execute();
             }
         } catch (SQLException e) {
@@ -613,5 +586,22 @@ public class MySqlManager {
 
     public static ArrayList<HeartRateSensorData> queryForHeartRateEvent(Date date) {
         return null;
+    }
+
+    private static class MySQLQueries {
+        static final String insertIntoActivityTable = " insert into " + ACTIVITY_TABLE + " (time_stamp,formatted_date, sensor_name, step_counts,step_delta)"
+                + " values (?, ?, ?, ?, ?)";
+        static final String insertInActivFitTable = " insert into " + ACTIV_FIT_TABLE + " (start_time, end_time, formatted_date, duration, activity)"
+                + " values (?, ?, ?, ?, ?)";
+        static final String insertInBatteryTable = " insert into " + BATTERY_TABLE + " (timestamp,time_stamp, formatted_date, sensor_name,percent,charging)"
+                + " values (?, ?, ?, ?, ?,?)";
+        static final String insertInBluetoothTable = " insert into " + BLUETOOTH_TABLE + " (timestamp,formatted_date,sensor_name,state)"
+                + " values (?, ?, ?, ?)";
+        static final String insertInHeartRateTable = " insert into " + HEART_RATE_TABLE + " (timestamp, formatted_date, sensor_name,bpm)"
+                + " values (?, ?, ?, ?)";
+        static final String insertIntoLightTable = " insert into " + LIGHT_TABLE + " (timestamp, formatted_date, sensor_name,lux)"
+                + " values (?, ?, ?, ?)";
+        static final String insertInScreenUsageTable = " insert into " + SCREEN_USAGE_TABLE + " (start_hour,end_hour,start_timestamp,end_timestamp, formatted_date, min_elapsed,min_start_hour,min_end_hour)"
+                + " values (?, ?, ?, ?, ?,?,?,?)";
     }
 }
