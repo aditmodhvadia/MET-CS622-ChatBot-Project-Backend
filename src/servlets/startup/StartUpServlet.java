@@ -54,7 +54,7 @@ public class StartUpServlet extends HttpServlet {
         System.out.println("\n\n*************** Unzipping complete***************\n\n");
 
 //        Now store all data into MongoDB, MySQL and Lucene
-        storeDataInDatabases();   // store JSON data from file storage
+//        storeDataInDatabases();   // store JSON data from file storage
     }
 
     /**

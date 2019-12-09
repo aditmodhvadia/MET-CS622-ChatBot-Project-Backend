@@ -12,7 +12,8 @@ import static jdk.nashorn.internal.objects.Global.Infinity;
 public class MySqlManager {
     // JDBC driver name and database URL
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    static final String DB_URL = "jdbc:mysql://localhost/sensordata";
+    static final String DB_NAME = "sensordata";
+    static final String DB_URL = "jdbc:mysql://localhost/" + DB_NAME;
 
     private static final String ACTIV_FIT_TABLE = "ActivFitSensorData";
     private static final String ACTIVITY_TABLE = "ActivitySensorData";
@@ -100,13 +101,13 @@ public class MySqlManager {
                     " min_end_hour INTEGER ) ";
 
             // executing statements to created SenorData database tables
-            stmt.executeUpdate(createActivityTable);
-            stmt.executeUpdate(createActivFitTable);
-            stmt.executeUpdate(createBatteryTable);
-            stmt.executeUpdate(createBluetoothTable);
-            stmt.executeUpdate(createHeartRateTable);
-            stmt.executeUpdate(createLightTable);
-            stmt.executeUpdate(createScreenUsageTable);
+//            stmt.executeUpdate(createActivityTable);
+//            stmt.executeUpdate(createActivFitTable);
+//            stmt.executeUpdate(createBatteryTable);
+//            stmt.executeUpdate(createBluetoothTable);
+//            stmt.executeUpdate(createHeartRateTable);
+//            stmt.executeUpdate(createLightTable);
+//            stmt.executeUpdate(createScreenUsageTable);
             System.out.println("Created tables in given database...");
         } catch (Exception se) {
             //Handle errors for JDBC
@@ -204,7 +205,7 @@ public class MySqlManager {
      */
     public static void insertIntoBatteryTable(List<BatterySensorData> sensorDataList) {
         connection = getConnection();
-        // create the mysql insert prepared statement
+        // create the mysql insert prepared statement\
         PreparedStatement preparedStmt;
         try {
             for (BatterySensorData sensorData :
@@ -429,9 +430,9 @@ public class MySqlManager {
         connection = getConnection();
         // if you only need a few columns, specify them by name instead of using "*"
         String query = "SELECT * FROM " + ACTIVITY_TABLE;
-
+        ArrayList<ActivitySensorData> resultSet = new ArrayList<>();
         // create the java statement
-        Statement st = null;
+        Statement st;
         try {
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(query);
@@ -445,6 +446,7 @@ public class MySqlManager {
                 sensorData.setStepCounts(rs.getInt("step_counts"));
                 sensorData.setStepDelta(rs.getInt("step_delta"));
                 data.setSensorData(sensorData);
+                resultSet.add(data);
             }
 
         } catch (SQLException e) {
@@ -452,16 +454,16 @@ public class MySqlManager {
         }
 
         // execute the query, and get a java resultset
-        return null;
+        return resultSet;
     }
 
     private static ArrayList<ActivFitSensorData> getActivFitSensorData() {
         connection = getConnection();
         // if you only need a few columns, specify them by name instead of using "*"
         String query = "SELECT * FROM " + ACTIV_FIT_TABLE;
-
+        ArrayList<ActivFitSensorData> resultSet = new ArrayList<>();
         // create the java statement
-        Statement st = null;
+        Statement st;
         try {
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(query);
@@ -476,6 +478,7 @@ public class MySqlManager {
                 sensorData.setActivity(rs.getString("activity"));
                 sensorData.setDuration(rs.getInt("duration"));
                 data.setSensorData(sensorData);
+                resultSet.add(data);
             }
 
         } catch (SQLException e) {
@@ -483,7 +486,7 @@ public class MySqlManager {
         }
 
         // execute the query, and get a java resultset
-        return null;
+        return resultSet;
     }
 
     private static ArrayList<HeartRateSensorData> getHeartRateSensorData() {
