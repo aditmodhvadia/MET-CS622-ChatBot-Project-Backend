@@ -25,7 +25,7 @@ public class MySqlManager {
 
     //  Database credentials
     static final String USER = "root";
-    static final String PASS = "Superj35@";
+    static final String PASS = "root";
     private static Connection connection;
 
     public static void init() {
