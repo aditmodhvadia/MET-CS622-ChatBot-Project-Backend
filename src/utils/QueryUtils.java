@@ -13,23 +13,24 @@ import java.util.regex.Pattern;
 import static jdk.nashorn.internal.objects.Global.Infinity;
 
 public class QueryUtils {
-    //    public static final String RUNNING_EVENT_REGEX = ".run./i";
     public static final String RUNNING_EVENT_REGEX = "([rR]un|[rR]unning)";
     public static final String STEP_COUNT_EVENT_REGEX = "([sS]teps*|[wW]alk)";
     public static final String HEART_RATE_EVENT_REGEX = "([hH]eart|[hH]eartrate)";
-//    public static final String RUNNING_EVENT_REGEX = "run|Run";
+    public static final String DATE_REGEX = "(\\d{2}[-,/]\\d{2}[-,/]\\d{4})";    //  Regex for Date input
 
+    /**
+     * Call to determine the category of the given query and get the callback for the same
+     *
+     * @param query    given query
+     * @param callback callback for the query type
+     */
     public static void determineQueryType(String query, OnQueryResolvedCallback callback) {
-        String regex = "(\\d{2}[-,/]\\d{2}[-,/]\\d{4})";    //  Regex for Date input
-        Matcher m = Pattern.compile(regex).matcher(query);
+        Matcher m = Pattern.compile(DATE_REGEX).matcher(query);
         Date date;
-        if (m.find()) {
+        if (m.find()) { //  find if user entered date in the query
             try {
-                date = WebAppConstants.inputDateFormat.parse(m.group(1));
+                date = WebAppConstants.inputDateFormat.parse(m.group(1));   //  get the first recognised date from query
 
-                System.out.println(WebAppConstants.inputDateFormat.format(date));
-
-//                TODO: Resolve query type now and remove this
                 if (isMatching(RUNNING_EVENT_REGEX, query)) {
                     callback.onDisplayRunningEventSelected(date);
                 } else if (isMatching(STEP_COUNT_EVENT_REGEX, query)) {
@@ -39,13 +40,11 @@ public class QueryUtils {
                 } else {
                     callback.onNoEventResolved();
                 }
-
             } catch (ParseException e) {
                 e.printStackTrace();
                 callback.onDateNotParsed();
             }
-        } else {
-            // Bad input
+        } else {    //  Bad input
             callback.onDateNotParsed();
         }
     }
@@ -132,14 +131,6 @@ public class QueryUtils {
             } else {
                 builder.append("No data found in MongoDB or some error occurred.");
             }
-            /*for (String date :
-                    heartRates.keySet()) {
-                int hearRateCount = heartRates.get(date);
-                builder.append("You received ")
-                        .append(hearRateCount)
-                        .append(" HeartRate notifications on ")
-                        .append(date);
-            }*/
         }
         return builder.toString();
     }

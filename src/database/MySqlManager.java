@@ -43,71 +43,14 @@ public class MySqlManager {
             System.out.println("Creating database...");
             stmt = connection.createStatement();
 
-            String createActivityTable = "CREATE TABLE " + ACTIVITY_TABLE +
-                    "(time_stamp VARCHAR(30) , " +
-                    " sensor_name CHAR(25) , " +
-                    " formatted_date CHAR(10) , " +
-                    " step_counts INTEGER, " +
-                    " step_delta INTEGER)";
-
-            // creating ActivFitSensorData table
-//            deleted timestamp column as it is not required
-            String createActivFitTable = "CREATE TABLE " + ACTIV_FIT_TABLE +
-                    " (start_time VARCHAR(30) , " +    //  replace all TIMESTAMP with VARCHAR and store as string
-                    " formatted_date VARCHAR(10) , " +
-                    " end_time VARCHAR(30) , " +
-                    " duration INTEGER , " +
-                    " activity VARCHAR(55) ) ";
-
-            //" PRIMARY KEY ( timestamp))";
-            // creating BatterySensorData table
-            String createBatteryTable = "CREATE TABLE " + BATTERY_TABLE +
-                    "(timestamp VARCHAR(30) , " +
-                    " time_stamp VARCHAR(30) , " +
-                    " formatted_date VARCHAR(10) , " +
-                    " sensor_name CHAR (25), " +
-                    " percent INTEGER , " +
-                    " charging BIT ) ";
-            //" PRIMARY KEY ( timestamp))";
-
-            // creating BluetoothSensorData table
-            String createBluetoothTable = "CREATE TABLE " + BLUETOOTH_TABLE +
-                    "(timestamp VARCHAR(30) , " +
-                    " formatted_date VARCHAR(10) , " +
-                    " sensor_name VARCHAR(30) , " +
-                    " state CHAR (225)) ";
-
-            // creating HeartRateSensorData table
-            String createHeartRateTable = "CREATE TABLE " + HEART_RATE_TABLE +
-                    "(timestamp VARCHAR(30) , " +
-                    " formatted_date VARCHAR(10) , " +
-                    " sensor_name CHAR (25), " +
-                    " bpm INTEGER)";
-            // creating LightSensorData table
-            String createLightTable = "CREATE TABLE " + LIGHT_TABLE +
-                    "(timestamp VARCHAR(30) , " +
-                    " formatted_date VARCHAR(10) , " +
-                    " sensor_name VARCHAR(30) , " +
-                    " lux INTEGER) ";
-            // creating ScreenUsageSensorData
-            String createScreenUsageTable = "CREATE TABLE " + SCREEN_USAGE_TABLE +
-                    "(start_hour VARCHAR(40) , " +
-                    " end_hour VARCHAR(40)," +
-                    " start_timestamp VARCHAR(30),  " +
-                    " end_timestamp VARCHAR(30),  " +
-                    " formatted_date VARCHAR(10),  " +
-                    " min_elapsed DOUBLE , " +
-                    " min_start_hour DOUBLE , " +
-                    " min_end_hour INTEGER ) ";
-
             // executing statements to created SenorData database tables
-//            stmt.executeUpdate(createActivityTable);
-//            stmt.executeUpdate(createActivFitTable);
-//            stmt.executeUpdate(createBatteryTable);
-//            stmt.executeUpdate(createBluetoothTable);
-//            stmt.executeUpdate(createHeartRateTable);
-//            stmt.executeUpdate(createLightTable);
-//            stmt.executeUpdate(createScreenUsageTable);
+            stmt.executeUpdate(MySQLQueries.createActivityTable);
+//            stmt.executeUpdate(MySQLQueries.createActivFitTable);
+//            stmt.executeUpdate(MySQLQueries.createBatteryTable);
+//            stmt.executeUpdate(MySQLQueries.createBluetoothTable);
+//            stmt.executeUpdate(MySQLQueries.createHeartRateTable);
+//            stmt.executeUpdate(MySQLQueries.createLightTable);
+//            stmt.executeUpdate(MySQLQueries.createScreenUsageTable);
             System.out.println("Created tables in given database...");
         } catch (Exception se) {
             //Handle errors for JDBC
@@ -592,6 +535,56 @@ public class MySqlManager {
     }
 
     private static class MySQLQueries {
+        static final String createActivityTable = "CREATE TABLE " + ACTIVITY_TABLE +
+                "(time_stamp VARCHAR(30) , " +
+                " sensor_name CHAR(25) , " +
+                " formatted_date CHAR(10) , " +
+                " step_counts INTEGER, " +
+                " step_delta INTEGER)";
+
+        static final String createActivFitTable = "CREATE TABLE " + ACTIV_FIT_TABLE +
+                " (start_time VARCHAR(30) , " +
+                " formatted_date VARCHAR(10) , " +
+                " end_time VARCHAR(30) , " +
+                " duration INTEGER , " +
+                " activity VARCHAR(55) ) ";
+
+        static final String createBatteryTable = "CREATE TABLE " + BATTERY_TABLE +
+                "(timestamp VARCHAR(30) , " +
+                " time_stamp VARCHAR(30) , " +
+                " formatted_date VARCHAR(10) , " +
+                " sensor_name CHAR (25), " +
+                " percent INTEGER , " +
+                " charging BIT ) ";
+
+        static final String createBluetoothTable = "CREATE TABLE " + BLUETOOTH_TABLE +
+                "(timestamp VARCHAR(30) , " +
+                " formatted_date VARCHAR(10) , " +
+                " sensor_name VARCHAR(30) , " +
+                " state CHAR (225)) ";
+
+        static final String createHeartRateTable = "CREATE TABLE " + HEART_RATE_TABLE +
+                "(timestamp VARCHAR(30) , " +
+                " formatted_date VARCHAR(10) , " +
+                " sensor_name CHAR (25), " +
+                " bpm INTEGER)";
+
+        static final String createLightTable = "CREATE TABLE " + LIGHT_TABLE +
+                "(timestamp VARCHAR(30) , " +
+                " formatted_date VARCHAR(10) , " +
+                " sensor_name VARCHAR(30) , " +
+                " lux INTEGER) ";
+
+        static final String createScreenUsageTable = "CREATE TABLE " + SCREEN_USAGE_TABLE +
+                "(start_hour VARCHAR(40) , " +
+                " end_hour VARCHAR(40)," +
+                " start_timestamp VARCHAR(30),  " +
+                " end_timestamp VARCHAR(30),  " +
+                " formatted_date VARCHAR(10),  " +
+                " min_elapsed DOUBLE , " +
+                " min_start_hour DOUBLE , " +
+                " min_end_hour INTEGER ) ";
+
         static final String insertIntoActivityTable = " insert into " + ACTIVITY_TABLE + " (time_stamp,formatted_date, sensor_name, step_counts,step_delta)"
                 + " values (?, ?, ?, ?, ?)";
         static final String insertInActivFitTable = " insert into " + ACTIV_FIT_TABLE + " (start_time, end_time, formatted_date, duration, activity)"
