@@ -4,11 +4,6 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
 
-    <servlet>
-        <servlet-name>HiWorldServlet</servlet-name>
-        <servlet-class>servlets.hi.HiWorldServlet</servlet-class>
-    </servlet>
-
     <!--    MongoDB Query resolver Servlet-->
     <servlet>
         <servlet-name>MongoDBServlet</servlet-name>
@@ -36,11 +31,6 @@
         <servlet-class>servlets.startup.StartUpServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>HiWorldServlet</servlet-name>
-        <url-pattern>/hi</url-pattern>
-    </servlet-mapping>
-
     <servlet-mapping>
         <servlet-name>MongoDBServlet</servlet-name>
         <url-pattern>/mongodb</url-pattern>
