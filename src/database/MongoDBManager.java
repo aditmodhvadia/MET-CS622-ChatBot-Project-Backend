@@ -83,6 +83,20 @@ public class MongoDBManager {
     }
 
     /**
+     * Use to insert given documents of the given type into the given target collection
+     *
+     * @param collection  given target collection
+     * @param documents   given documents to be inserted
+     * @param <TDocument> given type of document
+     */
+    public static <TDocument> void insertDocumentsIntoCollection(MongoCollection<TDocument> collection, List<TDocument> documents) {
+        if (shouldInsert) {
+            collection.insertMany(documents);
+            System.out.println("MongoDB Log: Data Inserted");
+        }
+    }
+
+    /**
      * Get the result from ActivFit Sensor Data for the given Date, if there is a running event for it
      *
      * @param userDate given Date

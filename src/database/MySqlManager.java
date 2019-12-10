@@ -45,12 +45,12 @@ public class MySqlManager {
 
             // executing statements to created SenorData database tables
             stmt.executeUpdate(MySQLQueries.createActivityTable);
-//            stmt.executeUpdate(MySQLQueries.createActivFitTable);
-//            stmt.executeUpdate(MySQLQueries.createBatteryTable);
-//            stmt.executeUpdate(MySQLQueries.createBluetoothTable);
-//            stmt.executeUpdate(MySQLQueries.createHeartRateTable);
-//            stmt.executeUpdate(MySQLQueries.createLightTable);
-//            stmt.executeUpdate(MySQLQueries.createScreenUsageTable);
+            stmt.executeUpdate(MySQLQueries.createActivFitTable);
+            stmt.executeUpdate(MySQLQueries.createBatteryTable);
+            stmt.executeUpdate(MySQLQueries.createBluetoothTable);
+            stmt.executeUpdate(MySQLQueries.createHeartRateTable);
+            stmt.executeUpdate(MySQLQueries.createLightTable);
+            stmt.executeUpdate(MySQLQueries.createScreenUsageTable);
             System.out.println("Created tables in given database...");
         } catch (Exception se) {
             //Handle errors for JDBC
@@ -70,7 +70,6 @@ public class MySqlManager {
                 se.printStackTrace();
             }//end finally try
         }//end try
-        System.out.println("Goodbye!");
     }//end main
 
     /**

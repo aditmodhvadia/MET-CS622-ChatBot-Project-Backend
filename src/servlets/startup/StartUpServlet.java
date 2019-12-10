@@ -94,14 +94,12 @@ public class StartUpServlet extends HttpServlet {
                 ActivitySensorData activitySensorData = g.fromJson(fileLine, ActivitySensorData.class);
                 activitySensorData.setFormattedDate();
                 sensorDataList.add(activitySensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activitySensorDataMongoCollection, activitySensorData);
-//                removed for now for testing
 
             } catch (Exception ignored) {
 //                ignore false entries
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.activitySensorDataMongoCollection, sensorDataList);
 //        store activity sensor data in lucene at once
         LuceneManager.storeActivitySensorData(sensorDataList);
 //        insert data into MYSQL for Activity sensor
@@ -123,14 +121,13 @@ public class StartUpServlet extends HttpServlet {
                 ActivFitSensorData activFitSensorData = g.fromJson(fileLine, ActivFitSensorData.class);
                 activFitSensorData.setFormattedDate();
                 sensorDataList.add(activFitSensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activFitSensorDataMongoCollection, activFitSensorData);
 
             } catch (Exception e) {
 //                e.printStackTrace();
 //                System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.activFitSensorDataMongoCollection, sensorDataList);
 //        store data in lucene
         LuceneManager.storeActivFitSensorData(sensorDataList);
         //insert data into MYSQL for ActivFit sensor
@@ -152,13 +149,11 @@ public class StartUpServlet extends HttpServlet {
                 BatterySensorData batterySensorData = g.fromJson(fileLine, BatterySensorData.class);
                 batterySensorData.setFormattedDate();
                 sensorDataList.add(batterySensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.batterySensorDataMongoCollection, batterySensorData);
-
             } catch (Exception ignored) {
                 // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.batterySensorDataMongoCollection, sensorDataList);
         //insert data into MYSQL for battery sensor
         MySqlManager.insertIntoBatteryTable(sensorDataList);
     }
@@ -178,14 +173,12 @@ public class StartUpServlet extends HttpServlet {
                 BluetoothSensorData bluetoothSensorData = g.fromJson(fileLine, BluetoothSensorData.class);
                 bluetoothSensorData.setFormattedDate();
                 sensorDataList.add(bluetoothSensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.bluetoothSensorDataMongoCollection, bluetoothSensorData);
-
             } catch (Exception e) {
 //                e.printStackTrace();
 //                System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.bluetoothSensorDataMongoCollection, sensorDataList);
         //insert data into MYSQL for Bluetooth sensor
         MySqlManager.insertIntoBluetoothTable(sensorDataList);
     }
@@ -205,12 +198,11 @@ public class StartUpServlet extends HttpServlet {
                 HeartRateSensorData heartRateSensorData = g.fromJson(fileLine, HeartRateSensorData.class);
                 heartRateSensorData.setFormattedDate();
                 sensorDataList.add(heartRateSensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.heartRateSensorDataMongoCollection, heartRateSensorData);
             } catch (Exception ignored) {
                 // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.heartRateSensorDataMongoCollection, sensorDataList);
         LuceneManager.storeHeartRateSensorData(sensorDataList);
         //insert data into MYSQL for Heart Rate sensor
         MySqlManager.insertIntoHeartRateTable(sensorDataList);
@@ -231,14 +223,13 @@ public class StartUpServlet extends HttpServlet {
                 LightSensorData lightSensorData = g.fromJson(fileLine, LightSensorData.class);
                 lightSensorData.setFormattedDate();
                 sensorDataList.add(lightSensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.lightSensorDataMongoCollection, lightSensorData);
 
             } catch (Exception e) {
 //                e.printStackTrace();
 //                System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.lightSensorDataMongoCollection, sensorDataList);
         //insert data into MYSQL for Light sensor
         MySqlManager.insertIntoLightTable(sensorDataList);
     }
@@ -258,14 +249,12 @@ public class StartUpServlet extends HttpServlet {
                 ScreenUsageSensorData screenUsageSensorData = g.fromJson(fileLine, ScreenUsageSensorData.class);
                 screenUsageSensorData.setFormattedDate();
                 sensorDataList.add(screenUsageSensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.screenUsageSensorDataMongoCollection, screenUsageSensorData);
-
             } catch (Exception e) {
 //                e.printStackTrace();
 //                System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.screenUsageSensorDataMongoCollection, sensorDataList);
         //insert data into MYSQL for Screen Usage sensor
         MySqlManager.insertIntoScreenUsageTable(sensorDataList);
     }

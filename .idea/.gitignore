@@ -3,3 +3,6 @@
 /codeStyles/codeStyleConfig.xml
 # Datasource local storage ignored files
 /dataSources/
+
+# Datasource local storage ignored files
+/dataSources.local.xml
