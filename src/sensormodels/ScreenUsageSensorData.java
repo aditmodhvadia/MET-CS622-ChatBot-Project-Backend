@@ -2,6 +2,9 @@ package sensormodels;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import utils.WebAppConstants;
+
+import java.util.Date;
 
 /**
  * @author Adit Modhvadia
@@ -29,6 +32,12 @@ public class ScreenUsageSensorData {
     @SerializedName("min_end_hour")
     @Expose
     private Integer minEndHour;
+    @Expose
+    private String formatted_date;
+
+    public String getFormatted_date() {
+        return formatted_date;
+    }
 
     public String getStartHour() {
         return startHour;
@@ -84,6 +93,10 @@ public class ScreenUsageSensorData {
 
     public void setMinEndHour(Integer minEndHour) {
         this.minEndHour = minEndHour;
+    }
+
+    public void setFormattedDate() {
+        this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(startTimestamp));
     }
 }
 
