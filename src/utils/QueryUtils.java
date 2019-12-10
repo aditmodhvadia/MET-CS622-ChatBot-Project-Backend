@@ -85,13 +85,17 @@ public class QueryUtils {
             return "No, there is no running activity.";
         } else {
             StringBuilder builder = new StringBuilder();
+            builder.append("Yes, you ran");
             for (ActivFitSensorData data : queryResult) {
-                builder.append("Yes, you ran from ")
+                builder.append(" from ")
                         .append(data.getTimestamp().getStartTime())
                         .append(" to ")
-                        .append(data.getTimestamp().getEndTime());
+                        .append(data.getTimestamp().getEndTime())
+                        .append(", ");
                 System.out.println("Yes, you ran from " + data.getTimestamp().getStartTime() + " to " + data.getTimestamp().getEndTime());
             }
+            builder.deleteCharAt(builder.length() - 1);
+            builder.deleteCharAt(builder.length() - 1);
             return builder.toString();
         }
     }
