@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -115,22 +114,18 @@ public class QueryUtils {
      * Call to get formatted output for HeartRates for the days
      *
      * @param date
-     * @param heartRates
+     * @param heartRateCount
      */
-    public static String getFormattedHeartRatesForTheDays(Date date, HashMap<String, Integer> heartRates) {
+    public static String getFormattedHeartRatesForTheDays(Date date, int heartRateCount) {
         StringBuilder builder = new StringBuilder();
-        if (heartRates.size() == 0) {
+        if (heartRateCount == 0) {
             builder.append("No data found in MongoDB or some error occurred.");
         } else {
             String formattedDate = WebAppConstants.inputDateFormat.format(date);
-            if (heartRates.containsKey(formattedDate)) {
-                builder.append("You received ")
-                        .append(heartRates.get(formattedDate))
-                        .append(" HeartRate notifications on ")
-                        .append(formattedDate);
-            } else {
-                builder.append("No data found in MongoDB or some error occurred.");
-            }
+            builder.append("You received ")
+                    .append(heartRateCount)
+                    .append(" HeartRate notifications on ")
+                    .append(formattedDate);
         }
         return builder.toString();
     }

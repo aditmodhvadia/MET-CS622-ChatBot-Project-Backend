@@ -322,24 +322,7 @@ public class MySqlManager {
     }
 
     public static ArrayList<ActivFitSensorData> queryForRunningEvent(Date date) {
-        //        get the next Day Date as well
-        Date nextDate = addDayToDate(date, 1);
-//        fetch all record from the collection
-
-        ArrayList<ActivFitSensorData> sensorDataList = getActivFitSensorData();
-
-        ArrayList<ActivFitSensorData> queryResult = new ArrayList<>();  // holds the result from the query
-        for (ActivFitSensorData sensorData :
-                sensorDataList) {
-//            get startDate of the SensorData entry and then check if it lies between the user entered Date and the next day or not
-            Date startDate = new Date(sensorData.getTimestamp().getStartTime());
-            if (startDate.after(date) && startDate.before(nextDate)) {  // check it lies within range
-                if (!sensorData.getSensorData().getActivity().equals("unknown") && Objects.equals(sensorData.getSensorData().getActivity(), "running")) {
-//                    SensorData entry lies between the dates and is for running, so add it to the result List
-                    queryResult.add(sensorData);
-                }
-            }
-        }
+        ArrayList<ActivFitSensorData> queryResult = getRunningEventFromActivFitSensorData(date);
         return queryResult;
     }
 
@@ -351,28 +334,20 @@ public class MySqlManager {
      */
     public static int queryForTotalStepsInDay(Date userDate) {
 //        fetch all documents from the collection
-        ArrayList<ActivitySensorData> sensorDataList = getActivitySensorData();
+        ArrayList<ActivitySensorData> sensorDataList = getActivitySensorDataForGivenDate(userDate);
         int maxStepCount = (int) -Infinity;    // Max value of step count for the day
         for (ActivitySensorData sensorData : sensorDataList) {
-//            get the next Data
-            Date sensorDate = new Date(sensorData.getTimestamp());
-            String sensorFormattedDate = WebAppConstants.inputDateFormat.format(sensorDate);
-            String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
-//            format both the user input date and the sensor date to compare if they are equal
-            if (sensorFormattedDate.equals(userFormattedDate)) {    // both dates are equal
-                if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
-//                    found a step count larger than the maxStepCount, so update it
-                    maxStepCount = sensorData.getSensorData().getStepCounts();
-                }
+            if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
+                maxStepCount = sensorData.getSensorData().getStepCounts();
             }
         }
         return maxStepCount;
     }
 
-    private static ArrayList<ActivitySensorData> getActivitySensorData() {
+    private static ArrayList<ActivitySensorData> getActivitySensorDataForGivenDate(Date userDate) {
         connection = getConnection();
-        // if you only need a few columns, specify them by name instead of using "*"
-        String query = "SELECT * FROM " + ACTIVITY_TABLE;
+        String query = "SELECT * FROM " + ACTIVITY_TABLE + " WHERE formatted_date LIKE '" + WebAppConstants.inputDateFormat.format(userDate)
+                + "' ORDER BY step_counts DESC LIMIT 1";
         ArrayList<ActivitySensorData> resultSet = new ArrayList<>();
         // create the java statement
         Statement st;
@@ -389,6 +364,7 @@ public class MySqlManager {
                 sensorData.setStepCounts(rs.getInt("step_counts"));
                 sensorData.setStepDelta(rs.getInt("step_delta"));
                 data.setSensorData(sensorData);
+                data.setFormattedDate();
                 resultSet.add(data);
             }
 
@@ -400,17 +376,23 @@ public class MySqlManager {
         return resultSet;
     }
 
-    private static ArrayList<ActivFitSensorData> getActivFitSensorData() {
+    /**
+     * Call to search for running event for the given date in the activ fit sensor data
+     *
+     * @param date given date
+     * @return all instances of running event recorded for the given date
+     */
+    private static ArrayList<ActivFitSensorData> getRunningEventFromActivFitSensorData(Date date) {
         connection = getConnection();
         // if you only need a few columns, specify them by name instead of using "*"
-        String query = "SELECT * FROM " + ACTIV_FIT_TABLE;
+        String query = "SELECT * FROM " + ACTIV_FIT_TABLE + " WHERE formatted_date LIKE '" + WebAppConstants.inputDateFormat.format(date)
+                + "' AND activity LIKE " + "'running'";
         ArrayList<ActivFitSensorData> resultSet = new ArrayList<>();
         // create the java statement
         Statement st;
         try {
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(query);
-
             while (rs.next()) {
                 ActivFitSensorData data = new ActivFitSensorData();
                 ActivFitSensorData.Timestamp timeStamp = new ActivFitSensorData.Timestamp();
@@ -421,22 +403,23 @@ public class MySqlManager {
                 sensorData.setActivity(rs.getString("activity"));
                 sensorData.setDuration(rs.getInt("duration"));
                 data.setSensorData(sensorData);
+                data.setFormattedDate();
                 resultSet.add(data);
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        // execute the query, and get a java resultset
+        // execute the query, and get a java result set
         return resultSet;
     }
 
-    private static ArrayList<HeartRateSensorData> getHeartRateSensorData() {
+    private static ArrayList<HeartRateSensorData> getHeartRateSensorDataForGivenDate(Date date) {
         connection = getConnection();
         ArrayList<HeartRateSensorData> results = new ArrayList<>();
         // if you only need a few columns, specify them by name instead of using "*"
-        String query = "SELECT * FROM " + HEART_RATE_TABLE;
+        String query = "SELECT * FROM " + HEART_RATE_TABLE + " WHERE formatted_date LIKE '" + WebAppConstants.inputDateFormat.format(date)
+                + "'";
 
         // create the java statement
         Statement st = null;
@@ -453,6 +436,7 @@ public class MySqlManager {
                 //sensorData.s(rs.getString("sensor_name"));
                 sensorData.setBpm(rs.getInt("bpm"));
                 heartRateSensorData.setSensorData(sensorData);
+                heartRateSensorData.setFormattedDate();
                 results.add(heartRateSensorData);
             }
 
@@ -510,28 +494,15 @@ public class MySqlManager {
         return cal.getTime();   // return the new Date
     }
 
-    public static HashMap<String, Integer> queryHeartRatesForDay() {
-        ArrayList<HeartRateSensorData> sensorDataList = getHeartRateSensorData();
-        HashMap<String, Integer> heartRateCounter = new HashMap<>();
-        for (HeartRateSensorData sensorData : sensorDataList) {
-            Date sensorDate = new Date(sensorData.getTimestamp());
-            String sensorFormattedDate = WebAppConstants.inputDateFormat.format(sensorDate);
-
-            if (heartRateCounter.containsKey(sensorFormattedDate)) {
-//                HashMap contains the count for the date
-                int count = heartRateCounter.get(sensorFormattedDate);
-//                increment the value of count for that day
-                heartRateCounter.replace(sensorFormattedDate, count++, count);
-            } else {
-//                sensor data not present, so put it in hashmap with counter set to
-                heartRateCounter.put(sensorFormattedDate, 1);
-            }
-        }
-        return heartRateCounter;
-    }
-
-    public static ArrayList<HeartRateSensorData> queryForHeartRateEvent(Date date) {
-        return null;
+    /**
+     * Call to get the number of heart rate notifications received for the given date
+     *
+     * @param date given date
+     * @return count of heart rate notifications received for the given date
+     */
+    public static int queryHeartRatesForDay(Date date) {
+        ArrayList<HeartRateSensorData> sensorDataList = getHeartRateSensorDataForGivenDate(date);
+        return sensorDataList.size();
     }
 
     private static class MySQLQueries {
