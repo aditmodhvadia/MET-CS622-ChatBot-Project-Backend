@@ -123,7 +123,7 @@ public class QueryUtils {
     public static String getFormattedHeartRatesForTheDays(Date date, int heartRateCount) {
         StringBuilder builder = new StringBuilder();
         if (heartRateCount == 0) {
-            builder.append("No data found in MongoDB or some error occurred.");
+            builder.append("No data found or some error occurred.");
         } else {
             String formattedDate = WebAppConstants.inputDateFormat.format(date);
             builder.append("You received ")

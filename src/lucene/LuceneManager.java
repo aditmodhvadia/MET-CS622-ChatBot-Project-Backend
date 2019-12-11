@@ -1,5 +1,6 @@
 package lucene;
 
+import com.mongodb.client.MongoCursor;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
@@ -25,6 +26,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Sorts.descending;
+import static com.mongodb.client.model.Sorts.orderBy;
+import static jdk.nashorn.internal.objects.Global.Infinity;
 
 /**
  * @author Adit Modhvadia
@@ -59,6 +65,47 @@ public class LuceneManager {
             }
         }
         return queryResult;
+    }
+
+    /**
+     * Called to query and fetch all days heart rate data to count the number of notifications user receives for the day
+     *
+     * @param date
+     * @return int value of the number of notifications received by the user for heart rates
+     */
+    public static int queryHeartRatesForDay(Date date) {
+        List<Document> results = getLuceneQueryTime("HeartRate", LuceneConstants.SENSOR_NAME);
+        System.out.println(results.size());
+        int heartRateCounter = 0;
+        for (Document doc :
+                results) {
+            System.out.println("Document found");
+            if (doc.get(LuceneConstants.FORMATTED_DATE) != null && doc.get(LuceneConstants.FORMATTED_DATE).equals(WebAppConstants.inputDateFormat.format(date))) {
+                heartRateCounter++;
+            }
+        }
+        return heartRateCounter;
+    }
+
+    /**
+     * Called to query the number of steps user takes for the given day
+     *
+     * @param userDate given day
+     * @return step count for the given day
+     */
+    public static int queryForTotalStepsInDay(Date userDate) {
+        List<Document> results = getLuceneQueryTime("Activity", LuceneConstants.SENSOR_NAME);
+        String formattedDate = WebAppConstants.inputDateFormat.format(userDate);
+        int maxStepCount = (int) -Infinity;    // Max value of step count for the day
+        for (Document doc :
+                results) {
+            System.out.println("Document found");
+            if (doc.get(LuceneConstants.FORMATTED_DATE) != null && doc.get(LuceneConstants.FORMATTED_DATE).equals(formattedDate)
+                    && doc.get(LuceneConstants.STEP_COUNT) != null && Integer.parseInt(doc.get(LuceneConstants.STEP_COUNT)) > maxStepCount) {
+                maxStepCount = Integer.parseInt(doc.get(LuceneConstants.STEP_COUNT));
+            }
+        }
+        return maxStepCount;
     }
 
     /**

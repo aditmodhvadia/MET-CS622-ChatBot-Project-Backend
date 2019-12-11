@@ -44,7 +44,8 @@ public class LuceneServlet extends HttpServlet {
 
             @Override
             public void onDisplayHeartRateEventSelected(Date date) {
-                String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, MongoDBManager.queryHeartRatesForDay(date));
+                System.out.println("Display number of heart rate notifications called in Lucene");
+                String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, LuceneManager.queryHeartRatesForDay(date));
                 QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
                 msg.setData(data);
                 try {
@@ -56,7 +57,7 @@ public class LuceneServlet extends HttpServlet {
 
             @Override
             public void onDisplayTotalStepsInDayEventSelected(Date date) {
-                int queryResult = MongoDBManager.queryForTotalStepsInDay(date);
+                int queryResult = LuceneManager.queryForTotalStepsInDay(date);
                 String queryResultString = QueryUtils.getFormattedTotalStepsForTheDay(queryResult, date);
                 QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
                 msg.setData(data);
