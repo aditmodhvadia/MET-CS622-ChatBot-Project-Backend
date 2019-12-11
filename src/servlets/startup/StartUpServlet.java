@@ -26,6 +26,7 @@ public class StartUpServlet extends HttpServlet {
     private static final FileCumulator fileCumulator = new FileCumulator(ioUtility);    // Data cumulator into result files
     private static final String destinationFolder = "UncompressedData" + FileSystems.getDefault().getSeparator(); // destination folder
     private static final String sourceFileName = "/WEB-INF/classes/SampleUserSmartwatch.zip";    // datasource file
+    public static String indexDir = "luceneIndex";
 
 
     @Override
@@ -37,6 +38,8 @@ public class StartUpServlet extends HttpServlet {
         MongoDBManager.init();
 
         MySqlManager.init();
+
+        LuceneManager.init(getServletContext().getRealPath(indexDir));
 
 //        unzipDataSource();
 
