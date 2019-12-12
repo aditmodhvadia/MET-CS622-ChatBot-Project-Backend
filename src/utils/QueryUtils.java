@@ -88,9 +88,9 @@ public class QueryUtils {
             builder.append("Yes, you ran");
             for (ActivFitSensorData data : queryResult) {
                 builder.append(" from ")
-                        .append(data.getTimestamp().getStartTime())
+                        .append(WebAppConstants.outputDateFormat.format(new Date(data.getTimestamp().getStartTime())))
                         .append(" to ")
-                        .append(data.getTimestamp().getEndTime())
+                        .append(WebAppConstants.outputDateFormat.format(new Date(data.getTimestamp().getEndTime())))
                         .append(", ");
                 System.out.println("Yes, you ran from " + data.getTimestamp().getStartTime() + " to " + data.getTimestamp().getEndTime());
             }
