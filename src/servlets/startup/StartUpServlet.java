@@ -26,6 +26,7 @@ public class StartUpServlet extends HttpServlet {
     private static final FileCumulator fileCumulator = new FileCumulator(ioUtility);    // Data cumulator into result files
     private static final String destinationFolder = "UncompressedData" + FileSystems.getDefault().getSeparator(); // destination folder
     private static final String sourceFileName = "/WEB-INF/classes/SampleUserSmartwatch.zip";    // datasource file
+    public static String indexDir = "luceneIndex";
 
 
     @Override
@@ -34,12 +35,23 @@ public class StartUpServlet extends HttpServlet {
         System.out.println("        Server started      ");
         System.out.println("--------#####--------");
 
-//        init MongoDB to get references to Database and Collections
         MongoDBManager.init();
 
         MySqlManager.init();
 
-        /*try {
+        LuceneManager.init(getServletContext().getRealPath(indexDir));
+
+        unzipDataSource();
+
+//        Now store all data into MongoDB, MySQL and Lucene
+        storeDataInDatabases();   // store JSON data from file storage
+    }
+
+    /**
+     * Call to unzip data source and create file structure to accumulate sensor data
+     */
+    private void unzipDataSource() {
+        try {
             String absoluteDiskPath = getServletContext().getRealPath(sourceFileName);
 //                start unzipping the datasource
             unZipper.unzip(absoluteDiskPath, destinationFolder, new ListenerClass());  // unzip source file
@@ -49,12 +61,9 @@ public class StartUpServlet extends HttpServlet {
             System.out.println("File already exists hence ignored");
         } catch (Exception ex) {
             ex.printStackTrace();   // some error occurred
-        }*/
+        }
 //            Unzipping complete
         System.out.println("\n\n*************** Unzipping complete***************\n\n");
-
-//        Now store all data into MongoDB, MySQL and Lucene
-//        storeDataInDatabases();   // store JSON data from file storage
     }
 
     /**
@@ -64,13 +73,13 @@ public class StartUpServlet extends HttpServlet {
      */
     private static void storeDataInDatabases() {
         System.out.println("*****************Storing data into Databases******************");
-        storeActivitySensorData();   // works
-        storeActivFitSensorData(); //  works
-        storeBatterySensorData();  //  works
-        storeBluetoothSensorData();    //  works
-        storeHeartRateSensorData();  //  works
-        storeLightSensorData();    //  works
-        storeScreenUsageSensorData();  //  works
+        storeActivitySensorData();
+        storeActivFitSensorData();
+        storeBatterySensorData();
+        storeBluetoothSensorData();
+        storeHeartRateSensorData();
+        storeLightSensorData();
+        storeScreenUsageSensorData();
     }
 
     /**
@@ -88,14 +97,12 @@ public class StartUpServlet extends HttpServlet {
                 ActivitySensorData activitySensorData = g.fromJson(fileLine, ActivitySensorData.class);
                 activitySensorData.setFormattedDate();
                 sensorDataList.add(activitySensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activitySensorDataMongoCollection, activitySensorData);
-//                removed for now for testing
 
             } catch (Exception ignored) {
 //                ignore false entries
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.activitySensorDataMongoCollection, sensorDataList);
 //        store activity sensor data in lucene at once
         LuceneManager.storeActivitySensorData(sensorDataList);
 //        insert data into MYSQL for Activity sensor
@@ -117,20 +124,22 @@ public class StartUpServlet extends HttpServlet {
                 ActivFitSensorData activFitSensorData = g.fromJson(fileLine, ActivFitSensorData.class);
                 activFitSensorData.setFormattedDate();
                 sensorDataList.add(activFitSensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.activFitSensorDataMongoCollection, activFitSensorData);
 
             } catch (Exception e) {
 //                e.printStackTrace();
 //                System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.activFitSensorDataMongoCollection, sensorDataList);
 //        store data in lucene
         LuceneManager.storeActivFitSensorData(sensorDataList);
         //insert data into MYSQL for ActivFit sensor
         MySqlManager.insertIntoActivFitTable(sensorDataList);
     }
 
+    /**
+     * Use to store battery sensor data in databases
+     */
     private static void storeBatterySensorData() {
         // store Battery Sensor data into MongoDB
         File batterySensorFile = fileCumulator.getBatterySensorFile();
@@ -143,18 +152,18 @@ public class StartUpServlet extends HttpServlet {
                 BatterySensorData batterySensorData = g.fromJson(fileLine, BatterySensorData.class);
                 batterySensorData.setFormattedDate();
                 sensorDataList.add(batterySensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.batterySensorDataMongoCollection, batterySensorData);
-
-            } catch (Exception e) {
-//                e.printStackTrace();
-//                System.out.println("Incorrect JSON format");    // don't store data in mongodb
+            } catch (Exception ignored) {
+                // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.batterySensorDataMongoCollection, sensorDataList);
         //insert data into MYSQL for battery sensor
         MySqlManager.insertIntoBatteryTable(sensorDataList);
     }
 
+    /**
+     * Use to store bluetooth sensor data in databases
+     */
     private static void storeBluetoothSensorData() {
         // store Bluetooth Sensor data into MongoDB
         File bluetoothSensorFile = fileCumulator.getBluetoothFile();
@@ -167,18 +176,19 @@ public class StartUpServlet extends HttpServlet {
                 BluetoothSensorData bluetoothSensorData = g.fromJson(fileLine, BluetoothSensorData.class);
                 bluetoothSensorData.setFormattedDate();
                 sensorDataList.add(bluetoothSensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.bluetoothSensorDataMongoCollection, bluetoothSensorData);
-
             } catch (Exception e) {
 //                e.printStackTrace();
 //                System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.bluetoothSensorDataMongoCollection, sensorDataList);
         //insert data into MYSQL for Bluetooth sensor
         MySqlManager.insertIntoBluetoothTable(sensorDataList);
     }
 
+    /**
+     * Use to store heart rate sensor data in databases
+     */
     private static void storeHeartRateSensorData() {
         // store Heart Rate Sensor data into MongoDB
         File heartRateSensorFile = fileCumulator.getHeartRateFile();
@@ -191,18 +201,19 @@ public class StartUpServlet extends HttpServlet {
                 HeartRateSensorData heartRateSensorData = g.fromJson(fileLine, HeartRateSensorData.class);
                 heartRateSensorData.setFormattedDate();
                 sensorDataList.add(heartRateSensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.heartRateSensorDataMongoCollection, heartRateSensorData);
-            } catch (Exception e) {
-//                e.printStackTrace();
-//                System.out.println("Incorrect JSON format");    // don't store data in mongodb
+            } catch (Exception ignored) {
+                // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.heartRateSensorDataMongoCollection, sensorDataList);
         LuceneManager.storeHeartRateSensorData(sensorDataList);
         //insert data into MYSQL for Heart Rate sensor
         MySqlManager.insertIntoHeartRateTable(sensorDataList);
     }
 
+    /**
+     * Use to store light sensor data in databases
+     */
     private static void storeLightSensorData() {
         // store Light Sensor data into MongoDB
         File lightSensorFile = fileCumulator.getLightSensorFile();
@@ -215,18 +226,20 @@ public class StartUpServlet extends HttpServlet {
                 LightSensorData lightSensorData = g.fromJson(fileLine, LightSensorData.class);
                 lightSensorData.setFormattedDate();
                 sensorDataList.add(lightSensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.lightSensorDataMongoCollection, lightSensorData);
 
             } catch (Exception e) {
 //                e.printStackTrace();
 //                System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.lightSensorDataMongoCollection, sensorDataList);
         //insert data into MYSQL for Light sensor
         MySqlManager.insertIntoLightTable(sensorDataList);
     }
 
+    /**
+     * Use to store screen usage sensor data in databases
+     */
     private static void storeScreenUsageSensorData() {
         // store Screen Usage Sensor data into MongoDB
         File screenUsageFile = fileCumulator.getScreenUsageFile();
@@ -239,14 +252,12 @@ public class StartUpServlet extends HttpServlet {
                 ScreenUsageSensorData screenUsageSensorData = g.fromJson(fileLine, ScreenUsageSensorData.class);
                 screenUsageSensorData.setFormattedDate();
                 sensorDataList.add(screenUsageSensorData);
-//                insert the new document into mongodb
-                MongoDBManager.insertDocumentIntoCollection(MongoDBManager.screenUsageSensorDataMongoCollection, screenUsageSensorData);
-
             } catch (Exception e) {
 //                e.printStackTrace();
 //                System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
+        MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.screenUsageSensorDataMongoCollection, sensorDataList);
         //insert data into MYSQL for Screen Usage sensor
         MySqlManager.insertIntoScreenUsageTable(sensorDataList);
     }

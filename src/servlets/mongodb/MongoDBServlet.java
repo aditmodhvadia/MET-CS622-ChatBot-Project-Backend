@@ -44,7 +44,7 @@ public class MongoDBServlet extends HttpServlet {
 
             @Override
             public void onDisplayHeartRateEventSelected(Date date) {
-                String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, MongoDBManager.queryHeartRatesForDay());
+                String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, MongoDBManager.queryHeartRatesForDay(date));
                 QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
                 msg.setData(data);
                 try {

@@ -45,7 +45,7 @@ public class BruteForceServlet extends HttpServlet {
 
             @Override
             public void onDisplayHeartRateEventSelected(Date date) {
-                String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, FileCumulator.queryHeartRatesForDay());
+                String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, FileCumulator.queryHeartRatesForDay(date));
                 QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
                 msg.setData(data);
                 try {

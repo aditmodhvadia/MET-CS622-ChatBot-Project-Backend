@@ -6,30 +6,30 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static jdk.nashorn.internal.objects.Global.Infinity;
 
 public class QueryUtils {
-    //    public static final String RUNNING_EVENT_REGEX = ".run./i";
     public static final String RUNNING_EVENT_REGEX = "([rR]un|[rR]unning)";
     public static final String STEP_COUNT_EVENT_REGEX = "([sS]teps*|[wW]alk)";
     public static final String HEART_RATE_EVENT_REGEX = "([hH]eart|[hH]eartrate)";
-//    public static final String RUNNING_EVENT_REGEX = "run|Run";
+    public static final String DATE_REGEX = "(\\d{2}[-,/]\\d{2}[-,/]\\d{4})";    //  Regex for Date input
 
+    /**
+     * Call to determine the category of the given query and get the callback for the same
+     *
+     * @param query    given query
+     * @param callback callback for the query type
+     */
     public static void determineQueryType(String query, OnQueryResolvedCallback callback) {
-        String regex = "(\\d{2}[-,/]\\d{2}[-,/]\\d{4})";    //  Regex for Date input
-        Matcher m = Pattern.compile(regex).matcher(query);
+        Matcher m = Pattern.compile(DATE_REGEX).matcher(query);
         Date date;
-        if (m.find()) {
+        if (m.find()) { //  find if user entered date in the query
             try {
-                date = WebAppConstants.inputDateFormat.parse(m.group(1));
+                date = WebAppConstants.inputDateFormat.parse(m.group(1));   //  get the first recognised date from query
 
-                System.out.println(WebAppConstants.inputDateFormat.format(date));
-
-//                TODO: Resolve query type now and remove this
                 if (isMatching(RUNNING_EVENT_REGEX, query)) {
                     callback.onDisplayRunningEventSelected(date);
                 } else if (isMatching(STEP_COUNT_EVENT_REGEX, query)) {
@@ -39,13 +39,11 @@ public class QueryUtils {
                 } else {
                     callback.onNoEventResolved();
                 }
-
             } catch (ParseException e) {
                 e.printStackTrace();
                 callback.onDateNotParsed();
             }
-        } else {
-            // Bad input
+        } else {    //  Bad input
             callback.onDateNotParsed();
         }
     }
@@ -87,13 +85,17 @@ public class QueryUtils {
             return "No, there is no running activity.";
         } else {
             StringBuilder builder = new StringBuilder();
+            builder.append("Yes, you ran");
             for (ActivFitSensorData data : queryResult) {
-                builder.append("Yes, you ran from ")
-                        .append(data.getTimestamp().getStartTime())
+                builder.append(" from ")
+                        .append(WebAppConstants.outputDateFormat.format(new Date(data.getTimestamp().getStartTime())))
                         .append(" to ")
-                        .append(data.getTimestamp().getEndTime());
+                        .append(WebAppConstants.outputDateFormat.format(new Date(data.getTimestamp().getEndTime())))
+                        .append(", ");
                 System.out.println("Yes, you ran from " + data.getTimestamp().getStartTime() + " to " + data.getTimestamp().getEndTime());
             }
+            builder.deleteCharAt(builder.length() - 1);
+            builder.deleteCharAt(builder.length() - 1);
             return builder.toString();
         }
     }
@@ -116,30 +118,18 @@ public class QueryUtils {
      * Call to get formatted output for HeartRates for the days
      *
      * @param date
-     * @param heartRates
+     * @param heartRateCount
      */
-    public static String getFormattedHeartRatesForTheDays(Date date, HashMap<String, Integer> heartRates) {
+    public static String getFormattedHeartRatesForTheDays(Date date, int heartRateCount) {
         StringBuilder builder = new StringBuilder();
-        if (heartRates.size() == 0) {
-            builder.append("No data found in MongoDB or some error occurred.");
+        if (heartRateCount == 0) {
+            builder.append("No data found or some error occurred.");
         } else {
             String formattedDate = WebAppConstants.inputDateFormat.format(date);
-            if (heartRates.containsKey(formattedDate)) {
-                builder.append("You received ")
-                        .append(heartRates.get(formattedDate))
-                        .append(" HeartRate notifications on ")
-                        .append(formattedDate);
-            } else {
-                builder.append("No data found in MongoDB or some error occurred.");
-            }
-            /*for (String date :
-                    heartRates.keySet()) {
-                int hearRateCount = heartRates.get(date);
-                builder.append("You received ")
-                        .append(hearRateCount)
-                        .append(" HeartRate notifications on ")
-                        .append(date);
-            }*/
+            builder.append("You received ")
+                    .append(heartRateCount)
+                    .append(" HeartRate notifications on ")
+                    .append(formattedDate);
         }
         return builder.toString();
     }

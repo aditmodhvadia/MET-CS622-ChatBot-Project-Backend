@@ -33,7 +33,6 @@ public class MySQLServlet extends HttpServlet {
         QueryUtils.determineQueryType(queryMessage.getQuery(), new QueryUtils.OnQueryResolvedCallback() {
             @Override
             public void onDisplayRunningEventSelected(Date date) {
-//                ArrayList<ActivFitSensorData> queryResult = MongoDBManager.queryForRunningEvent(date);
                 ArrayList<ActivFitSensorData> queryResult = MySqlManager.queryForRunningEvent(date);
                 String queryResultString = QueryUtils.getFormattedRunningResultData(queryResult);
                 QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
@@ -48,7 +47,7 @@ public class MySQLServlet extends HttpServlet {
             @Override
             public void onDisplayHeartRateEventSelected(Date date) {
 //                ArrayList<HeartRateSensorData> queryResult = MySqlManager.queryHeartRatesForDay(date);
-                String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, MySqlManager.queryHeartRatesForDay());
+                String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, MySqlManager.queryHeartRatesForDay(date));
                 QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
                 msg.setData(data);
                 try {

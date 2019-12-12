@@ -85,31 +85,22 @@ public class FileCumulator {
     }
 
     /**
-     * Called to query and fetch all days heart rate data to count the number of notifications user receives for the day
+     * Called to query and fetch the number of heart rate notifications received for the given day
      *
-     * @return HashMap containing key value pair of date and the corresponding count for the day
+     * @param date given day
+     * @return int value of the number of heart rate notifications received in the given day
      */
-    public static HashMap<String, Integer> queryHeartRatesForDay() {
-
-        List<HeartRateSensorData> sensorData = getHeartRateSensorFileContents(1000);
-        HashMap<String, Integer> heartRateCounter = new HashMap<>();
+    public static int queryHeartRatesForDay(Date date) {
+        List<HeartRateSensorData> sensorData = getHeartRateSensorFileContents();
+        int heartRateCount = 0;
+        String formattedDate = WebAppConstants.inputDateFormat.format(date);
         for (HeartRateSensorData data :
                 sensorData) {
-//            get the date and format it accordingly
-            Date sensorDate = new Date(data.getTimestamp());
-            String sensorFormattedDate = WebAppConstants.inputDateFormat.format(sensorDate);
-
-            if (heartRateCounter.containsKey(sensorFormattedDate)) {
-//                HashMap contains the count for the date
-                int count = heartRateCounter.get(sensorFormattedDate);
-//                increment the value of count for that day
-                heartRateCounter.replace(sensorFormattedDate, count++, count);
-            } else {
-//                sensor data not present, so put it in hashmap with counter set to
-                heartRateCounter.put(sensorFormattedDate, 1);
+            if (data.getFormatted_date().equals(formattedDate)) {
+                heartRateCount++;
             }
         }
-        return heartRateCounter;
+        return heartRateCount;
     }
 
     /**
@@ -121,13 +112,10 @@ public class FileCumulator {
     public static int queryForTotalStepsInDay(Date userDate) {
         List<ActivitySensorData> activitySensorDataList = getActivityFileContents(1000);
         int maxStepCount = (int) -Infinity;    // Max value of step count for the day
+        String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
         for (ActivitySensorData sensorData :
                 activitySensorDataList) {
-            Date sensorDate = new Date(sensorData.getTimestamp());
-            String sensorFormattedDate = WebAppConstants.inputDateFormat.format(sensorDate);
-            String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
-//            format both the user input date and the sensor date to compare if they are equal
-            if (sensorFormattedDate.equals(userFormattedDate)) {    // both dates are equal
+            if (sensorData.getFormatted_date().equals(userFormattedDate)) {    // both dates are equal
                 if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
 //                    found a step count larger than the maxStepCount, so update it
                     maxStepCount = sensorData.getSensorData().getStepCounts();
@@ -265,6 +253,7 @@ public class FileCumulator {
             try {
 //                converts JSON string into POJO
                 ActivFitSensorData activFitSensorData = g.fromJson(fileLine, ActivFitSensorData.class);
+                activFitSensorData.setFormattedDate();
 //                get date of current sensor data to compare
                 String sensorFormattedDate = getFormattedDateFromTimeStamp(activFitSensorData.getTimestamp().getStartTime());
 
@@ -304,6 +293,7 @@ public class FileCumulator {
             try {
 //                converts JSON string into POJO
                 ActivitySensorData activitySensorData = g.fromJson(fileLine, ActivitySensorData.class);
+                activitySensorData.setFormattedDate();
 //                get date of current sensor data to compare
                 String sensorFormattedDate = getFormattedDateFromTimeStamp(activitySensorData.getTimestamp());
 
@@ -380,7 +370,7 @@ public class FileCumulator {
         return sensorDataList;
     }
 
-    static List<HeartRateSensorData> getHeartRateSensorFileContents(int numOfDays) {
+    static List<HeartRateSensorData> getHeartRateSensorFileContents() {
         List<HeartRateSensorData> sensorDataList = new ArrayList<>();    // holds the sensor data
         List<String> fileContents = IOUtility.getFileContentsLineByLine(heartRateFile);  // holds all lines of the cumulativeFile for the sensor
         String currentDate = "";    // will hold the value of current date
@@ -390,20 +380,8 @@ public class FileCumulator {
             try {
 //                converts JSON string into POJO
                 HeartRateSensorData heartRateSensorData = g.fromJson(fileLine, HeartRateSensorData.class);
-//                get date of current sensor data to compare
-                String sensorFormattedDate = getFormattedDateFromTimeStamp(heartRateSensorData.getTimestamp());
-
-                if (sensorFormattedDate.equals(currentDate)) {
-//                    add sensor data to list as date is same as current date
-                    sensorDataList.add(heartRateSensorData);
-                } else {
-                    currentDate = sensorFormattedDate;  // update current date
-                    numOfDays--;    // decrement num of days left
-                    if (numOfDays == -1) {
-//                        found data for the specified number of days so return the sensor data list
-                        return sensorDataList;
-                    }
-                }
+                heartRateSensorData.setFormattedDate();
+                sensorDataList.add(heartRateSensorData);
             } catch (Exception e) {
 //                e.printStackTrace();
 //                System.out.println("Incorrect JSON format");    // don't store data in mongodb
@@ -465,7 +443,7 @@ public class FileCumulator {
     long searchForHundredBpm(int numOfDays) {
         long searchTime = System.currentTimeMillis();   // used to calculate search time for brute force
         for (HeartRateSensorData sensorData :
-                getHeartRateSensorFileContents(numOfDays)) {   // iterate all sensordata and find the result
+                getHeartRateSensorFileContents()) {   // iterate all sensordata and find the result
             if (sensorData.getSensorData().getBpm() == 100) {
 //                System.out.println("100 bpm found " + sensorData.getTimestamp());
             }

@@ -1,8 +1,10 @@
 package database;
 
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
+import com.mongodb.operation.OrderBy;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import sensormodels.*;
@@ -11,6 +13,10 @@ import utils.WebAppConstants;
 
 import java.util.*;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Sorts.descending;
+import static com.mongodb.client.model.Sorts.orderBy;
 import static jdk.nashorn.internal.objects.Global.Infinity;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -77,27 +83,33 @@ public class MongoDBManager {
     }
 
     /**
+     * Use to insert given documents of the given type into the given target collection
+     *
+     * @param collection  given target collection
+     * @param documents   given documents to be inserted
+     * @param <TDocument> given type of document
+     */
+    public static <TDocument> void insertDocumentsIntoCollection(MongoCollection<TDocument> collection, List<TDocument> documents) {
+        if (shouldInsert) {
+            collection.insertMany(documents);
+            System.out.println("MongoDB Log: Data Inserted");
+        }
+    }
+
+    /**
      * Get the result from ActivFit Sensor Data for the given Date, if there is a running event for it
      *
      * @param userDate given Date
      * @return List of ActivFitSensorData having running activity for the given Date
      */
     public static ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
-//        get the next Day Date as well
-        Date nextDate = QueryUtils.addDayToDate(userDate, 1);
-//        fetch all record from the collection
-        MongoCursor<ActivFitSensorData> cursor = activFitSensorDataMongoCollection.find().cursor();
+        MongoCursor<ActivFitSensorData> cursor = activFitSensorDataMongoCollection
+                .find(and(eq("formatted_date", WebAppConstants.inputDateFormat.format(userDate)),
+                        eq("sensorData.activity", "running"))).cursor();
         ArrayList<ActivFitSensorData> queryResult = new ArrayList<>();  // holds the result from the query
         while (cursor.hasNext()) {
             ActivFitSensorData nextData = cursor.next();
-//            get startDate of the SensorData entry and then check if it lies between the user entered Date and the next day or not
-            Date startDate = new Date(nextData.getTimestamp().getStartTime());
-            if (startDate.after(userDate) && startDate.before(nextDate)) {  // check it lies within range
-                if (!nextData.getSensorData().getActivity().equals("unknown") && Objects.equals(nextData.getSensorData().getActivity(), "running")) {
-//                    SensorData entry lies between the dates and is for running, so add it to the result List
-                    queryResult.add(nextData);
-                }
-            }
+            queryResult.add(nextData);
         }
         return queryResult;
     }
@@ -109,21 +121,16 @@ public class MongoDBManager {
      * @return step count for the given day
      */
     public static int queryForTotalStepsInDay(Date userDate) {
-//        fetch all documents from the collection
-        MongoCursor<ActivitySensorData> cursor = activitySensorDataMongoCollection.find().cursor();
+        MongoCursor<ActivitySensorData> cursor = activitySensorDataMongoCollection
+                .find(eq("formatted_date", WebAppConstants.inputDateFormat.format(userDate)))
+                .sort(orderBy(descending("step_counts")))
+                .cursor();
         int maxStepCount = (int) -Infinity;    // Max value of step count for the day
         while (cursor.hasNext()) {
 //            get the next Data
             ActivitySensorData sensorData = cursor.next();
-            Date sensorDate = new Date(sensorData.getTimestamp());
-            String sensorFormattedDate = WebAppConstants.inputDateFormat.format(sensorDate);
-            String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
-//            format both the user input date and the sensor date to compare if they are equal
-            if (sensorFormattedDate.equals(userFormattedDate)) {    // both dates are equal
-                if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
-//                    found a step count larger than the maxStepCount, so update it
-                    maxStepCount = sensorData.getSensorData().getStepCounts();
-                }
+            if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
+                maxStepCount = sensorData.getSensorData().getStepCounts();
             }
         }
         return maxStepCount;
@@ -132,27 +139,16 @@ public class MongoDBManager {
     /**
      * Called to query and fetch all days heart rate data to count the number of notifications user receives for the day
      *
-     * @return HashMap containing key value pair of date and the corresponding count for the day
+     * @param date
+     * @return int value of the number of notifications received by the user for heart rates
      */
-    public static HashMap<String, Integer> queryHeartRatesForDay() {
-        MongoCursor<HeartRateSensorData> cursor = heartRateSensorDataMongoCollection.find().cursor();
-        HashMap<String, Integer> heartRateCounter = new HashMap<>();
+    public static int queryHeartRatesForDay(Date date) {
+        MongoCursor<HeartRateSensorData> cursor = heartRateSensorDataMongoCollection
+                .find(eq("formatted_date", WebAppConstants.inputDateFormat.format(date))).cursor();
+        int heartRateCounter = 0;
         while (cursor.hasNext()) {
-//            get the next in line Sensor Data object
-            HeartRateSensorData sensorData = cursor.next();
-//            get the date and format it accordingly
-            Date sensorDate = new Date(sensorData.getTimestamp());
-            String sensorFormattedDate = WebAppConstants.inputDateFormat.format(sensorDate);
-
-            if (heartRateCounter.containsKey(sensorFormattedDate)) {
-//                HashMap contains the count for the date
-                int count = heartRateCounter.get(sensorFormattedDate);
-//                increment the value of count for that day
-                heartRateCounter.replace(sensorFormattedDate, count++, count);
-            } else {
-//                sensor data not present, so put it in hashmap with counter set to
-                heartRateCounter.put(sensorFormattedDate, 1);
-            }
+            heartRateCounter++;
+            cursor.next();
         }
         return heartRateCounter;
     }

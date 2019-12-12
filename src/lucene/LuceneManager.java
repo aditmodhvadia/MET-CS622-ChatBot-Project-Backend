@@ -1,5 +1,6 @@
 package lucene;
 
+import com.mongodb.client.MongoCursor;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
@@ -18,16 +19,94 @@ import sensormodels.ActivFitSensorData;
 import sensormodels.ActivitySensorData;
 import sensormodels.HeartRateSensorData;
 import sensormodels.LightSensorData;
+import utils.WebAppConstants;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Sorts.descending;
+import static com.mongodb.client.model.Sorts.orderBy;
+import static jdk.nashorn.internal.objects.Global.Infinity;
 
 /**
  * @author Adit Modhvadia
  */
 public class LuceneManager {
-    public static String indexDir = "luceneIndex";
+
+    private static String indexDir;
+    private static IndexWriter indexWriter;
+
+    /**
+     * Get the result from ActivFit Sensor Data for the given Date, if there is a running event for it
+     *
+     * @param userDate given Date
+     * @return List of ActivFitSensorData having running activity for the given Date
+     */
+    public static ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
+        ArrayList<ActivFitSensorData> queryResult = new ArrayList<>();  // holds the result from the query
+        String formattedDate = WebAppConstants.inputDateFormat.format(userDate);
+        for (Document doc :
+                getLuceneQueryTime("running", LuceneConstants.ACTIVITY)) {
+            if (doc.get(LuceneConstants.FORMATTED_DATE).equals(formattedDate)) {
+                ActivFitSensorData data = new ActivFitSensorData();
+                ActivFitSensorData.Timestamp timeStamp = new ActivFitSensorData.Timestamp();
+                timeStamp.setStartTime(doc.get(LuceneConstants.START_TIME));
+                timeStamp.setEndTime(doc.get(LuceneConstants.END_TIME));
+                data.setTimestamp(timeStamp);
+                ActivFitSensorData.SensorData sensorData = new ActivFitSensorData.SensorData();
+                sensorData.setActivity(doc.get(LuceneConstants.ACTIVITY));
+                data.setSensorData(sensorData);
+                data.setFormattedDate();
+                queryResult.add(data);
+            }
+        }
+        return queryResult;
+    }
+
+    /**
+     * Called to query and fetch all days heart rate data to count the number of notifications user receives for the day
+     *
+     * @param date
+     * @return int value of the number of notifications received by the user for heart rates
+     */
+    public static int queryHeartRatesForDay(Date date) {
+        List<Document> results = getLuceneQueryTime("HeartRate", LuceneConstants.SENSOR_NAME);
+        System.out.println(results.size());
+        int heartRateCounter = 0;
+        for (Document doc :
+                results) {
+            System.out.println("Document found");
+            if (doc.get(LuceneConstants.FORMATTED_DATE) != null && doc.get(LuceneConstants.FORMATTED_DATE).equals(WebAppConstants.inputDateFormat.format(date))) {
+                heartRateCounter++;
+            }
+        }
+        return heartRateCounter;
+    }
+
+    /**
+     * Called to query the number of steps user takes for the given day
+     *
+     * @param userDate given day
+     * @return step count for the given day
+     */
+    public static int queryForTotalStepsInDay(Date userDate) {
+        List<Document> results = getLuceneQueryTime("Activity", LuceneConstants.SENSOR_NAME);
+        String formattedDate = WebAppConstants.inputDateFormat.format(userDate);
+        int maxStepCount = (int) -Infinity;    // Max value of step count for the day
+        for (Document doc :
+                results) {
+            System.out.println("Document found");
+            if (doc.get(LuceneConstants.FORMATTED_DATE) != null && doc.get(LuceneConstants.FORMATTED_DATE).equals(formattedDate)
+                    && doc.get(LuceneConstants.STEP_COUNT) != null && Integer.parseInt(doc.get(LuceneConstants.STEP_COUNT)) > maxStepCount) {
+                maxStepCount = Integer.parseInt(doc.get(LuceneConstants.STEP_COUNT));
+            }
+        }
+        return maxStepCount;
+    }
 
     /**
      * Call to store given activfit sensor data
@@ -44,6 +123,7 @@ public class LuceneManager {
                     addActivFitData(indexWriter, sensorData);
                 }
             }
+            closeWriter();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -64,6 +144,7 @@ public class LuceneManager {
                     addHeartRateDoc(indexWriter, sensorData);
                 }
             }
+            closeWriter();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -84,6 +165,7 @@ public class LuceneManager {
                     addActivityDoc(indexWriter, sensorData);
                 }
             }
+            closeWriter();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -104,11 +186,22 @@ public class LuceneManager {
             // The same analyzer should be used for indexing and searching
             StandardAnalyzer analyzer = new StandardAnalyzer();
             IndexWriterConfig config = new IndexWriterConfig(analyzer);
-            return new IndexWriter(dir, config);
+            indexWriter = new IndexWriter(dir, config);
+            return indexWriter;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private static void closeWriter() {
+        if (indexWriter != null) {
+            try {
+                indexWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -118,8 +211,8 @@ public class LuceneManager {
      * @param indexValue given index value
      * @return time in milliseconds to perform the query
      */
-    public static long getLuceneQueryTime(String queryStr, String indexValue) {
-        long searchTime = System.currentTimeMillis();
+    private static List<Document> getLuceneQueryTime(String queryStr, String indexValue) {
+        List<Document> results = new ArrayList<>();
         try {
             // 0. Specify the analyzer for tokenizing text.
             // The same analyzer should be used for indexing and searching
@@ -129,19 +222,18 @@ public class LuceneManager {
 
             Query q = new QueryParser(indexValue, analyzer).parse(queryStr);
             // 3. search
-            int hitsPerPage = 10;
+            int hitsPerPage = 100;
             IndexReader reader = DirectoryReader.open(index);
             IndexSearcher searcher = new IndexSearcher(reader);
             TopDocs docs = searcher.search(q, hitsPerPage);
 
-//            search complete, record end time to calculate total time
-            searchTime = System.currentTimeMillis() - searchTime;
             ScoreDoc[] hits = docs.scoreDocs;
 
 //            System.out.println("Found " + hits.length + " hits.");
             for (int i = 0; i < hits.length; ++i) {
                 int docId = hits[i].doc;
                 Document d = searcher.doc(docId);
+                results.add(d);
 //                System.out.println((i + 1) + ". " + d.get("isbn") + "\t" + d.get("title"));
 //                System.out.println((i + 1) + ". " + d.get(LuceneConstants.BPM) + "\t" + d.get(LuceneConstants.SENSOR_NAME));
                 /*System.out.println((i + 1) + ". " + d.get(LuceneConstants.SENSOR_NAME) + "\t" + d.get(indexValue)
@@ -154,7 +246,7 @@ public class LuceneManager {
             e.printStackTrace();
         }
 //        System.out.println("Search time for " + queryStr + " for index " + indexValue + " is " + searchTime + "ms");
-        return searchTime;
+        return results;
     }
 
     /**
@@ -169,6 +261,7 @@ public class LuceneManager {
 //        doc.add(new TextField(LuceneConstants.BPM, String.valueOf(sensorData.getSensorData().getBpm()), Field.Store.YES));
         doc.add(new IntPoint(LuceneConstants.BPM, sensorData.getSensorData().getBpm()));
         doc.add(new StringField(LuceneConstants.SENSOR_NAME, sensorData.getSensorName(), Field.Store.YES));
+        doc.add(new StringField(LuceneConstants.FORMATTED_DATE, sensorData.getFormatted_date(), Field.Store.YES));
 //         use a string field for timestamp because we don't want it tokenized
         doc.add(new StringField(LuceneConstants.TIMESTAMP, sensorData.getTimestamp(), Field.Store.YES));
         w.addDocument(doc);
@@ -186,6 +279,7 @@ public class LuceneManager {
         doc.add(new IntPoint(LuceneConstants.STEP_COUNT, sensorData.getSensorData().getStepCounts()));
         doc.add(new IntPoint(LuceneConstants.STEP_DELTA, sensorData.getSensorData().getStepDelta()));
         doc.add(new StringField(LuceneConstants.SENSOR_NAME, sensorData.getSensorName(), Field.Store.YES));
+        doc.add(new StringField(LuceneConstants.FORMATTED_DATE, sensorData.getSensorName(), Field.Store.YES));
 //         use a string field for timestamp because we don't want it tokenized
         doc.add(new StringField(LuceneConstants.TIMESTAMP, sensorData.getTimestamp(), Field.Store.YES));
         w.addDocument(doc);
@@ -202,6 +296,7 @@ public class LuceneManager {
         Document doc = new Document();
         doc.add(new TextField(LuceneConstants.LUX, sensorData.getLuxValue(), Field.Store.YES));
         doc.add(new StringField(LuceneConstants.SENSOR_NAME, sensorData.getSensorName(), Field.Store.YES));
+        doc.add(new StringField(LuceneConstants.FORMATTED_DATE, sensorData.getFormatted_date(), Field.Store.YES));
         //         use a string field for timestamp because we don't want it tokenized
         doc.add(new StringField(LuceneConstants.TIMESTAMP, sensorData.getTimestamp(), Field.Store.YES));
         w.addDocument(doc);
@@ -218,9 +313,16 @@ public class LuceneManager {
         Document doc = new Document();
         doc.add(new TextField(LuceneConstants.ACTIVITY, sensorData.getSensorData().getActivity(), Field.Store.YES));
         doc.add(new StringField(LuceneConstants.SENSOR_NAME, sensorData.getSensorName(), Field.Store.YES));
+        doc.add(new StringField(LuceneConstants.FORMATTED_DATE, sensorData.getFormatted_date(), Field.Store.YES));
+        doc.add(new StringField(LuceneConstants.START_TIME, sensorData.getTimestamp().getStartTime(), Field.Store.YES));
+        doc.add(new StringField(LuceneConstants.END_TIME, sensorData.getTimestamp().getEndTime(), Field.Store.YES));
         //         use a string field for timestamp because we don't want it tokenized
         doc.add(new StringField(LuceneConstants.TIMESTAMP, sensorData.getTimestamp().getStartTime(), Field.Store.YES));
         w.addDocument(doc);
+    }
+
+    public static void init(String indexDirFromContext) {
+        indexDir = indexDirFromContext;
     }
 
     /**
@@ -233,6 +335,9 @@ public class LuceneManager {
         public static final String ACTIVITY = "activity";
         public static final String STEP_COUNT = "step_counts";
         public static final String STEP_DELTA = "step_delta";
+        public static final String FORMATTED_DATE = "formattedDate";
+        public static final String START_TIME = "start_time";
+        public static final String END_TIME = "end_time";
 
         static final String TIMESTAMP = "timestamp";
         static final String SENSOR_NAME = "sensorName";
