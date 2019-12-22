@@ -1,94 +1,26 @@
 package servlets.lucene;
 
-import com.google.gson.Gson;
-import database.MongoDBManager;
 import lucene.LuceneManager;
-import requestmodel.MessageQueryRequestModel;
-import responsemodels.QueryResponseMessage;
 import sensormodels.ActivFitSensorData;
-import utils.QueryUtils;
+import servlets.queryresponseservlet.QueryResponseServlet;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.stream.Collectors;
 
-public class LuceneServlet extends HttpServlet {
+public class LuceneServlet extends QueryResponseServlet {
+
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("Lucene POST request called");
-        Gson g = new Gson();
-        String requestHeaderString = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-        System.out.println(requestHeaderString);
-        MessageQueryRequestModel queryMessage = g.fromJson(requestHeaderString, MessageQueryRequestModel.class);
+    public ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
+        return LuceneManager.queryForRunningEvent(userDate);
+    }
 
-        QueryResponseMessage msg = new QueryResponseMessage();
+    @Override
+    public int queryHeartRatesForDay(Date date) {
+        return LuceneManager.queryHeartRatesForDay(date);
+    }
 
-        QueryUtils.determineQueryType(queryMessage.getQuery(), new QueryUtils.OnQueryResolvedCallback() {
-            @Override
-            public void onDisplayRunningEventSelected(Date date) {
-                ArrayList<ActivFitSensorData> queryResult = LuceneManager.queryForRunningEvent(date);
-                String queryResultString = QueryUtils.getFormattedRunningResultData(queryResult);
-                QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
-                msg.setData(data);
-                try {
-                    resp.getOutputStream().print(g.toJson(msg));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onDisplayHeartRateEventSelected(Date date) {
-                System.out.println("Display number of heart rate notifications called in Lucene");
-                String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, LuceneManager.queryHeartRatesForDay(date));
-                QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
-                msg.setData(data);
-                try {
-                    resp.getOutputStream().print(g.toJson(msg));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onDisplayTotalStepsInDayEventSelected(Date date) {
-                int queryResult = LuceneManager.queryForTotalStepsInDay(date);
-                String queryResultString = QueryUtils.getFormattedTotalStepsForTheDay(queryResult, date);
-                QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResultString);
-                msg.setData(data);
-                try {
-                    resp.getOutputStream().print(g.toJson(msg));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onDateNotParsed() {
-                QueryResponseMessage.Data data = new QueryResponseMessage.Data("Incorrect date, enter in this format: MM/dd/YYYY");
-                msg.setData(data);
-                try {
-                    resp.getOutputStream().print(g.toJson(msg));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onNoEventResolved() {
-                QueryResponseMessage.Data data = new QueryResponseMessage.Data("Could not recognise the query");
-                msg.setData(data);
-                try {
-                    resp.getOutputStream().print(g.toJson(msg));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+    @Override
+    public int queryForTotalStepsInDay(Date userDate) {
+        return LuceneManager.queryForTotalStepsInDay(userDate);
     }
 }

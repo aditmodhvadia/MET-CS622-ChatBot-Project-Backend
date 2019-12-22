@@ -41,10 +41,10 @@ public class StartUpServlet extends HttpServlet {
 
         LuceneManager.init(getServletContext().getRealPath(indexDir));
 
-        unzipDataSource();
+//        unzipDataSource();
 
 //        Now store all data into MongoDB, MySQL and Lucene
-        storeDataInDatabases();   // store JSON data from file storage
+//        storeDataInDatabases();   // store JSON data from file storage
     }
 
     /**
