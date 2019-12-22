@@ -1,6 +1,7 @@
 package servlets.startup;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import database.MongoDBManager;
 import database.MySqlManager;
 import listeners.FileListener;
@@ -12,9 +13,9 @@ import utils.UnzipUtility;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.util.ArrayList;
@@ -88,7 +89,20 @@ public class StartUpServlet extends HttpServlet {
     private static void storeActivitySensorData() {
         // store Activity Sensor data into MongoDB
         File activityFile = fileCumulator.getActivityFile();
-        List<ActivitySensorData> sensorDataList = new ArrayList<>();
+        InputStreamReader reader = null;
+        try {
+            reader = new InputStreamReader(new FileInputStream(activityFile));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // use gson to map it to the model
+//        TODO: Check this and implement for all the sensor data methods
+        Type heartRateListType = new TypeToken<ArrayList<ActivitySensorData>>() {
+        }.getType();
+        List<ActivitySensorData> sensorDataList = new Gson().fromJson(reader, heartRateListType);
+/*
+//        List<ActivitySensorData> sensorDataList = new ArrayList<>();
         for (String fileLine :
                 ioUtility.getFileContentsLineByLine(activityFile)) {
             Gson g = new Gson();
@@ -101,7 +115,7 @@ public class StartUpServlet extends HttpServlet {
             } catch (Exception ignored) {
 //                ignore false entries
             }
-        }
+        }*/
         MongoDBManager.insertDocumentsIntoCollection(MongoDBManager.activitySensorDataMongoCollection, sensorDataList);
 //        store activity sensor data in lucene at once
         LuceneManager.storeActivitySensorData(sensorDataList);
