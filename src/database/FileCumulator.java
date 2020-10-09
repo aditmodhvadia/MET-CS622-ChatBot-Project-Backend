@@ -1,4 +1,4 @@
-package utils;
+package database;
 
 import com.google.gson.Gson;
 import com.mongodb.client.MongoCursor;
@@ -6,6 +6,9 @@ import sensormodels.ActivFitSensorData;
 import sensormodels.ActivitySensorData;
 import sensormodels.HeartRateSensorData;
 import sensormodels.LightSensorData;
+import utils.IOUtility;
+import utils.QueryUtils;
+import utils.WebAppConstants;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -1,6 +1,6 @@
 package servlets.lucene;
 
-import lucene.LuceneManager;
+import database.LuceneManager;
 import sensormodels.ActivFitSensorData;
 import servlets.queryresponseservlet.QueryResponseServlet;
 

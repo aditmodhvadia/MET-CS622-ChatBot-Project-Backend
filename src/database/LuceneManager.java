@@ -1,6 +1,5 @@
-package lucene;
+package database;
 
-import com.mongodb.client.MongoCursor;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
@@ -27,9 +26,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Sorts.descending;
-import static com.mongodb.client.model.Sorts.orderBy;
 import static jdk.nashorn.internal.objects.Global.Infinity;
 
 /**

@@ -2,7 +2,7 @@ package servlets.bruteforce;
 
 import sensormodels.ActivFitSensorData;
 import servlets.queryresponseservlet.QueryResponseServlet;
-import utils.FileCumulator;
+import database.FileCumulator;
 
 import java.util.ArrayList;
 import java.util.Date;

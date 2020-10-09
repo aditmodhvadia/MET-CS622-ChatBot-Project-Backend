@@ -5,16 +5,15 @@ import com.google.gson.reflect.TypeToken;
 import database.MongoDBManager;
 import database.MySqlManager;
 import listeners.FileListener;
-import lucene.LuceneManager;
+import database.LuceneManager;
 import sensormodels.*;
-import utils.FileCumulator;
+import database.FileCumulator;
 import utils.IOUtility;
 import utils.UnzipUtility;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
