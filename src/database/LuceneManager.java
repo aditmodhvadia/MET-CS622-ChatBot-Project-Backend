@@ -20,6 +20,7 @@ import sensormodels.HeartRateSensorData;
 import sensormodels.LightSensorData;
 import utils.WebAppConstants;
 
+import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -32,9 +33,33 @@ import static jdk.nashorn.internal.objects.Global.Infinity;
  * @author Adit Modhvadia
  */
 public class LuceneManager {
+    public static String indexDirRelativePath = "luceneIndex";
 
-    private static String indexDir;
-    private static IndexWriter indexWriter;
+    private static LuceneManager instance;
+
+    private String indexDir;
+    private IndexWriter indexWriter;
+
+    private LuceneManager(String indexDirRealPath) {
+        this.indexDir = indexDirRealPath;
+    }
+
+    /**
+     * Singleton method to get the instance of the class
+     *
+     * @param servletContext
+     * @return singleton instance of the class
+     */
+    public static LuceneManager getInstance(ServletContext servletContext) {
+        if (instance == null) {
+            instance = new LuceneManager(servletContext.getRealPath(indexDirRelativePath));
+        }
+        return instance;
+    }
+
+    public void setIndexDir(String indexDir) {
+        this.indexDir = indexDir;
+    }
 
     /**
      * Get the result from ActivFit Sensor Data for the given Date, if there is a running event for it
@@ -42,7 +67,7 @@ public class LuceneManager {
      * @param userDate given Date
      * @return List of ActivFitSensorData having running activity for the given Date
      */
-    public static ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
+    public ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
         ArrayList<ActivFitSensorData> queryResult = new ArrayList<>();  // holds the result from the query
         String formattedDate = WebAppConstants.inputDateFormat.format(userDate);
         for (Document doc :
@@ -69,7 +94,7 @@ public class LuceneManager {
      * @param date
      * @return int value of the number of notifications received by the user for heart rates
      */
-    public static int queryHeartRatesForDay(Date date) {
+    public int queryHeartRatesForDay(Date date) {
         List<Document> results = getLuceneQueryTime("HeartRate", LuceneConstants.SENSOR_NAME);
         System.out.println(results.size());
         int heartRateCounter = 0;
@@ -89,7 +114,7 @@ public class LuceneManager {
      * @param userDate given day
      * @return step count for the given day
      */
-    public static int queryForTotalStepsInDay(Date userDate) {
+    public int queryForTotalStepsInDay(Date userDate) {
         List<Document> results = getLuceneQueryTime("Activity", LuceneConstants.SENSOR_NAME);
         String formattedDate = WebAppConstants.inputDateFormat.format(userDate);
         int maxStepCount = (int) -Infinity;    // Max value of step count for the day
@@ -109,7 +134,7 @@ public class LuceneManager {
      *
      * @param activFitSensorDataList
      */
-    public static void storeActivFitSensorData(List<ActivFitSensorData> activFitSensorDataList) {
+    public void storeActivFitSensorData(List<ActivFitSensorData> activFitSensorDataList) {
         try {
             IndexWriter indexWriter = getIndexWriter();
 //            index ActivFitSensorData
@@ -130,7 +155,7 @@ public class LuceneManager {
      *
      * @param heartRateSensorDataList given list of heart rate sensor data
      */
-    public static void storeHeartRateSensorData(List<HeartRateSensorData> heartRateSensorDataList) {
+    public void storeHeartRateSensorData(List<HeartRateSensorData> heartRateSensorDataList) {
         try {
             IndexWriter indexWriter = getIndexWriter();
 //            index HeartRateSensorData
@@ -151,7 +176,7 @@ public class LuceneManager {
      *
      * @param activitySensorDataList given list of sensor data
      */
-    public static void storeActivitySensorData(List<ActivitySensorData> activitySensorDataList) {
+    public void storeActivitySensorData(List<ActivitySensorData> activitySensorDataList) {
         try {
             IndexWriter indexWriter = getIndexWriter();
 //            index HeartRateSensorData
@@ -173,7 +198,7 @@ public class LuceneManager {
      *
      * @return index writer
      */
-    private static IndexWriter getIndexWriter() {
+    private IndexWriter getIndexWriter() {
         try {
             // 0. Specify the analyzer for tokenizing text.
             // 1. create the index
@@ -190,7 +215,7 @@ public class LuceneManager {
         return null;
     }
 
-    private static void closeWriter() {
+    private void closeWriter() {
         if (indexWriter != null) {
             try {
                 indexWriter.close();
@@ -207,7 +232,7 @@ public class LuceneManager {
      * @param indexValue given index value
      * @return time in milliseconds to perform the query
      */
-    private static List<Document> getLuceneQueryTime(String queryStr, String indexValue) {
+    private List<Document> getLuceneQueryTime(String queryStr, String indexValue) {
         List<Document> results = new ArrayList<>();
         try {
             // 0. Specify the analyzer for tokenizing text.
@@ -252,7 +277,7 @@ public class LuceneManager {
      * @param sensorData given heart rate sensor data
      * @throws IOException
      */
-    private static void addHeartRateDoc(IndexWriter w, HeartRateSensorData sensorData) throws IOException {
+    private void addHeartRateDoc(IndexWriter w, HeartRateSensorData sensorData) throws IOException {
         Document doc = new Document();
 //        doc.add(new TextField(LuceneConstants.BPM, String.valueOf(sensorData.getSensorData().getBpm()), Field.Store.YES));
         doc.add(new IntPoint(LuceneConstants.BPM, sensorData.getSensorData().getBpm()));
@@ -270,7 +295,7 @@ public class LuceneManager {
      * @param sensorData given activity sensor data
      * @throws IOException
      */
-    private static void addActivityDoc(IndexWriter w, ActivitySensorData sensorData) throws IOException {
+    private void addActivityDoc(IndexWriter w, ActivitySensorData sensorData) throws IOException {
         Document doc = new Document();
         doc.add(new IntPoint(LuceneConstants.STEP_COUNT, sensorData.getSensorData().getStepCounts()));
         doc.add(new IntPoint(LuceneConstants.STEP_DELTA, sensorData.getSensorData().getStepDelta()));
@@ -288,7 +313,7 @@ public class LuceneManager {
      * @param sensorData given heart rate sensor data
      * @throws IOException
      */
-    private static void addLightSensorData(IndexWriter w, LightSensorData sensorData) throws IOException {
+    private void addLightSensorData(IndexWriter w, LightSensorData sensorData) throws IOException {
         Document doc = new Document();
         doc.add(new TextField(LuceneConstants.LUX, sensorData.getLuxValue(), Field.Store.YES));
         doc.add(new StringField(LuceneConstants.SENSOR_NAME, sensorData.getSensorName(), Field.Store.YES));
@@ -305,7 +330,7 @@ public class LuceneManager {
      * @param sensorData given heart rate sensor data
      * @throws IOException
      */
-    private static void addActivFitData(IndexWriter w, ActivFitSensorData sensorData) throws IOException {
+    private void addActivFitData(IndexWriter w, ActivFitSensorData sensorData) throws IOException {
         Document doc = new Document();
         doc.add(new TextField(LuceneConstants.ACTIVITY, sensorData.getSensorData().getActivity(), Field.Store.YES));
         doc.add(new StringField(LuceneConstants.SENSOR_NAME, sensorData.getSensorName(), Field.Store.YES));
@@ -315,10 +340,6 @@ public class LuceneManager {
         //         use a string field for timestamp because we don't want it tokenized
         doc.add(new StringField(LuceneConstants.TIMESTAMP, sensorData.getTimestamp().getStartTime(), Field.Store.YES));
         w.addDocument(doc);
-    }
-
-    public static void init(String indexDirFromContext) {
-        indexDir = indexDirFromContext;
     }
 
     /**

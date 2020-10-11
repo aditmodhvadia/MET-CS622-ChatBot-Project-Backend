@@ -10,6 +10,7 @@ import java.util.*;
 import static jdk.nashorn.internal.objects.Global.Infinity;
 
 public class MySqlManager {
+    private static MySqlManager instance;
     // JDBC driver name and database URL
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
     static final String DB_NAME = "sensordata";
@@ -27,6 +28,23 @@ public class MySqlManager {
     static final String USER = "root";
     static final String PASS = "root";
     private static Connection connection;
+
+
+    private MySqlManager() {
+        init();
+    }
+
+    /**
+     * Singleton method to get the instance of the class
+     *
+     * @return singleton instance of the class
+     */
+    public static MySqlManager getInstance() {
+        if (instance == null) {
+            instance = new MySqlManager();
+        }
+        return instance;
+    }
 
     public static void init() {
         connection = null;
@@ -77,7 +95,7 @@ public class MySqlManager {
      *
      * @param sensorDataList given data list
      */
-    public static void insertIntoActivityTable(List<ActivitySensorData> sensorDataList) {
+    public void insertIntoActivityTable(List<ActivitySensorData> sensorDataList) {
         connection = getConnection();
         // create the mysql insert prepared statement
         PreparedStatement preparedStmt;
@@ -111,7 +129,7 @@ public class MySqlManager {
      *
      * @param sensorDataList given data list
      */
-    public static void insertIntoActivFitTable(List<ActivFitSensorData> sensorDataList) {
+    public void insertIntoActivFitTable(List<ActivFitSensorData> sensorDataList) {
         connection = getConnection();
         // create the mysql insert prepared statement
         PreparedStatement preparedStmt;
@@ -145,7 +163,7 @@ public class MySqlManager {
      *
      * @param sensorDataList given data list
      */
-    public static void insertIntoBatteryTable(List<BatterySensorData> sensorDataList) {
+    public void insertIntoBatteryTable(List<BatterySensorData> sensorDataList) {
         connection = getConnection();
         // create the mysql insert prepared statement\
         PreparedStatement preparedStmt;
@@ -180,7 +198,7 @@ public class MySqlManager {
      *
      * @param sensorDataList given data list
      */
-    public static void insertIntoBluetoothTable(List<BluetoothSensorData> sensorDataList) {
+    public void insertIntoBluetoothTable(List<BluetoothSensorData> sensorDataList) {
         connection = getConnection();
         // create the mysql insert prepared statement
         PreparedStatement preparedStmt = null;
@@ -213,7 +231,7 @@ public class MySqlManager {
      *
      * @param sensorDataList given data list
      */
-    public static void insertIntoHeartRateTable(List<HeartRateSensorData> sensorDataList) {
+    public void insertIntoHeartRateTable(List<HeartRateSensorData> sensorDataList) {
         connection = getConnection();
         // create the mysql insert prepared statement
         PreparedStatement preparedStmt;
@@ -246,7 +264,7 @@ public class MySqlManager {
      *
      * @param sensorDataList given data list
      */
-    public static void insertIntoLightTable(List<LightSensorData> sensorDataList) {
+    public void insertIntoLightTable(List<LightSensorData> sensorDataList) {
         connection = getConnection();
         // create the mysql insert prepared statement
         PreparedStatement preparedStmt = null;
@@ -274,7 +292,7 @@ public class MySqlManager {
         }
     }
 
-    public static void insertIntoScreenUsageTable(List<ScreenUsageSensorData> sensorDataList) {
+    public void insertIntoScreenUsageTable(List<ScreenUsageSensorData> sensorDataList) {
         connection = getConnection();
         // create the mysql insert prepared statement
         PreparedStatement preparedStmt;

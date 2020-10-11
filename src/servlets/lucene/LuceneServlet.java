@@ -8,19 +8,24 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class LuceneServlet extends QueryResponseServlet {
+    private LuceneManager luceneManager;
+
+    public LuceneServlet() {
+        this.luceneManager = LuceneManager.getInstance(getServletContext());
+    }
 
     @Override
     public ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
-        return LuceneManager.queryForRunningEvent(userDate);
+        return this.luceneManager.queryForRunningEvent(userDate);
     }
 
     @Override
     public int queryHeartRatesForDay(Date date) {
-        return LuceneManager.queryHeartRatesForDay(date);
+        return this.luceneManager.queryHeartRatesForDay(date);
     }
 
     @Override
     public int queryForTotalStepsInDay(Date userDate) {
-        return LuceneManager.queryForTotalStepsInDay(userDate);
+        return this.luceneManager.queryForTotalStepsInDay(userDate);
     }
 }

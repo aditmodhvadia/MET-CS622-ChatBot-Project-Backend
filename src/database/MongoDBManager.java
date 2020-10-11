@@ -26,6 +26,7 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
  * @author Adit Modhvadia
  */
 public class MongoDBManager {
+    private static MongoDBManager instance;
     public static final String DATABASE_NAME = "SensorData";
     public static MongoCollection<ActivitySensorData> activitySensorDataMongoCollection;
     public static MongoCollection<ActivFitSensorData> activFitSensorDataMongoCollection;
@@ -38,11 +39,27 @@ public class MongoDBManager {
     private static MongoDatabase database;
     private static boolean shouldInsert = false;
 
+    private MongoDBManager() {
+        init();
+    }
+
+    /**
+     * Singleton method to get the instance of the class
+     *
+     * @return singleton instance of the class
+     */
+    public static MongoDBManager getInstance() {
+        if (instance == null) {
+            instance = new MongoDBManager();
+        }
+        return instance;
+    }
+
     /**
      * Use to initialise the MongoDB Database and Connections corresponding to the Sensors
      * Call only once per execution
      */
-    public static void init() {
+    private static void init() {
         shouldInsert = true;
 
         CodecRegistry pojoCodecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
@@ -89,20 +106,14 @@ public class MongoDBManager {
      * @param documents   given documents to be inserted
      * @param <TDocument> given type of document
      */
-    public static <TDocument> void insertDocumentsIntoCollection(MongoCollection<TDocument> collection, List<TDocument> documents) {
+    public <TDocument> void insertDocumentsIntoCollection(MongoCollection<TDocument> collection, List<TDocument> documents) {
         if (shouldInsert) {
             collection.insertMany(documents);
             System.out.println("MongoDB Log: Data Inserted");
         }
     }
 
-    /**
-     * Get the result from ActivFit Sensor Data for the given Date, if there is a running event for it
-     *
-     * @param userDate given Date
-     * @return List of ActivFitSensorData having running activity for the given Date
-     */
-    public static ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
+    public ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
         MongoCursor<ActivFitSensorData> cursor = activFitSensorDataMongoCollection
                 .find(and(eq("formatted_date", WebAppConstants.inputDateFormat.format(userDate)),
                         eq("sensorData.activity", "running"))).cursor();
