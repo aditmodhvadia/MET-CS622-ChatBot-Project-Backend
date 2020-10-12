@@ -25,7 +25,7 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 /**
  * @author Adit Modhvadia
  */
-public class MongoDBManager {
+public class MongoDBManager implements DbManager, DatabaseQueryRunner {
     private static MongoDBManager instance;
     public static final String DATABASE_NAME = "SensorData";
     public static MongoCollection<ActivitySensorData> activitySensorDataMongoCollection;
@@ -59,7 +59,7 @@ public class MongoDBManager {
      * Use to initialise the MongoDB Database and Connections corresponding to the Sensors
      * Call only once per execution
      */
-    private static void init() {
+    public void init() {
         shouldInsert = true;
 
         CodecRegistry pojoCodecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
@@ -92,7 +92,7 @@ public class MongoDBManager {
      * @param document    given document to be inserted
      * @param <TDocument> given type of document
      */
-    public static <TDocument> void insertDocumentIntoCollection(MongoCollection<TDocument> collection, TDocument document) {
+    public <TDocument> void insertDocumentIntoCollection(MongoCollection<TDocument> collection, TDocument document) {
         if (shouldInsert) {
             collection.insertOne(document);
             System.out.println("MongoDB Log: Data Inserted");
@@ -113,6 +113,7 @@ public class MongoDBManager {
         }
     }
 
+    @Override
     public ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
         MongoCursor<ActivFitSensorData> cursor = activFitSensorDataMongoCollection
                 .find(and(eq("formatted_date", WebAppConstants.inputDateFormat.format(userDate)),
@@ -125,13 +126,8 @@ public class MongoDBManager {
         return queryResult;
     }
 
-    /**
-     * Called to query the number of steps user takes for the given day
-     *
-     * @param userDate given day
-     * @return step count for the given day
-     */
-    public static int queryForTotalStepsInDay(Date userDate) {
+    @Override
+    public int queryForTotalStepsInDay(Date userDate) {
         MongoCursor<ActivitySensorData> cursor = activitySensorDataMongoCollection
                 .find(eq("formatted_date", WebAppConstants.inputDateFormat.format(userDate)))
                 .sort(orderBy(descending("step_counts")))
@@ -147,13 +143,8 @@ public class MongoDBManager {
         return maxStepCount;
     }
 
-    /**
-     * Called to query and fetch all days heart rate data to count the number of notifications user receives for the day
-     *
-     * @param date
-     * @return int value of the number of notifications received by the user for heart rates
-     */
-    public static int queryHeartRatesForDay(Date date) {
+    @Override
+    public int queryHeartRatesForDay(Date date) {
         MongoCursor<HeartRateSensorData> cursor = heartRateSensorDataMongoCollection
                 .find(eq("formatted_date", WebAppConstants.inputDateFormat.format(date))).cursor();
         int heartRateCounter = 0;

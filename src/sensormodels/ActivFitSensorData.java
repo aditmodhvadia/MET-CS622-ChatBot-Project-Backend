@@ -3,6 +3,11 @@ package sensormodels;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import database.LuceneManager;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import utils.WebAppConstants;
 
 import java.util.Date;
@@ -10,7 +15,7 @@ import java.util.Date;
 /**
  * @author Adit Modhvadia
  */
-public class ActivFitSensorData {
+public class ActivFitSensorData implements LuceneStoreModel {
 
     @SerializedName("sensor_name")
     @Expose
@@ -54,6 +59,19 @@ public class ActivFitSensorData {
 
     public void setFormattedDate() {
         this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(timestamp.getStartTime()));
+    }
+
+    @Override
+    public Document getDocument() {
+        Document doc = new Document();
+        doc.add(new TextField(LuceneManager.LuceneConstants.ACTIVITY, this.getSensorData().getActivity(), Field.Store.YES));
+        doc.add(new StringField(LuceneManager.LuceneConstants.SENSOR_NAME, this.getSensorName(), Field.Store.YES));
+        doc.add(new StringField(LuceneManager.LuceneConstants.FORMATTED_DATE, this.getFormatted_date(), Field.Store.YES));
+        doc.add(new StringField(LuceneManager.LuceneConstants.START_TIME, this.getTimestamp().getStartTime(), Field.Store.YES));
+        doc.add(new StringField(LuceneManager.LuceneConstants.END_TIME, this.getTimestamp().getEndTime(), Field.Store.YES));
+        //         use a string field for timestamp because we don't want it tokenized
+        doc.add(new StringField(LuceneManager.LuceneConstants.TIMESTAMP, this.getTimestamp().getStartTime(), Field.Store.YES));
+        return doc;
     }
 
 

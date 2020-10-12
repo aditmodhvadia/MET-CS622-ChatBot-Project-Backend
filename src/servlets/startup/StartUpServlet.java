@@ -118,7 +118,7 @@ public class StartUpServlet extends HttpServlet {
         }*/
         mongoDBManager.insertDocumentsIntoCollection(MongoDBManager.activitySensorDataMongoCollection, sensorDataList);
 //        store activity sensor data in lucene at once
-        luceneManager.storeActivitySensorData(sensorDataList);
+        luceneManager.storeSensorData(sensorDataList);
 //        insert data into MYSQL for Activity sensor
         mySqlManager.insertIntoActivityTable(sensorDataList);
     }
@@ -146,7 +146,7 @@ public class StartUpServlet extends HttpServlet {
         }
         mongoDBManager.insertDocumentsIntoCollection(MongoDBManager.activFitSensorDataMongoCollection, sensorDataList);
 //        store data in lucene
-        luceneManager.storeActivFitSensorData(sensorDataList);
+        luceneManager.storeSensorData(sensorDataList);
         //insert data into MYSQL for ActivFit sensor
         mySqlManager.insertIntoActivFitTable(sensorDataList);
     }
@@ -220,7 +220,7 @@ public class StartUpServlet extends HttpServlet {
             }
         }
         mongoDBManager.insertDocumentsIntoCollection(MongoDBManager.heartRateSensorDataMongoCollection, sensorDataList);
-        luceneManager.storeHeartRateSensorData(sensorDataList);
+        luceneManager.storeSensorData(sensorDataList);
         //insert data into MYSQL for Heart Rate sensor
         mySqlManager.insertIntoHeartRateTable(sensorDataList);
     }

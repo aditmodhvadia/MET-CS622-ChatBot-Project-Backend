@@ -3,6 +3,11 @@ package sensormodels;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import database.LuceneManager;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.IntPoint;
+import org.apache.lucene.document.StringField;
 import utils.WebAppConstants;
 
 import java.util.Date;
@@ -10,7 +15,7 @@ import java.util.Date;
 /**
  * @author Adit Modhvadia
  */
-public class ActivitySensorData {
+public class ActivitySensorData implements LuceneStoreModel {
 
     @SerializedName("sensor_name")
     @Expose
@@ -68,6 +73,18 @@ public class ActivitySensorData {
 
     public void setSensorData(SensorData sensorData) {
         this.sensorData = sensorData;
+    }
+
+    @Override
+    public Document getDocument() {
+        Document doc = new Document();
+        doc.add(new IntPoint(LuceneManager.LuceneConstants.STEP_COUNT, this.getSensorData().getStepCounts()));
+        doc.add(new IntPoint(LuceneManager.LuceneConstants.STEP_DELTA, this.getSensorData().getStepDelta()));
+        doc.add(new StringField(LuceneManager.LuceneConstants.SENSOR_NAME, this.getSensorName(), Field.Store.YES));
+        doc.add(new StringField(LuceneManager.LuceneConstants.FORMATTED_DATE, this.getSensorName(), Field.Store.YES));
+//         use a string field for timestamp because we don't want it tokenized
+        doc.add(new StringField(LuceneManager.LuceneConstants.TIMESTAMP, this.getTimestamp(), Field.Store.YES));
+        return doc;
     }
 
     public static class SensorData {
