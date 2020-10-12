@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class LuceneServlet extends QueryResponseServlet {
-    private LuceneManager luceneManager;
+    private final LuceneManager luceneManager;
 
     public LuceneServlet() {
         this.luceneManager = LuceneManager.getInstance(getServletContext());

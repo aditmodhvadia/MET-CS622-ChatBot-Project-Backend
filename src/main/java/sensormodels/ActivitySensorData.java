@@ -4,20 +4,22 @@ package sensormodels;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import database.LuceneManager;
-import database.MongoStoreModel;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.StringField;
 import utils.WebAppConstants;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Date;
 
 /**
  * @author Adit Modhvadia
  */
-public class ActivitySensorData implements LuceneStoreModel, MongoStoreModel {
+public class ActivitySensorData implements LuceneStoreModel, MongoStoreModel, MySQLStoreModel {
 
+    public static final String MY_SQL_TABLE_NAME = "ActivitySensorData";
     public static final String MONGO_COLLECTION_NAME = "ActivitySensorData";
     @SerializedName("sensor_name")
     @Expose
@@ -97,6 +99,36 @@ public class ActivitySensorData implements LuceneStoreModel, MongoStoreModel {
     @Override
     public Class<ActivitySensorData> getClassObject() {
         return ActivitySensorData.class;
+    }
+
+    @Override
+    public String getTableName() {
+        return MY_SQL_TABLE_NAME;
+    }
+
+    @Override
+    public String getCreateTableQuery() {
+        return "CREATE TABLE " + this.getTableName() +
+                "(time_stamp VARCHAR(30) , " +
+                " sensor_name CHAR(25) , " +
+                " formatted_date CHAR(10) , " +
+                " step_counts INTEGER, " +
+                " step_delta INTEGER)";
+    }
+
+    @Override
+    public String getInsertIntoTableQuery() {
+        return " insert into " + this.getTableName() + " (time_stamp,formatted_date, sensor_name, step_counts,step_delta)"
+                + " values (?, ?, ?, ?, ?)";
+    }
+
+    @Override
+    public void setQueryData(PreparedStatement preparedStmt) throws SQLException {
+        preparedStmt.setString(1, this.getTimestamp());
+        preparedStmt.setString(2, this.getFormatted_date());
+        preparedStmt.setString(3, this.getSensorName());
+        preparedStmt.setInt(4, this.getSensorData().getStepCounts());
+        preparedStmt.setInt(5, this.getSensorData().getStepDelta());
     }
 
     public static class SensorData {

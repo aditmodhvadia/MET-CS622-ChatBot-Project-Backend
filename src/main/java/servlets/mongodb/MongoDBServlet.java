@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class MongoDBServlet extends QueryResponseServlet {
-    private MongoDBManager mongoManager;
+    private final MongoDBManager mongoManager;
 
     public MongoDBServlet() {
         this.mongoManager = MongoDBManager.getInstance();

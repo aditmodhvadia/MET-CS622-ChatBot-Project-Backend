@@ -4,20 +4,22 @@ package sensormodels;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import database.LuceneManager;
-import database.MongoStoreModel;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import utils.WebAppConstants;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Date;
 
 /**
  * @author Adit Modhvadia
  */
-public class ActivFitSensorData implements LuceneStoreModel, MongoStoreModel {
+public class ActivFitSensorData implements LuceneStoreModel, MongoStoreModel, MySQLStoreModel {
 
+    public static final String MY_SQL_TABLE_NAME = "ActivFitSensorData";
     public static final String MONGO_COLLECTION_NAME = "ActivFitSensorData";
     @SerializedName("sensor_name")
     @Expose
@@ -86,6 +88,35 @@ public class ActivFitSensorData implements LuceneStoreModel, MongoStoreModel {
         return ActivFitSensorData.class;
     }
 
+    @Override
+    public String getTableName() {
+        return MY_SQL_TABLE_NAME;
+    }
+
+    @Override
+    public String getCreateTableQuery() {
+        return "CREATE TABLE " + this.getTableName() +
+                " (start_time VARCHAR(30) , " +
+                " formatted_date VARCHAR(10) , " +
+                " end_time VARCHAR(30) , " +
+                " duration INTEGER , " +
+                " activity VARCHAR(55) ) ";
+    }
+
+    @Override
+    public String getInsertIntoTableQuery() {
+        return " insert into " + this.getTableName() + " (start_time, end_time, formatted_date, duration, activity)"
+                + " values (?, ?, ?, ?, ?)";
+    }
+
+    @Override
+    public void setQueryData(PreparedStatement preparedStmt) throws SQLException {
+        preparedStmt.setString(1, this.getTimestamp().getStartTime());
+        preparedStmt.setString(2, this.getTimestamp().getEndTime());
+        preparedStmt.setString(3, this.getFormatted_date());
+        preparedStmt.setInt(4, this.getSensorData().getDuration());
+        preparedStmt.setString(5, this.getSensorData().getActivity());
+    }
 
     public static class Timestamp {
         @SerializedName("start_time")

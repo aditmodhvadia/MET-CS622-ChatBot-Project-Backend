@@ -2,16 +2,18 @@ package sensormodels;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import database.MongoStoreModel;
 import utils.WebAppConstants;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Date;
 
 /**
  * @author Adit Modhvadia
  */
-public class ScreenUsageSensorData implements MongoStoreModel {
+public class ScreenUsageSensorData implements MongoStoreModel, MySQLStoreModel {
 
+    public static final String MY_SQL_TABLE_NAME = "";
     @SerializedName("start_hour")
     @Expose
     private String startHour;
@@ -108,6 +110,42 @@ public class ScreenUsageSensorData implements MongoStoreModel {
     @Override
     public Class<ScreenUsageSensorData> getClassObject() {
         return ScreenUsageSensorData.class;
+    }
+
+    @Override
+    public String getTableName() {
+        return MY_SQL_TABLE_NAME;
+    }
+
+    @Override
+    public String getCreateTableQuery() {
+        return "CREATE TABLE " + this.getTableName() +
+                "(start_hour VARCHAR(40) , " +
+                " end_hour VARCHAR(40)," +
+                " start_timestamp VARCHAR(30),  " +
+                " end_timestamp VARCHAR(30),  " +
+                " formatted_date VARCHAR(10),  " +
+                " min_elapsed DOUBLE , " +
+                " min_start_hour DOUBLE , " +
+                " min_end_hour INTEGER ) ";
+    }
+
+    @Override
+    public String getInsertIntoTableQuery() {
+        return " insert into " + this.getTableName() + " (start_hour,end_hour,start_timestamp,end_timestamp, formatted_date, min_elapsed,min_start_hour,min_end_hour)"
+                + " values (?, ?, ?, ?, ?,?,?,?)";
+    }
+
+    @Override
+    public void setQueryData(PreparedStatement preparedStmt) throws SQLException {
+        preparedStmt.setString(1, this.getStartHour());
+        preparedStmt.setString(2, this.getEndHour());
+        preparedStmt.setString(3, this.getStartTimestamp());
+        preparedStmt.setString(4, this.getEndTimestamp());
+        preparedStmt.setString(5, this.getFormatted_date());
+        preparedStmt.setDouble(6, this.getMinElapsed());
+        preparedStmt.setDouble(7, this.getMinStartHour());
+        preparedStmt.setInt(8, this.getMinEndHour());
     }
 }
 

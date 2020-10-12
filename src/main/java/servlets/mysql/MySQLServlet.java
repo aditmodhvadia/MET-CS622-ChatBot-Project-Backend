@@ -8,19 +8,24 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class MySQLServlet extends QueryResponseServlet {
+    private final MySqlManager mySqlManager;
+
+    public MySQLServlet() {
+        this.mySqlManager = MySqlManager.getInstance();
+    }
 
     @Override
     public ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
-        return MySqlManager.queryForRunningEvent(userDate);
+        return this.mySqlManager.queryForRunningEvent(userDate);
     }
 
     @Override
     public int queryHeartRatesForDay(Date date) {
-        return MySqlManager.queryHeartRatesForDay(date);
+        return this.mySqlManager.queryHeartRatesForDay(date);
     }
 
     @Override
     public int queryForTotalStepsInDay(Date userDate) {
-        return MySqlManager.queryForTotalStepsInDay(userDate);
+        return this.mySqlManager.queryForTotalStepsInDay(userDate);
     }
 }

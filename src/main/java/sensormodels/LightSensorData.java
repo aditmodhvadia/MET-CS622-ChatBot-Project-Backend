@@ -3,20 +3,22 @@ package sensormodels;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import database.LuceneManager;
-import database.MongoStoreModel;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import utils.WebAppConstants;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Date;
 
 /**
  * @author Adit Modhvadia
  */
-public class LightSensorData implements LuceneStoreModel, MongoStoreModel {
+public class LightSensorData implements LuceneStoreModel, MongoStoreModel, MySQLStoreModel {
 
+    public static final String MY_SQL_TABLE_NAME = "LightSensorData";
     @SerializedName("sensor_name")
     @Expose
     private String sensorName;
@@ -90,6 +92,34 @@ public class LightSensorData implements LuceneStoreModel, MongoStoreModel {
     @Override
     public Class<LightSensorData> getClassObject() {
         return LightSensorData.class;
+    }
+
+    @Override
+    public String getTableName() {
+        return MY_SQL_TABLE_NAME;
+    }
+
+    @Override
+    public String getCreateTableQuery() {
+        return "CREATE TABLE " + this.getTableName() +
+                "(timestamp VARCHAR(30) , " +
+                " formatted_date VARCHAR(10) , " +
+                " sensor_name VARCHAR(30) , " +
+                " lux INTEGER) ";
+    }
+
+    @Override
+    public String getInsertIntoTableQuery() {
+        return " insert into " + this.getTableName() + " (timestamp, formatted_date, sensor_name,lux)"
+                + " values (?, ?, ?, ?)";
+    }
+
+    @Override
+    public void setQueryData(PreparedStatement preparedStmt) throws SQLException {
+        preparedStmt.setString(1, this.getTimestamp());
+        preparedStmt.setString(2, this.getFormatted_date());
+        preparedStmt.setString(3, this.getSensorName());
+        preparedStmt.setInt(4, this.getSensorData().getLux());
     }
 
     public static class SensorData {

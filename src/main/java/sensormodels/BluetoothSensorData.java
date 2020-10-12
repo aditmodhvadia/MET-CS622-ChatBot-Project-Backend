@@ -2,15 +2,17 @@ package sensormodels;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import database.MongoStoreModel;
 import utils.WebAppConstants;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Date;
 
 /**
  * @author Adit Modhvadia
  */
-public class BluetoothSensorData implements MongoStoreModel {
+public class BluetoothSensorData implements MongoStoreModel, MySQLStoreModel {
+    public static final String MY_SQL_TABLE_NAME = "BluetoothSensorData";
     @SerializedName("sensor_name")
     @Expose
     private String sensorName;
@@ -63,6 +65,34 @@ public class BluetoothSensorData implements MongoStoreModel {
     @Override
     public Class<BluetoothSensorData> getClassObject() {
         return BluetoothSensorData.class;
+    }
+
+    @Override
+    public String getTableName() {
+        return MY_SQL_TABLE_NAME;
+    }
+
+    @Override
+    public String getCreateTableQuery() {
+        return "CREATE TABLE " + this.getTableName() +
+                "(timestamp VARCHAR(30) , " +
+                " formatted_date VARCHAR(10) , " +
+                " sensor_name VARCHAR(30) , " +
+                " state CHAR (225)) ";
+    }
+
+    @Override
+    public String getInsertIntoTableQuery() {
+        return " insert into " + this.getTableName() + " (timestamp,formatted_date,sensor_name,state)"
+                + " values (?, ?, ?, ?)";
+    }
+
+    @Override
+    public void setQueryData(PreparedStatement preparedStmt) throws SQLException {
+        preparedStmt.setString(1, this.getTimestamp());
+        preparedStmt.setString(2, this.getFormatted_date());
+        preparedStmt.setString(3, this.getSensorName());
+        preparedStmt.setString(4, this.getSensorData().getState());
     }
 
     public static class SensorData {
