@@ -2,10 +2,12 @@ package sensormodels;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import sensormodels.store.models.FileStoreModel;
 import sensormodels.store.models.MongoStoreModel;
 import sensormodels.store.models.MySQLStoreModel;
 import utils.WebAppConstants;
 
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
@@ -13,8 +15,9 @@ import java.util.Date;
 /**
  * @author Adit Modhvadia
  */
-public class BluetoothSensorData implements MongoStoreModel, MySQLStoreModel {
+public class BluetoothSensorData implements MongoStoreModel, MySQLStoreModel, FileStoreModel {
     public static final String MY_SQL_TABLE_NAME = "BluetoothSensorData";
+    private static final String FILE_NAME = "Bluetooth";
     @SerializedName("sensor_name")
     @Expose
     private String sensorName;
@@ -26,6 +29,7 @@ public class BluetoothSensorData implements MongoStoreModel, MySQLStoreModel {
     private SensorData sensorData;
     @Expose
     private String formatted_date;
+    private File file;
 
     public String getSensorName() {
         return sensorName;
@@ -53,6 +57,11 @@ public class BluetoothSensorData implements MongoStoreModel, MySQLStoreModel {
 
     public void setFormattedDate() {
         this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+    }
+
+    @Override
+    public String getStartTime() {
+        return this.getTimestamp();
     }
 
     public String getFormatted_date() {
@@ -95,6 +104,21 @@ public class BluetoothSensorData implements MongoStoreModel, MySQLStoreModel {
         preparedStmt.setString(2, this.getFormatted_date());
         preparedStmt.setString(3, this.getSensorName());
         preparedStmt.setString(4, this.getSensorData().getState());
+    }
+
+    @Override
+    public String getFileName() {
+        return FILE_NAME;
+    }
+
+    @Override
+    public void setFile(File file) {
+        this.file = file;
+    }
+
+    @Override
+    public File getFile() {
+        return this.file;
     }
 
     public static class SensorData {

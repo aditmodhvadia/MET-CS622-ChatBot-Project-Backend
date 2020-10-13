@@ -1,10 +1,8 @@
 package database;
 
 import com.google.gson.Gson;
-import sensormodels.ActivFitSensorData;
-import sensormodels.ActivitySensorData;
-import sensormodels.HeartRateSensorData;
-import sensormodels.LightSensorData;
+import sensormodels.*;
+import sensormodels.store.models.FileStoreModel;
 import utils.IOUtility;
 import utils.QueryUtils;
 import utils.WebAppConstants;
@@ -37,6 +35,7 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
 
     public static File activityFile, activFitFile, batterySensorFile, bluetoothFile, errorFile, heartRateFile, lightSensorFile, screenUsageFile, miscFile;
     private final ArrayList<File> files = new ArrayList<>();
+    private final ArrayList<FileStoreModel> sensorModels = new ArrayList<>();
 
 
     private FileCumulator() {
@@ -73,6 +72,20 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
         files.add(heartRateFile);
         files.add(lightSensorFile);
         files.add(screenUsageFile);
+
+        sensorModels.add(new ActivFitSensorData());
+        sensorModels.add(new ActivitySensorData());
+        sensorModels.add(new BatterySensorData());
+        sensorModels.add(new BluetoothSensorData());
+        sensorModels.add(new HeartRateSensorData());
+        sensorModels.add(new LightSensorData());
+        sensorModels.add(new ScreenUsageSensorData());
+        sensorModels.add(new ScreenUsageSensorData());
+
+        for (FileStoreModel sensor :
+                sensorModels) {
+            sensor.setFile(ioUtility.createEmptyFile(BASE_ADDRESS + sensor.getFileName() + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME));
+        }
     }
 
     @Override
@@ -80,7 +93,7 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
 //        get the next Day Date as well
         Date nextDate = QueryUtils.addDayToDate(date, 1);
 //        fetch all record from the collection
-        List<ActivFitSensorData> fileData = getActivFitFileContents(1000);
+        List<ActivFitSensorData> fileData = getSensorFileContents(new ActivFitSensorData(), 1000);
         ArrayList<ActivFitSensorData> queryResult = new ArrayList<>();  // holds the result from the query
         for (ActivFitSensorData nextData :
                 fileData) {
@@ -112,7 +125,7 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
 
     @Override
     public int queryForTotalStepsInDay(Date userDate) {
-        List<ActivitySensorData> activitySensorDataList = getActivityFileContents(1000);
+        List<ActivitySensorData> activitySensorDataList = getSensorFileContents(new ActivitySensorData(), 1000);
         int maxStepCount = -1;    // Max value of step count for the day
         String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
         for (ActivitySensorData sensorData :
@@ -239,136 +252,37 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
         return screenUsageFile;
     }
 
-    /**
-     * Call to get contents of ActivFitSensorData for the given number of days
-     *
-     * @param numOfDays given number of days
-     * @return list of ActivFitSensorData for the given number of days
-     */
-    static List<ActivFitSensorData> getActivFitFileContents(int numOfDays) {
-        List<ActivFitSensorData> sensorDataList = new ArrayList<>();    // holds the sensor data
-        List<String> fileContents = IOUtility.getFileContentsLineByLine(activFitFile);  // holds all lines of the cumulativeFile for the sensor
+
+    static <T extends FileStoreModel> List<T> getSensorFileContents(T sensorModel, int numOfDays) {
+        List<T> sensorDataList = new ArrayList<>();    // holds the sensor data
+        List<String> fileContents = IOUtility.getFileContentsLineByLine(sensorModel.getFile());  // holds all lines of the cumulativeFile for the sensor
         String currentDate = "";    // will hold the value of current date
         for (String fileLine :
                 fileContents) {
             Gson g = new Gson();
             try {
 //                converts JSON string into POJO
-                ActivFitSensorData activFitSensorData = g.fromJson(fileLine, ActivFitSensorData.class);
-                activFitSensorData.setFormattedDate();
+                T sensorData = (T) g.fromJson(fileLine, sensorModel.getClassObject());
+                sensorData.setFormattedDate();
 //                get date of current sensor data to compare
-                String sensorFormattedDate = getFormattedDateFromTimeStamp(activFitSensorData.getTimestamp().getStartTime());
+                String sensorFormattedDate = getFormattedDateFromTimeStamp(sensorData.getStartTime());
 
                 if (sensorFormattedDate.equals(currentDate)) {
 //                    add sensor data to list as date is same as current date
-                    sensorDataList.add(activFitSensorData);
-                } else {
-                    currentDate = sensorFormattedDate;  // update current date
-                    numOfDays--;    // decrement num of days left
-                    if (numOfDays == -1) {
-//                        found data for the specified number of days so return the sensor data list
-                        return sensorDataList;
-                    }
-                }
-            } catch (Exception e) {
-//                e.printStackTrace();
-//                System.out.println("Incorrect JSON format");    // don't store data in mongodb
-            }
-        }
-
-        return sensorDataList;
-    }
-
-    /**
-     * Call to get contents of ActivitySensorData for the given number of days
-     *
-     * @param numOfDays given number of days
-     * @return list of ActivitySensorData for the given number of days
-     */
-    static List<ActivitySensorData> getActivityFileContents(int numOfDays) {
-        List<ActivitySensorData> sensorDataList = new ArrayList<>();    // holds the sensor data
-        List<String> fileContents = IOUtility.getFileContentsLineByLine(activityFile);  // holds all lines of the cumulativeFile for the sensor
-        String currentDate = "";    // will hold the value of current date
-        for (String fileLine :
-                fileContents) {
-            Gson g = new Gson();
-            try {
-//                converts JSON string into POJO
-                ActivitySensorData activitySensorData = g.fromJson(fileLine, ActivitySensorData.class);
-                activitySensorData.setFormattedDate();
-//                get date of current sensor data to compare
-                String sensorFormattedDate = getFormattedDateFromTimeStamp(activitySensorData.getTimestamp());
-
-                if (sensorFormattedDate.equals(currentDate)) {
-//                    add sensor data to list as date is same as current date
-                    sensorDataList.add(activitySensorData);
-                } else {
-                    currentDate = sensorFormattedDate;  // update current date
-                    numOfDays--;    // decrement num of days left
-                    if (numOfDays == -1) {
-//                        found data for the specified number of days so return the sensor data list
-                        return sensorDataList;
-                    }
-                }
-            } catch (Exception e) {
-//                e.printStackTrace();
-//                System.out.println("Incorrect JSON format");    // don't store data in mongodb
-            }
-        }
-
-        return sensorDataList;
-    }
-
-    /**
-     * Call to get contents of LightSensorData for the given number of days
-     *
-     * @param numOfDays given number of days
-     * @return list of LightSensorData for the given number of days
-     */
-    List<LightSensorData> getLightSensorFileContents(int numOfDays) {
-        List<LightSensorData> sensorDataList = new ArrayList<>();    // holds the sensor data
-        List<String> fileContents = ioUtility.getFileContentsLineByLine(lightSensorFile);  // holds all lines of the cumulativeFile for the sensor
-        String currentDate = "";    // will hold the value of current date
-        for (String fileLine :
-                fileContents) {
-            Gson g = new Gson();
-            try {
-//                converts JSON string into POJO
-                LightSensorData lightSensorData = g.fromJson(fileLine, LightSensorData.class);
-            } catch (Exception e) {
-                // could not parse into JSON and hence, we want to use this data
-                String[] split = fileLine.split(",");
-                if (split[0].equals("light")) {
-                    LightSensorData sensorData = new LightSensorData();
-                    sensorData.setSensorName(split[0]);
-                    sensorData.setTimestamp(split[2]);
-                    sensorData.setLuxValue(split[3]);
                     sensorDataList.add(sensorData);
-
-                    try {
-//                get date of current sensor data to compare
-                        String sensorFormattedDate = getFormattedDateFromTimeStamp(sensorData.getTimestamp());
-
-                        if (sensorFormattedDate.equals(currentDate)) {
-//                    add sensor data to list as date is same as current date
-                            sensorDataList.add(sensorData);
-                        } else {
-                            currentDate = sensorFormattedDate;  // update current date
-                            numOfDays--;    // decrement num of days left
-                            if (numOfDays == -1) {
+                } else {
+                    currentDate = sensorFormattedDate;  // update current date
+                    numOfDays--;    // decrement num of days left
+                    if (numOfDays == -1) {
 //                        found data for the specified number of days so return the sensor data list
-                                return sensorDataList;
-                            }
-                        }  // some incorrect data, ignore it if in else
-                    } catch (Exception ex) {
-                        // some error in reading data, ignore it
+                        return sensorDataList;
                     }
                 }
+            } catch (Exception e) {
 //                e.printStackTrace();
 //                System.out.println("Incorrect JSON format");    // don't store data in mongodb
             }
         }
-
         return sensorDataList;
     }
 
@@ -407,7 +321,7 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
     long searchForRunningActivity(int numOfDays) {
         long searchTime = System.currentTimeMillis();   // used to calculate search time for brute force
         for (ActivFitSensorData sensorData :
-                getActivFitFileContents(numOfDays)) {   // iterate all sensordata and find the result
+                getSensorFileContents(new ActivFitSensorData(), numOfDays)) {   // iterate all sensordata and find the result
             if (sensorData.getSensorData().getActivity().equalsIgnoreCase("running")) {
 //                System.out.println("Running event found " + sensorData.getTimestamp().getStartTime());
             }
@@ -426,7 +340,7 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
     long searchForLessBrightData(int numOfDays) {
         long searchTime = System.currentTimeMillis();   // used to calculate search time for brute force
         for (LightSensorData sensorData :
-                getLightSensorFileContents(numOfDays)) {   // iterate all sensordata and find the result
+                getSensorFileContents(new LightSensorData(), numOfDays)) {   // iterate all sensordata and find the result
             if (sensorData.getLuxValue().equalsIgnoreCase("less bright")) {
 //                System.out.println("less bright found " + sensorData.getTimestamp());
             }

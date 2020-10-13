@@ -2,10 +2,12 @@ package sensormodels;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import sensormodels.store.models.FileStoreModel;
 import sensormodels.store.models.MongoStoreModel;
 import sensormodels.store.models.MySQLStoreModel;
 import utils.WebAppConstants;
 
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
@@ -13,9 +15,10 @@ import java.util.Date;
 /**
  * @author Adit Modhvadia
  */
-public class ScreenUsageSensorData implements MongoStoreModel, MySQLStoreModel {
+public class ScreenUsageSensorData implements MongoStoreModel, MySQLStoreModel, FileStoreModel {
 
     public static final String MY_SQL_TABLE_NAME = "";
+    private static final String FILE_NAME = "ScreenUsage";
     @SerializedName("start_hour")
     @Expose
     private String startHour;
@@ -39,6 +42,7 @@ public class ScreenUsageSensorData implements MongoStoreModel, MySQLStoreModel {
     private Integer minEndHour;
     @Expose
     private String formatted_date;
+    private File file;
 
     public String getFormatted_date() {
         return formatted_date;
@@ -105,6 +109,11 @@ public class ScreenUsageSensorData implements MongoStoreModel, MySQLStoreModel {
     }
 
     @Override
+    public String getStartTime() {
+        return this.getStartTimestamp();
+    }
+
+    @Override
     public String getMongoCollectionName() {
         return "ScreenUsageSensorData";
     }
@@ -148,6 +157,21 @@ public class ScreenUsageSensorData implements MongoStoreModel, MySQLStoreModel {
         preparedStmt.setDouble(6, this.getMinElapsed());
         preparedStmt.setDouble(7, this.getMinStartHour());
         preparedStmt.setInt(8, this.getMinEndHour());
+    }
+
+    @Override
+    public String getFileName() {
+        return FILE_NAME;
+    }
+
+    @Override
+    public void setFile(File file) {
+        this.file = file;
+    }
+
+    @Override
+    public File getFile() {
+        return this.file;
     }
 }
 

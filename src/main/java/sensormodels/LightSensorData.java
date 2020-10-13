@@ -7,11 +7,13 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
+import sensormodels.store.models.FileStoreModel;
 import sensormodels.store.models.LuceneStoreModel;
 import sensormodels.store.models.MongoStoreModel;
 import sensormodels.store.models.MySQLStoreModel;
 import utils.WebAppConstants;
 
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
@@ -19,9 +21,10 @@ import java.util.Date;
 /**
  * @author Adit Modhvadia
  */
-public class LightSensorData implements LuceneStoreModel, MongoStoreModel, MySQLStoreModel {
+public class LightSensorData implements LuceneStoreModel, MongoStoreModel, MySQLStoreModel, FileStoreModel {
 
     public static final String MY_SQL_TABLE_NAME = "LightSensorData";
+    private static final String FILE_NAME = "LightSensor";
     @SerializedName("sensor_name")
     @Expose
     private String sensorName;
@@ -35,6 +38,7 @@ public class LightSensorData implements LuceneStoreModel, MongoStoreModel, MySQL
     private String luxValue;
     @Expose
     private String formatted_date;
+    private File file;
 
     public String getLuxValue() {
         return luxValue;
@@ -70,6 +74,11 @@ public class LightSensorData implements LuceneStoreModel, MongoStoreModel, MySQL
 
     public void setFormattedDate() {
         this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+    }
+
+    @Override
+    public String getStartTime() {
+        return this.getTimestamp();
     }
 
     public String getFormatted_date() {
@@ -123,6 +132,21 @@ public class LightSensorData implements LuceneStoreModel, MongoStoreModel, MySQL
         preparedStmt.setString(2, this.getFormatted_date());
         preparedStmt.setString(3, this.getSensorName());
         preparedStmt.setInt(4, this.getSensorData().getLux());
+    }
+
+    @Override
+    public String getFileName() {
+        return FILE_NAME;
+    }
+
+    @Override
+    public void setFile(File file) {
+        this.file = file;
+    }
+
+    @Override
+    public File getFile() {
+        return this.file;
     }
 
     public static class SensorData {

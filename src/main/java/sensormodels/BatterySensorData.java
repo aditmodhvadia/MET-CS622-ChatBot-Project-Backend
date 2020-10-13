@@ -3,10 +3,12 @@ package sensormodels;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import sensormodels.store.models.FileStoreModel;
 import sensormodels.store.models.MongoStoreModel;
 import sensormodels.store.models.MySQLStoreModel;
 import utils.WebAppConstants;
 
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
@@ -14,9 +16,10 @@ import java.util.Date;
 /**
  * @author Adit Modhvadia
  */
-public class BatterySensorData implements MongoStoreModel, MySQLStoreModel {
+public class BatterySensorData implements MongoStoreModel, MySQLStoreModel, FileStoreModel {
 
     public static final String MY_SQL_TABLE_NAME = "BatterySensorData";
+    private static final String FILE_NAME = "BatterySensor";
 
     @SerializedName("sensor_name")
     @Expose
@@ -29,6 +32,7 @@ public class BatterySensorData implements MongoStoreModel, MySQLStoreModel {
     private SensorData sensorData;
     @Expose
     private String formatted_date;
+    private File file;
 
     public String getFormatted_date() {
         return formatted_date;
@@ -60,6 +64,11 @@ public class BatterySensorData implements MongoStoreModel, MySQLStoreModel {
 
     public void setFormattedDate() {
         this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+    }
+
+    @Override
+    public String getStartTime() {
+        return this.getTimestamp();
     }
 
     @Override
@@ -102,6 +111,21 @@ public class BatterySensorData implements MongoStoreModel, MySQLStoreModel {
         preparedStmt.setString(4, this.getSensorName());
         preparedStmt.setInt(5, this.getSensorData().getPercent());
         preparedStmt.setBoolean(6, this.getSensorData().getCharging());
+    }
+
+    @Override
+    public String getFileName() {
+        return FILE_NAME;
+    }
+
+    @Override
+    public void setFile(File file) {
+        this.file = file;
+    }
+
+    @Override
+    public File getFile() {
+        return this.file;
     }
 
     public static class SensorData {

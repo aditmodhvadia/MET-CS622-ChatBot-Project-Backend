@@ -8,11 +8,13 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.StringField;
+import sensormodels.store.models.FileStoreModel;
 import sensormodels.store.models.LuceneStoreModel;
 import sensormodels.store.models.MongoStoreModel;
 import sensormodels.store.models.MySQLStoreModel;
 import utils.WebAppConstants;
 
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
@@ -20,10 +22,12 @@ import java.util.Date;
 /**
  * @author Adit Modhvadia
  */
-public class ActivitySensorData implements LuceneStoreModel, MongoStoreModel, MySQLStoreModel {
+public class ActivitySensorData implements LuceneStoreModel, MongoStoreModel, MySQLStoreModel, FileStoreModel {
 
     public static final String MY_SQL_TABLE_NAME = "ActivitySensorData";
     public static final String MONGO_COLLECTION_NAME = "ActivitySensorData";
+    private static final String FILE_NAME = "Activity";
+    private File file;
     @SerializedName("sensor_name")
     @Expose
     private String sensorName;
@@ -67,6 +71,11 @@ public class ActivitySensorData implements LuceneStoreModel, MongoStoreModel, My
 
     public void setFormattedDate() {
         this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+    }
+
+    @Override
+    public String getStartTime() {
+        return this.getTime_stamp();
     }
 
     public void setTime_stamp(String time_stamp) {
@@ -132,6 +141,21 @@ public class ActivitySensorData implements LuceneStoreModel, MongoStoreModel, My
         preparedStmt.setString(3, this.getSensorName());
         preparedStmt.setInt(4, this.getSensorData().getStepCounts());
         preparedStmt.setInt(5, this.getSensorData().getStepDelta());
+    }
+
+    @Override
+    public String getFileName() {
+        return FILE_NAME;
+    }
+
+    @Override
+    public void setFile(File file) {
+        this.file = file;
+    }
+
+    @Override
+    public File getFile() {
+        return this.file;
     }
 
     public static class SensorData {
