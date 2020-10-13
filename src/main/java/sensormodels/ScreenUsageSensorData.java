@@ -18,7 +18,7 @@ import java.util.Date;
 public class ScreenUsageSensorData implements MongoStoreModel, MySQLStoreModel, FileStoreModel {
 
     public static final String MY_SQL_TABLE_NAME = "";
-    private static final String FILE_NAME = "ScreenUsage";
+    public static final String FILE_NAME = "ScreenUsage";
     @SerializedName("start_hour")
     @Expose
     private String startHour;

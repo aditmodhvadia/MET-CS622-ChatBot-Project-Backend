@@ -24,7 +24,7 @@ import java.util.Date;
 public class LightSensorData implements LuceneStoreModel, MongoStoreModel, MySQLStoreModel, FileStoreModel {
 
     public static final String MY_SQL_TABLE_NAME = "LightSensorData";
-    private static final String FILE_NAME = "LightSensor";
+    public static final String FILE_NAME = "LightSensor";
     @SerializedName("sensor_name")
     @Expose
     private String sensorName;

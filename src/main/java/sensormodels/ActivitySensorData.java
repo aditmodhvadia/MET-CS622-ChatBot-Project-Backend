@@ -26,7 +26,7 @@ public class ActivitySensorData implements LuceneStoreModel, MongoStoreModel, My
 
     public static final String MY_SQL_TABLE_NAME = "ActivitySensorData";
     public static final String MONGO_COLLECTION_NAME = "ActivitySensorData";
-    private static final String FILE_NAME = "Activity";
+    public static final String FILE_NAME = "Activity";
     private File file;
     @SerializedName("sensor_name")
     @Expose

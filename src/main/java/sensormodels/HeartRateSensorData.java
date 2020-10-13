@@ -25,7 +25,7 @@ public class HeartRateSensorData implements LuceneStoreModel, MongoStoreModel, M
 
     public static final String MY_SQL_TABLE_NAME = "HeartRateSensorData";
     public static final String MONGO_COLLECTION_NAME = "HeartRateSensorData";
-    private static final String FILE_NAME = "HeartRate";
+    public static final String FILE_NAME = "HeartRate";
     @SerializedName("sensor_name")
     @Expose
     private String sensorName;

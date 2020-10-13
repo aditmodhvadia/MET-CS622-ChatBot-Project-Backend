@@ -17,7 +17,7 @@ import java.util.Date;
  */
 public class BluetoothSensorData implements MongoStoreModel, MySQLStoreModel, FileStoreModel {
     public static final String MY_SQL_TABLE_NAME = "BluetoothSensorData";
-    private static final String FILE_NAME = "Bluetooth";
+    public static final String FILE_NAME = "Bluetooth";
     @SerializedName("sensor_name")
     @Expose
     private String sensorName;

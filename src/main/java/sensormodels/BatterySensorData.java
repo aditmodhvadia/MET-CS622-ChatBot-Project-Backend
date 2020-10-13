@@ -19,7 +19,7 @@ import java.util.Date;
 public class BatterySensorData implements MongoStoreModel, MySQLStoreModel, FileStoreModel {
 
     public static final String MY_SQL_TABLE_NAME = "BatterySensorData";
-    private static final String FILE_NAME = "BatterySensor";
+    public static final String FILE_NAME = "BatterySensor";
 
     @SerializedName("sensor_name")
     @Expose

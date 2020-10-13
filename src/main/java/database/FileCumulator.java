@@ -10,10 +10,7 @@ import utils.WebAppConstants;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.FileSystems;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class FileCumulator implements DbManager, DatabaseQueryRunner {
     private static FileCumulator instance;
@@ -35,7 +32,7 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
 
     public static File activityFile, activFitFile, batterySensorFile, bluetoothFile, errorFile, heartRateFile, lightSensorFile, screenUsageFile, miscFile;
     private final ArrayList<File> files = new ArrayList<>();
-    private final ArrayList<FileStoreModel> sensorModels = new ArrayList<>();
+    private final HashMap<String, FileStoreModel> sensorModels = new HashMap<>(); // <File Name, Sensor Model>
 
 
     private FileCumulator() {
@@ -73,17 +70,16 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
         files.add(lightSensorFile);
         files.add(screenUsageFile);
 
-        sensorModels.add(new ActivFitSensorData());
-        sensorModels.add(new ActivitySensorData());
-        sensorModels.add(new BatterySensorData());
-        sensorModels.add(new BluetoothSensorData());
-        sensorModels.add(new HeartRateSensorData());
-        sensorModels.add(new LightSensorData());
-        sensorModels.add(new ScreenUsageSensorData());
-        sensorModels.add(new ScreenUsageSensorData());
+        sensorModels.put(ActivFitSensorData.FILE_NAME, new ActivFitSensorData());
+        sensorModels.put(ActivitySensorData.FILE_NAME, new ActivitySensorData());
+        sensorModels.put(BatterySensorData.FILE_NAME, new BatterySensorData());
+        sensorModels.put(BluetoothSensorData.FILE_NAME, new BluetoothSensorData());
+        sensorModels.put(HeartRateSensorData.FILE_NAME, new HeartRateSensorData());
+        sensorModels.put(LightSensorData.FILE_NAME, new LightSensorData());
+        sensorModels.put(ScreenUsageSensorData.FILE_NAME, new ScreenUsageSensorData());
 
         for (FileStoreModel sensor :
-                sensorModels) {
+                sensorModels.values()) {
             sensor.setFile(ioUtility.createEmptyFile(BASE_ADDRESS + sensor.getFileName() + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME));
         }
     }
@@ -93,7 +89,7 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
 //        get the next Day Date as well
         Date nextDate = QueryUtils.addDayToDate(date, 1);
 //        fetch all record from the collection
-        List<ActivFitSensorData> fileData = getSensorFileContents(new ActivFitSensorData(), 1000);
+        List<ActivFitSensorData> fileData = getSensorFileContents((ActivFitSensorData) sensorModels.get(ActivFitSensorData.FILE_NAME), 1000);
         ArrayList<ActivFitSensorData> queryResult = new ArrayList<>();  // holds the result from the query
         for (ActivFitSensorData nextData :
                 fileData) {
@@ -125,7 +121,8 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
 
     @Override
     public int queryForTotalStepsInDay(Date userDate) {
-        List<ActivitySensorData> activitySensorDataList = getSensorFileContents(new ActivitySensorData(), 1000);
+        List<ActivitySensorData> activitySensorDataList = getSensorFileContents((ActivitySensorData) sensorModels.get(ActivitySensorData.FILE_NAME),
+                1000);
         int maxStepCount = -1;    // Max value of step count for the day
         String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
         for (ActivitySensorData sensorData :
@@ -147,25 +144,12 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
      * @return the cumulative data file
      */
     public File determineFileCategoryAndGet(File inputFile) {
-        if (inputFile.getPath().contains(ACTIVITY)) {
-            return activityFile;
-        } else if (inputFile.getPath().contains(ACTIV_FIT)) {
-            return activFitFile;
-        } else if (inputFile.getPath().contains(BATTERY_SENSOR)) {
-            return batterySensorFile;
-        } else if (inputFile.getPath().contains(BLUETOOTH)) {
-            return bluetoothFile;
-        } else if (inputFile.getPath().contains(ERROR)) {
-            return errorFile;
-        } else if (inputFile.getPath().contains(HEART_RATE)) {
-            return heartRateFile;
-        } else if (inputFile.getPath().contains(LIGHT_SENSOR)) {
-            return lightSensorFile;
-        } else if (inputFile.getPath().contains(SCREEN_USAGE)) {
-            return screenUsageFile;
-        } else {
-            return miscFile;
+        for (String fileName : sensorModels.keySet()) {
+            if (inputFile.getPath().contains(fileName)) {
+                return sensorModels.get(fileName).getFile();
+            }
         }
+        return miscFile;
     }
 
     /**
@@ -321,7 +305,7 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
     long searchForRunningActivity(int numOfDays) {
         long searchTime = System.currentTimeMillis();   // used to calculate search time for brute force
         for (ActivFitSensorData sensorData :
-                getSensorFileContents(new ActivFitSensorData(), numOfDays)) {   // iterate all sensordata and find the result
+                getSensorFileContents((ActivFitSensorData) sensorModels.get(ActivFitSensorData.FILE_NAME), numOfDays)) {   // iterate all sensordata and find the result
             if (sensorData.getSensorData().getActivity().equalsIgnoreCase("running")) {
 //                System.out.println("Running event found " + sensorData.getTimestamp().getStartTime());
             }
@@ -340,7 +324,7 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
     long searchForLessBrightData(int numOfDays) {
         long searchTime = System.currentTimeMillis();   // used to calculate search time for brute force
         for (LightSensorData sensorData :
-                getSensorFileContents(new LightSensorData(), numOfDays)) {   // iterate all sensordata and find the result
+                getSensorFileContents((LightSensorData) sensorModels.get(LightSensorData.FILE_NAME), numOfDays)) {   // iterate all sensordata and find the result
             if (sensorData.getLuxValue().equalsIgnoreCase("less bright")) {
 //                System.out.println("less bright found " + sensorData.getTimestamp());
             }
