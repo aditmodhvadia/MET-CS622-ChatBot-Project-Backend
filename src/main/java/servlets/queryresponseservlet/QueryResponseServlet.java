@@ -1,6 +1,7 @@
 package servlets.queryresponseservlet;
 
 import com.google.gson.Gson;
+import database.DatabaseQueryRunner;
 import requestmodel.MessageQueryRequestModel;
 import responsemodels.QueryResponseMessage;
 import sensormodels.ActivFitSensorData;
@@ -18,7 +19,12 @@ import java.util.stream.Collectors;
 public abstract class QueryResponseServlet extends HttpServlet implements QueryUtils.OnQueryResolvedCallback {
 
     private HttpServletResponse response;
-    private Gson g = new Gson();
+    private final Gson g = new Gson();
+    private DatabaseQueryRunner dbManager;
+
+    public QueryResponseServlet(DatabaseQueryRunner dbManager) {
+        this.dbManager = dbManager;
+    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -33,12 +39,12 @@ public abstract class QueryResponseServlet extends HttpServlet implements QueryU
 
     @Override
     public void onDisplayRunningEventSelected(Date date) {
-        ArrayList<ActivFitSensorData> queryResult = queryForRunningEvent(date);
+        ArrayList<ActivFitSensorData> queryResult = this.dbManager.queryForRunningEvent(date);
         String queryResultString = QueryUtils.getFormattedRunningResultData(queryResult);
         sendResponse(queryResultString);
     }
 
-    public abstract ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate);
+//    public abstract ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate);
 
     /**
      * Call to send back the response with given query response data
@@ -58,20 +64,20 @@ public abstract class QueryResponseServlet extends HttpServlet implements QueryU
 
     @Override
     public void onDisplayHeartRateEventSelected(Date date) {
-        String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, queryHeartRatesForDay(date));
+        String queryResultString = QueryUtils.getFormattedHeartRatesForTheDays(date, this.dbManager.queryHeartRatesForDay(date));
         sendResponse(queryResultString);
     }
 
-    public abstract int queryHeartRatesForDay(Date date);
+//    public abstract int queryHeartRatesForDay(Date date);
 
     @Override
     public void onDisplayTotalStepsInDayEventSelected(Date date) {
-        int queryResult = queryForTotalStepsInDay(date);
+        int queryResult = this.dbManager.queryForTotalStepsInDay(date);
         String queryResultString = QueryUtils.getFormattedTotalStepsForTheDay(queryResult, date);
         sendResponse(queryResultString);
     }
 
-    public abstract int queryForTotalStepsInDay(Date userDate);
+//    public abstract int queryForTotalStepsInDay(Date userDate);
 
     @Override
     public void onDateNotParsed() {

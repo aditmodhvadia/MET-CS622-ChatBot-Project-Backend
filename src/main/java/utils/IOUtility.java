@@ -8,6 +8,17 @@ import java.util.List;
 import java.util.Objects;
 
 public class IOUtility {
+    private static IOUtility instance;
+
+    private IOUtility() {
+    }
+
+    public static IOUtility getInstance() {
+        if (instance == null) {
+            instance = new IOUtility();
+        }
+        return instance;
+    }
 
     /**
      * Use to read/get contents of the given file

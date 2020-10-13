@@ -15,6 +15,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import sensormodels.*;
+import sensormodels.store.models.LuceneStoreModel;
 import utils.WebAppConstants;
 
 import javax.servlet.ServletContext;
@@ -34,24 +35,26 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager {
 
     private static LuceneManager instance;
 
-    private final String indexDir;
+    private String indexDir;
     private IndexWriter indexWriter;
 
-    private LuceneManager(String indexDirRealPath) {
-        this.indexDir = indexDirRealPath;
+    private LuceneManager() {
     }
 
     /**
      * Singleton method to get the instance of the class
      *
-     * @param servletContext context of the running servlet
      * @return singleton instance of the class
      */
-    public static LuceneManager getInstance(ServletContext servletContext) {
+    public static LuceneManager getInstance() {
         if (instance == null) {
-            instance = new LuceneManager(servletContext.getRealPath(indexDirRelativePath));
+            instance = new LuceneManager();
         }
         return instance;
+    }
+
+    public void updateServletContext(ServletContext servletContext) {
+        this.indexDir = servletContext.getRealPath(indexDirRelativePath);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package sensormodels;
+package sensormodels.store.models;
 
 import org.apache.lucene.document.Document;
 

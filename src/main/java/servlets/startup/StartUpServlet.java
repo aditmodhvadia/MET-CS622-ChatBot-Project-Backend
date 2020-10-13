@@ -22,8 +22,8 @@ import java.util.List;
 
 public class StartUpServlet extends HttpServlet {
     private static final UnzipUtility unZipper = new UnzipUtility();    // unzips zip folder and files
-    private static final IOUtility ioUtility = new IOUtility();     // utility class for IO Operations
-    private static final FileCumulator fileCumulator = new FileCumulator(ioUtility);    // Data cumulator into result files
+    private IOUtility ioUtility;     // utility class for IO Operations
+    private FileCumulator fileCumulator;    // Data cumulator into result files
     private static final String destinationFolder = "UncompressedData" + FileSystems.getDefault().getSeparator(); // destination folder
     private static final String sourceFileName = "/WEB-INF/classes/SampleUserSmartwatch.zip";    // datasource file
 
@@ -33,13 +33,17 @@ public class StartUpServlet extends HttpServlet {
 
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
         System.out.println("--------#####--------");
         System.out.println("        Server started      ");
         System.out.println("--------#####--------");
 
+        ioUtility = IOUtility.getInstance();
+        fileCumulator = FileCumulator.getInstance();
+
         mongoDBManager = MongoDBManager.getInstance();
-        luceneManager = LuceneManager.getInstance(getServletContext());
+        luceneManager = LuceneManager.getInstance();
+        luceneManager.updateServletContext(getServletContext());
         mySqlManager = MySqlManager.getInstance();
 
 //        unzipDataSource();
@@ -279,7 +283,7 @@ public class StartUpServlet extends HttpServlet {
     /**
      * Inner Class which listens for Files and Zip Files/folders when found
      */
-    static class ListenerClass implements FileListener {
+    class ListenerClass implements FileListener {
 
         @Override
         public void fileFound(File file) {

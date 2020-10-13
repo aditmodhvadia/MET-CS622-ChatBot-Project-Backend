@@ -1,4 +1,4 @@
-package sensormodels;
+package sensormodels.store.models;
 
 public interface MongoStoreModel {
     String getMongoCollectionName();

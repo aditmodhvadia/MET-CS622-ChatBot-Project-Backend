@@ -3,6 +3,8 @@ package sensormodels;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import sensormodels.store.models.MongoStoreModel;
+import sensormodels.store.models.MySQLStoreModel;
 import utils.WebAppConstants;
 
 import java.sql.PreparedStatement;

@@ -8,6 +8,9 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.StringField;
+import sensormodels.store.models.LuceneStoreModel;
+import sensormodels.store.models.MongoStoreModel;
+import sensormodels.store.models.MySQLStoreModel;
 import utils.WebAppConstants;
 
 import java.sql.PreparedStatement;

@@ -1,4 +1,4 @@
-package sensormodels;
+package sensormodels.store.models;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

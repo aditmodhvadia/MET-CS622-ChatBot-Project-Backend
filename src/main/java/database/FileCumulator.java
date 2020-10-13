@@ -17,7 +17,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-public class FileCumulator {
+public class FileCumulator implements DbManager, DatabaseQueryRunner {
+    private static FileCumulator instance;
     private static final String ACTIV_FIT = "ActivFit";
     private static final String ACTIVITY = "Activity";
     private static final String BATTERY_SENSOR = "BatterySensor";
@@ -28,18 +29,31 @@ public class FileCumulator {
     private static final String SCREEN_USAGE = "ScreenUsage";
     private static final String MISC = "Misc";
 
-    private IOUtility ioUtility;    // to perform IO Operations
+    private final IOUtility ioUtility;    // to perform IO Operations
 
 
     private static final String BASE_ADDRESS = "Result" + FileSystems.getDefault().getSeparator();
     private static final String DATA_FILE_NAME = "CumulativeData.txt";
 
     public static File activityFile, activFitFile, batterySensorFile, bluetoothFile, errorFile, heartRateFile, lightSensorFile, screenUsageFile, miscFile;
-    private ArrayList<File> files = new ArrayList<>();
+    private final ArrayList<File> files = new ArrayList<>();
 
-    public FileCumulator(IOUtility ioUtility) {
-        this.ioUtility = ioUtility;
+
+    private FileCumulator() {
+        this.ioUtility = IOUtility.getInstance();
         ioUtility.createDirectory(BASE_ADDRESS);
+        init();
+    }
+
+    public static FileCumulator getInstance() {
+        if (instance == null) {
+            instance = new FileCumulator();
+        }
+        return instance;
+    }
+
+    @Override
+    public void init() {
         activFitFile = ioUtility.createEmptyFile(BASE_ADDRESS + ACTIV_FIT + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
         activityFile = ioUtility.createEmptyFile(BASE_ADDRESS + ACTIVITY + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
         batterySensorFile = ioUtility.createEmptyFile(BASE_ADDRESS + BATTERY_SENSOR + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
@@ -61,13 +75,8 @@ public class FileCumulator {
         files.add(screenUsageFile);
     }
 
-    /**
-     * Get the result from ActivFit Sensor Data for the given Date, if there is a running event for it
-     *
-     * @param date given Date
-     * @return List of ActivFitSensorData having running activity for the given Date
-     */
-    public static ArrayList<ActivFitSensorData> queryForRunningEvent(Date date) {
+    @Override
+    public ArrayList<ActivFitSensorData> queryForRunningEvent(Date date) {
 //        get the next Day Date as well
         Date nextDate = QueryUtils.addDayToDate(date, 1);
 //        fetch all record from the collection
@@ -87,13 +96,8 @@ public class FileCumulator {
         return queryResult;
     }
 
-    /**
-     * Called to query and fetch the number of heart rate notifications received for the given day
-     *
-     * @param date given day
-     * @return int value of the number of heart rate notifications received in the given day
-     */
-    public static int queryHeartRatesForDay(Date date) {
+    @Override
+    public int queryHeartRatesForDay(Date date) {
         List<HeartRateSensorData> sensorData = getHeartRateSensorFileContents();
         int heartRateCount = 0;
         String formattedDate = WebAppConstants.inputDateFormat.format(date);
@@ -106,13 +110,8 @@ public class FileCumulator {
         return heartRateCount;
     }
 
-    /**
-     * Called to query the number of steps user takes for the given day
-     *
-     * @param userDate given day
-     * @return step count for the given day
-     */
-    public static int queryForTotalStepsInDay(Date userDate) {
+    @Override
+    public int queryForTotalStepsInDay(Date userDate) {
         List<ActivitySensorData> activitySensorDataList = getActivityFileContents(1000);
         int maxStepCount = -1;    // Max value of step count for the day
         String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);

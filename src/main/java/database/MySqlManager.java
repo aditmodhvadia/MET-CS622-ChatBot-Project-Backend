@@ -1,6 +1,7 @@
 package database;
 
 import sensormodels.*;
+import sensormodels.store.models.MySQLStoreModel;
 import utils.WebAppConstants;
 
 import java.sql.*;
