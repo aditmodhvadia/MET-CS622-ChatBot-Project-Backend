@@ -5,7 +5,7 @@ import servlets.queryresponseservlet.QueryResponseServlet;
 
 public class BruteForceServlet extends QueryResponseServlet {
 
-    public BruteForceServlet() {
-        super(FileCumulator.getInstance());
-    }
+  public BruteForceServlet() {
+    super(FileCumulator.getInstance());
+  }
 }

@@ -5,8 +5,8 @@ import servlets.queryresponseservlet.QueryResponseServlet;
 
 public class LuceneServlet extends QueryResponseServlet {
 
-    public LuceneServlet() {
-        super(LuceneManager.getInstance());
-        LuceneManager.getInstance().updateServletContext(this.getServletContext());
-    }
+  public LuceneServlet() {
+    super(LuceneManager.getInstance());
+    LuceneManager.getInstance().updateServletContext(this.getServletContext());
+  }
 }

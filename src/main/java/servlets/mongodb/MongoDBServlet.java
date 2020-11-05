@@ -5,7 +5,7 @@ import servlets.queryresponseservlet.QueryResponseServlet;
 
 public class MongoDBServlet extends QueryResponseServlet {
 
-    public MongoDBServlet() {
-        super(MongoDBManager.getInstance());
-    }
+  public MongoDBServlet() {
+    super(MongoDBManager.getInstance());
+  }
 }

@@ -3,15 +3,15 @@ package sensormodels.store.models;
 import java.io.File;
 
 public interface FileStoreModel {
-    String getFileName();
+  String getFileName();
 
-    void setFile(File file);
+  void setFile(File file);
 
-    File getFile();
+  File getFile();
 
-    void setFormattedDate();
+  void setFormattedDate();
 
-    String getStartTime();
+  String getStartTime();
 
-    Class getClassObject();
+  Class getClassObject();
 }

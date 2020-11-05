@@ -5,11 +5,11 @@ import java.sql.SQLException;
 
 public interface MySQLStoreModel {
 
-    String getTableName();
+  String getTableName();
 
-    String getCreateTableQuery();
+  String getCreateTableQuery();
 
-    String getInsertIntoTableQuery();
+  String getInsertIntoTableQuery();
 
-    void setQueryData(PreparedStatement preparedStmt) throws SQLException;
+  void setQueryData(PreparedStatement preparedStmt) throws SQLException;
 }

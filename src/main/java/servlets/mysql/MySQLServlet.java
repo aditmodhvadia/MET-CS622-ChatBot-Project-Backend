@@ -5,7 +5,7 @@ import servlets.queryresponseservlet.QueryResponseServlet;
 
 public class MySQLServlet extends QueryResponseServlet {
 
-    public MySQLServlet() {
-        super(MySqlManager.getInstance());
-    }
+  public MySQLServlet() {
+    super(MySqlManager.getInstance());
+  }
 }
