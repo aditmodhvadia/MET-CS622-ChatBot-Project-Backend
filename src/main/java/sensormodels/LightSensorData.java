@@ -10,7 +10,6 @@ import org.apache.lucene.document.TextField;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import utils.WebAppConstants;
 
-import javax.persistence.Transient;
 import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -21,11 +20,11 @@ import java.util.Date;
  */
 public class LightSensorData extends DatabaseModel {
 
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     public static final String MY_SQL_TABLE_NAME = "LightSensorData";
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     public static final String FILE_NAME = "LightSensor";
 
     @SerializedName("sensor_name")
@@ -43,8 +42,8 @@ public class LightSensorData extends DatabaseModel {
   private String luxValue;
     @Expose
     private String formatted_date;
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     private File file;
 
   public String getLuxValue() {
@@ -93,7 +92,7 @@ public class LightSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public Document getDocument() {
     Document doc = new Document();
@@ -114,28 +113,28 @@ public class LightSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getMongoCollectionName() {
     return "LightSensorData";
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public Class<LightSensorData> getClassObject() {
     return LightSensorData.class;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getTableName() {
     return MY_SQL_TABLE_NAME;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getCreateTableQuery() {
     return "CREATE TABLE "
@@ -147,7 +146,7 @@ public class LightSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getInsertIntoTableQuery() {
     return " insert into "
@@ -157,7 +156,7 @@ public class LightSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
         preparedStmt.setString(1, this.getTimestamp());
@@ -167,7 +166,7 @@ public class LightSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getFileName() {
     return FILE_NAME;
@@ -179,7 +178,7 @@ public class LightSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public File getFile() {
     return this.file;

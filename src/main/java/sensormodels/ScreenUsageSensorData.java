@@ -6,7 +6,6 @@ import org.apache.lucene.document.Document;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import utils.WebAppConstants;
 
-import javax.persistence.Transient;
 import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -17,11 +16,11 @@ import java.util.Date;
  */
 public class ScreenUsageSensorData extends DatabaseModel {
 
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     public static final String MY_SQL_TABLE_NAME = "ScreenUsageSensorData";
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     public static final String FILE_NAME = "ScreenUsage";
 
     @SerializedName("start_hour")
@@ -54,8 +53,8 @@ public class ScreenUsageSensorData extends DatabaseModel {
 
     @Expose
     private String formatted_date;
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     private File file;
 
   public String getFormatted_date() {
@@ -128,28 +127,28 @@ public class ScreenUsageSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getMongoCollectionName() {
     return "ScreenUsageSensorData";
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public Class<ScreenUsageSensorData> getClassObject() {
     return ScreenUsageSensorData.class;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getTableName() {
     return MY_SQL_TABLE_NAME;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getCreateTableQuery() {
     return "CREATE TABLE "
@@ -165,7 +164,7 @@ public class ScreenUsageSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getInsertIntoTableQuery() {
     return " insert into "
@@ -175,7 +174,7 @@ public class ScreenUsageSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
         preparedStmt.setString(1, this.getStartHour());
@@ -189,7 +188,7 @@ public class ScreenUsageSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getFileName() {
     return FILE_NAME;
@@ -201,14 +200,14 @@ public class ScreenUsageSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public File getFile() {
     return this.file;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public Document getDocument() {
     return new Document();

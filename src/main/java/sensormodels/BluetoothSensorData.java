@@ -6,7 +6,6 @@ import org.apache.lucene.document.Document;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import utils.WebAppConstants;
 
-import javax.persistence.Transient;
 import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -16,11 +15,11 @@ import java.util.Date;
  * @author Adit Modhvadia
  */
 public class BluetoothSensorData extends DatabaseModel {
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     public static final String MY_SQL_TABLE_NAME = "BluetoothSensorData";
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     public static final String FILE_NAME = "Bluetooth";
 
     @SerializedName("sensor_name")
@@ -76,28 +75,28 @@ public class BluetoothSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getMongoCollectionName() {
     return "BluetoothSensorData";
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public Class<BluetoothSensorData> getClassObject() {
     return BluetoothSensorData.class;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getTableName() {
     return MY_SQL_TABLE_NAME;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getCreateTableQuery() {
     return "CREATE TABLE "
@@ -109,7 +108,7 @@ public class BluetoothSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getInsertIntoTableQuery() {
     return " insert into "
@@ -119,7 +118,7 @@ public class BluetoothSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
         preparedStmt.setString(1, this.getTimestamp());
@@ -129,28 +128,28 @@ public class BluetoothSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getFileName() {
     return FILE_NAME;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public void setFile(File file) {
     this.file = file;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public File getFile() {
     return this.file;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public Document getDocument() {
     return new Document();

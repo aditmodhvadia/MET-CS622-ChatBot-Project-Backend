@@ -46,7 +46,7 @@ public class StartUpServlet extends HttpServlet {
     luceneManager.updateServletContext(getServletContext());
     mySqlManager = MySqlManager.getInstance();
 
-      //    unzipDataSource();
+    //    unzipDataSource();
 
     //        Now store all data into MongoDB, MySQL and Lucene
     storeDataInDatabases(); // store JSON data from file storage
@@ -76,13 +76,13 @@ public class StartUpServlet extends HttpServlet {
    * @see MongoDBManager
    */
   private void storeDataInDatabases() {
-    System.out.println("*****************Storing data into Databases******************");
-    storeActivitySensorData();
-    storeActivFitSensorData();
-    storeBatterySensorData();
-    storeBluetoothSensorData();
-    storeHeartRateSensorData();
-    storeLightSensorData();
+      System.out.println("*****************Storing data into Databases******************");
+      storeActivitySensorData();
+      storeActivFitSensorData();
+      storeBatterySensorData();
+      storeBluetoothSensorData();
+      storeHeartRateSensorData();
+      storeLightSensorData();
       storeScreenUsageSensorData();
       System.out.println("*****************Storing data into Databases complete******************");
   }
@@ -107,7 +107,7 @@ public class StartUpServlet extends HttpServlet {
                       .filter(Objects::nonNull)
                       .collect(Collectors.toList());
 
-      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, ActivitySensorData.class);
+      mongoDBManager.insertDocumentsIntoCollection(sensorDataList, ActivitySensorData.class);
       //        store activity sensor data in lucene at once
       //        luceneManager.storeSensorDataList(sensorDataList);
       //        insert data into MYSQL for Activity sensor
@@ -134,7 +134,7 @@ public class StartUpServlet extends HttpServlet {
                       .filter(Objects::nonNull)
                       .collect(Collectors.toList());
 
-      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, ActivFitSensorData.class);
+      mongoDBManager.insertDocumentsIntoCollection(sensorDataList, ActivFitSensorData.class);
       //        store data in lucene
       //    luceneManager.storeSensorDataList(sensorDataList);
       // insert data into MYSQL for ActivFit sensor
@@ -162,7 +162,7 @@ public class StartUpServlet extends HttpServlet {
                       .filter(Objects::nonNull)
                       .collect(Collectors.toList());
 
-      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, BatterySensorData.class);
+      mongoDBManager.insertDocumentsIntoCollection(sensorDataList, BatterySensorData.class);
       // insert data into MYSQL for battery sensor
       mySqlManager.storeSensorDataList(sensorDataList);
   }
@@ -189,7 +189,7 @@ public class StartUpServlet extends HttpServlet {
                       .filter(Objects::nonNull)
                       .collect(Collectors.toList());
 
-      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, BluetoothSensorData.class);
+      mongoDBManager.insertDocumentsIntoCollection(sensorDataList, BluetoothSensorData.class);
       // insert data into MYSQL for Bluetooth sensor
       mySqlManager.storeSensorDataList(sensorDataList);
   }
@@ -216,7 +216,7 @@ public class StartUpServlet extends HttpServlet {
                       .filter(Objects::nonNull)
                       .collect(Collectors.toList());
 
-      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, HeartRateSensorData.class);
+      mongoDBManager.insertDocumentsIntoCollection(sensorDataList, HeartRateSensorData.class);
       //    luceneManager.storeSensorDataList(sensorDataList);
       // insert data into MYSQL for Heart Rate sensor
       mySqlManager.storeSensorDataList(sensorDataList);
@@ -243,7 +243,7 @@ public class StartUpServlet extends HttpServlet {
                       .filter(Objects::nonNull)
                       .collect(Collectors.toList());
 
-      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, LightSensorData.class);
+      mongoDBManager.insertDocumentsIntoCollection(sensorDataList, LightSensorData.class);
       // insert data into MYSQL for Light sensor
       mySqlManager.storeSensorDataList(sensorDataList);
   }
@@ -270,7 +270,7 @@ public class StartUpServlet extends HttpServlet {
                       .filter(Objects::nonNull)
                       .collect(Collectors.toList());
 
-      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, ScreenUsageSensorData.class);
+      mongoDBManager.insertDocumentsIntoCollection(sensorDataList, ScreenUsageSensorData.class);
       // insert data into MYSQL for Screen Usage sensor
       mySqlManager.storeSensorDataList(sensorDataList);
   }

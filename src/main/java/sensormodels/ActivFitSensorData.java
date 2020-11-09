@@ -10,7 +10,6 @@ import org.apache.lucene.document.TextField;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import utils.WebAppConstants;
 
-import javax.persistence.Transient;
 import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -21,17 +20,17 @@ import java.util.Date;
  */
 public class ActivFitSensorData extends DatabaseModel {
 
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     public static final String MY_SQL_TABLE_NAME = "ActivFitSensorData";
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     public static final String MONGO_COLLECTION_NAME = "ActivFitSensorData";
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     public static final String FILE_NAME = "ActivFit";
-    @Transient
-    @BsonIgnore
+
+  @BsonIgnore
     private File file;
 
     @SerializedName("sensor_name")
@@ -88,7 +87,7 @@ public class ActivFitSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public Document getDocument() {
     Document doc = new Document();
@@ -125,28 +124,28 @@ public class ActivFitSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getMongoCollectionName() {
     return MONGO_COLLECTION_NAME;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public Class<ActivFitSensorData> getClassObject() {
     return ActivFitSensorData.class;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getTableName() {
     return MY_SQL_TABLE_NAME;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getCreateTableQuery() {
     return "CREATE TABLE "
@@ -159,7 +158,7 @@ public class ActivFitSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getInsertIntoTableQuery() {
     return " insert into "
@@ -169,7 +168,7 @@ public class ActivFitSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
         preparedStmt.setString(1, this.getTimestamp().getStartTime());
@@ -180,21 +179,21 @@ public class ActivFitSensorData extends DatabaseModel {
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public String getFileName() {
     return FILE_NAME;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public void setFile(File file) {
     this.file = file;
   }
 
     @Override
-    @Transient
+
     @BsonIgnore
     public File getFile() {
     return this.file;
