@@ -12,7 +12,7 @@
 1. MongoDB
     - Run docker container for mongodb
     ```shell script
-    docker run -d -p 27017:27017 mongodb:3.6-xenial
+    docker run -d -p 27017:27017 mongo:3.6-xenial
     ```
 
 1. MySQL

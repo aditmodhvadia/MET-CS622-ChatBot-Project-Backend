@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MySqlManager implements DbManager, DatabaseQueryRunner {
+public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRunner {
   private static MySqlManager instance;
   // JDBC driver name and database URL TODO: Not using this one in init()
   static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
@@ -77,7 +77,9 @@ public class MySqlManager implements DbManager, DatabaseQueryRunner {
     }
   }
 
-  public <T extends MySQLStoreModel> void storeSensorDataList(List<T> sensorDataList) {
+  @Override
+  public <V extends MySQLStoreModel> void insertSensorDataList(List<V> sensorDataList) {
+    //    sensorDataList.forEach(this::insertSensorData);
     connection = getConnection();
     // create the mysql insert prepared statement
     PreparedStatement preparedStmt;
@@ -92,7 +94,7 @@ public class MySqlManager implements DbManager, DatabaseQueryRunner {
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
-      System.out.println("Data inserted in mysql server");
+      System.out.println("MySQL Log: Data Inserted for " + sensorDataList.get(0).getTableName());
       try {
         if (connection != null) {
           connection.close();
@@ -103,7 +105,8 @@ public class MySqlManager implements DbManager, DatabaseQueryRunner {
     }
   }
 
-  public <T extends MySQLStoreModel> void storeSensorData(T sensorData) {
+  @Override
+  public <V extends MySQLStoreModel> void insertSensorData(V sensorData) {
     connection = getConnection();
     // create the mysql insert prepared statement
     PreparedStatement preparedStmt;

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /** @author Adit Modhvadia */
-public class LuceneManager implements DatabaseQueryRunner, DbManager {
+public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStoreModel> {
   public static String indexDirRelativePath = "luceneIndex";
 
   private static LuceneManager instance;
@@ -106,31 +106,6 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager {
       }
     }
     return maxStepCount;
-  }
-
-  public <T extends LuceneStoreModel> void storeSensorDataList(List<T> sensorData) {
-    try {
-      IndexWriter indexWriter = getIndexWriter();
-      if (indexWriter != null) {
-        indexWriter.addDocuments(
-            sensorData.stream().map(LuceneStoreModel::getDocument).collect(Collectors.toList()));
-      }
-      closeWriter();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public <T extends LuceneStoreModel> void storeSensorData(T sensorData) {
-    try {
-      IndexWriter indexWriter = getIndexWriter();
-      if (indexWriter != null) {
-        indexWriter.addDocument(sensorData.getDocument());
-      }
-      closeWriter();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 
   /**
@@ -217,6 +192,35 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager {
   @Override
   public void init() {
     System.out.println("<----Lucene initialized.---->");
+  }
+
+  @Override
+  public <V extends LuceneStoreModel> void insertSensorDataList(List<V> sensorDataList) {
+    try {
+      IndexWriter indexWriter = getIndexWriter();
+      if (indexWriter != null) {
+        indexWriter.addDocuments(
+            sensorDataList.stream()
+                .map(LuceneStoreModel::getDocument)
+                .collect(Collectors.toList()));
+      }
+      closeWriter();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public <V extends LuceneStoreModel> void insertSensorData(V sensorData) {
+    try {
+      IndexWriter indexWriter = getIndexWriter();
+      if (indexWriter != null) {
+        indexWriter.addDocument(sensorData.getDocument());
+      }
+      closeWriter();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   /** Constants class */

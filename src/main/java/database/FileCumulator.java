@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
 import java.nio.file.FileSystems;
 import java.util.*;
 
-public class FileCumulator implements DbManager, DatabaseQueryRunner {
+public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRunner {
   private static FileCumulator instance;
   private static final String ACTIV_FIT = "ActivFit";
   private static final String ACTIVITY = "Activity";
@@ -115,6 +115,16 @@ public class FileCumulator implements DbManager, DatabaseQueryRunner {
               BASE_ADDRESS + sensor.getFileName() + FileSystems.getDefault().getSeparator(),
               DATA_FILE_NAME));
     }
+  }
+
+  @Override
+  public <V extends FileStoreModel> void insertSensorDataList(List<V> sensorDataList) {
+    System.out.println("No need to store in the file system again.");
+  }
+
+  @Override
+  public <V extends FileStoreModel> void insertSensorData(V sensorData) {
+    System.out.println("No need to store in the file system again.");
   }
 
   @Override

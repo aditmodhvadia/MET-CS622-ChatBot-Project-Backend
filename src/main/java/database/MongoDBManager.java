@@ -23,7 +23,7 @@ import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 /** @author Adit Modhvadia */
-public class MongoDBManager implements DbManager, DatabaseQueryRunner {
+public class MongoDBManager implements DbManager<MongoStoreModel>, DatabaseQueryRunner {
   private static MongoDBManager instance;
   public static final String DATABASE_NAME = "SensorData";
   private static MongoDatabase database;
@@ -54,16 +54,16 @@ public class MongoDBManager implements DbManager, DatabaseQueryRunner {
             MongoClientSettings.getDefaultCodecRegistry(),
             fromProviders(
                 PojoCodecProvider.builder()
-                        //                    .register(ActivFitSensorData.class)
+                    //                    .register(ActivFitSensorData.class)
                     .automatic(true)
                     .build())); // custom codec required to store POJO in MongoDB
 
     ConnectionString connectionString = new ConnectionString("mongodb://localhost:27017");
     MongoClientSettings settings =
-            MongoClientSettings.builder()
-                    .applyConnectionString(connectionString)
-                    .codecRegistry(pojoCodecRegistry)
-                    .build();
+        MongoClientSettings.builder()
+            .applyConnectionString(connectionString)
+            .codecRegistry(pojoCodecRegistry)
+            .build();
 
     //        create a connection to MongoDB Client
     MongoClient mongoClient = MongoClients.create(settings);
@@ -82,35 +82,27 @@ public class MongoDBManager implements DbManager, DatabaseQueryRunner {
     //        initialise all the mongoCollections for the Sensors
   }
 
-  /**
-   * Use to insert given document of the given type into the given target collection
-   *
-   * @param document given document to be inserted
-   */
-  public <T extends MongoStoreModel> void insertDocumentIntoCollection(T document) {
-    MongoCollection<T> collection =
-        database.getCollection(document.getMongoCollectionName(), document.getClassObject());
-    collection.insertOne(document);
-    System.out.println("MongoDB Log: Data Inserted");
-  }
-
-  /**
-   * Use to insert given documents of the given type into the given target collection
-   *
-   * @param documents               given documents to be inserted
-   * @param activitySensorDataClass
-   */
-  public <T extends MongoStoreModel> void insertDocumentsIntoCollection(
-          List<T> documents, Class<T> activitySensorDataClass) {
+  @Override
+  public <V extends MongoStoreModel> void insertSensorDataList(List<V> sensorDataList) {
     try {
-      MongoCollection<T> collection =
-              database.getCollection(
-                      documents.get(0).getMongoCollectionName(), activitySensorDataClass);
-      collection.insertMany(documents);
-      System.out.println("MongoDB Log: Data Inserted");
+      MongoCollection<V> collection =
+          database.getCollection(
+              sensorDataList.get(0).getMongoCollectionName(),
+              sensorDataList.get(0).getClassObject());
+      collection.insertMany(sensorDataList);
+      System.out.println(
+          "MongoDB Log: Data Inserted for " + sensorDataList.get(0).getMongoCollectionName());
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  @Override
+  public <V extends MongoStoreModel> void insertSensorData(V sensorData) {
+    MongoCollection<V> collection =
+        database.getCollection(sensorData.getMongoCollectionName(), sensorData.getClassObject());
+    collection.insertOne(sensorData);
+    System.out.println("MongoDB Log: Data Inserted");
   }
 
   @Override
