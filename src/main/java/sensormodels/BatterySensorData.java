@@ -3,33 +3,44 @@ package sensormodels;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import org.apache.lucene.document.Document;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import utils.WebAppConstants;
 
+import javax.persistence.Transient;
 import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
-/** @author Adit Modhvadia */
+/**
+ * @author Adit Modhvadia
+ */
 public class BatterySensorData extends DatabaseModel {
 
-  public static final String MY_SQL_TABLE_NAME = "BatterySensorData";
-  public static final String FILE_NAME = "BatterySensor";
+    @Transient
+    @BsonIgnore
+    public static final String MY_SQL_TABLE_NAME = "BatterySensorData";
+    @Transient
+    @BsonIgnore
+    public static final String FILE_NAME = "BatterySensor";
 
-  @SerializedName("sensor_name")
-  @Expose
-  private String sensorName;
+    @SerializedName("sensor_name")
+    @Expose
+    private String sensorName;
 
-  @SerializedName("timestamp")
-  @Expose
-  private String timestamp;
+    @SerializedName("timestamp")
+    @Expose
+    private String timestamp;
 
-  @SerializedName("sensor_data")
+    @SerializedName("sensor_data")
   @Expose
   private SensorData sensorData;
 
-  @Expose private String formatted_date;
-  private File file;
+    @Expose
+    private String formatted_date;
+    @Transient
+    @BsonIgnore
+    private File file;
 
   public String getFormatted_date() {
     return formatted_date;
@@ -68,23 +79,31 @@ public class BatterySensorData extends DatabaseModel {
     return this.getTimestamp();
   }
 
-  @Override
-  public String getMongoCollectionName() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getMongoCollectionName() {
     return "BatterySensorData";
   }
 
-  @Override
-  public Class<BatterySensorData> getClassObject() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public Class<BatterySensorData> getClassObject() {
     return BatterySensorData.class;
   }
 
-  @Override
-  public String getTableName() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getTableName() {
     return MY_SQL_TABLE_NAME;
   }
 
-  @Override
-  public String getCreateTableQuery() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getCreateTableQuery() {
     return "CREATE TABLE "
         + this.getTableName()
         + "(timestamp VARCHAR(30) , "
@@ -95,41 +114,53 @@ public class BatterySensorData extends DatabaseModel {
         + " charging BIT ) ";
   }
 
-  @Override
-  public String getInsertIntoTableQuery() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getInsertIntoTableQuery() {
     return " insert into "
         + this.getTableName()
         + " (timestamp,time_stamp, formatted_date, sensor_name,percent,charging)"
         + " values (?, ?, ?, ?, ?,?)";
   }
 
-  @Override
-  public void setQueryData(PreparedStatement preparedStmt) throws SQLException {
-    preparedStmt.setString(1, this.getTimestamp());
-    preparedStmt.setString(2, this.getTimestamp());
-    preparedStmt.setString(3, this.getFormatted_date());
-    preparedStmt.setString(4, this.getSensorName());
-    preparedStmt.setInt(5, this.getSensorData().getPercent());
-    preparedStmt.setBoolean(6, this.getSensorData().getCharging());
+    @Override
+    @Transient
+    @BsonIgnore
+    public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
+        preparedStmt.setString(1, this.getTimestamp());
+        preparedStmt.setString(2, this.getTimestamp());
+        preparedStmt.setString(3, this.getFormatted_date());
+        preparedStmt.setString(4, this.getSensorName());
+        preparedStmt.setInt(5, this.getSensorData().getPercent());
+        preparedStmt.setBoolean(6, this.getSensorData().getCharging());
   }
 
-  @Override
-  public String getFileName() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getFileName() {
     return FILE_NAME;
   }
 
-  @Override
-  public void setFile(File file) {
+    @Override
+    @Transient
+    @BsonIgnore
+    public void setFile(File file) {
     this.file = file;
   }
 
-  @Override
-  public File getFile() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public File getFile() {
     return this.file;
   }
 
-  @Override
-  public Document getDocument() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public Document getDocument() {
     return new Document();
   }
 

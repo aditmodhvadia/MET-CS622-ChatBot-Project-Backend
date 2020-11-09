@@ -14,13 +14,11 @@ public class MySqlManager implements DbManager, DatabaseQueryRunner {
   // JDBC driver name and database URL TODO: Not using this one in init()
   static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
   static final String DB_NAME = "sensordata";
-  static final String DB_URL = "jdbc:mysql://localhost/" + DB_NAME;
-
-  private static final String SCREEN_USAGE_TABLE = "ScreenUsageSensorData";
+  static final String DB_URL = "jdbc:mysql://localhost:3306/" + DB_NAME;
 
   //  Database credentials
-  static final String USER = "root";
-  static final String PASS = "root";
+  static final String USER = "admin";
+  static final String PASS = "admin";
   private static Connection connection;
   private static ArrayList<MySQLStoreModel> sensorModels;
 
@@ -54,7 +52,7 @@ public class MySqlManager implements DbManager, DatabaseQueryRunner {
       connection = getConnection();
 
       // STEP 4: Execute a query
-      System.out.println("Creating database...");
+      System.out.println("Creating tables...");
       stmt = connection.createStatement();
 
       // executing statements to created SenorData database tables
@@ -86,13 +84,15 @@ public class MySqlManager implements DbManager, DatabaseQueryRunner {
     try {
       for (MySQLStoreModel sensorData : sensorDataList) {
         preparedStmt = connection.prepareStatement(sensorData.getInsertIntoTableQuery());
-        sensorData.setQueryData(preparedStmt);
+        sensorData.fillQueryData(preparedStmt);
         // execute the prepared statement
+        //        System.out.println(preparedStmt);
         preparedStmt.execute();
       }
-    } catch (SQLException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     } finally {
+      System.out.println("Data inserted in mysql server");
       try {
         if (connection != null) {
           connection.close();
@@ -109,7 +109,7 @@ public class MySqlManager implements DbManager, DatabaseQueryRunner {
     PreparedStatement preparedStmt;
     try {
       preparedStmt = connection.prepareStatement(sensorData.getInsertIntoTableQuery());
-      sensorData.setQueryData(preparedStmt);
+      sensorData.fillQueryData(preparedStmt);
       // execute the prepared statement
       preparedStmt.execute();
     } catch (SQLException e) {
@@ -161,7 +161,12 @@ public class MySqlManager implements DbManager, DatabaseQueryRunner {
 
   private void createAllTables(Statement stmt) throws SQLException {
     for (MySQLStoreModel sensorData : sensorModels) {
-      stmt.executeUpdate(sensorData.getCreateTableQuery());
+      try {
+        stmt.executeUpdate(sensorData.getCreateTableQuery());
+      } catch (SQLSyntaxErrorException exception) {
+        System.out.println("Table " + sensorData.getTableName() + " already exists");
+        //        System.out.println("exception = " + exception);
+      }
     }
   }
 
@@ -173,7 +178,7 @@ public class MySqlManager implements DbManager, DatabaseQueryRunner {
   private Connection getConnection() {
     try {
       return DriverManager.getConnection(DB_URL, USER, PASS);
-    } catch (SQLException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
     return null;

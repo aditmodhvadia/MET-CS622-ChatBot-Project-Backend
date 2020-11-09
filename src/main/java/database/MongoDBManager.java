@@ -1,5 +1,6 @@
 package database;
 
+import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -12,6 +13,7 @@ import utils.WebAppConstants;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
@@ -52,18 +54,29 @@ public class MongoDBManager implements DbManager, DatabaseQueryRunner {
             MongoClientSettings.getDefaultCodecRegistry(),
             fromProviders(
                 PojoCodecProvider.builder()
+                        //                    .register(ActivFitSensorData.class)
                     .automatic(true)
                     .build())); // custom codec required to store POJO in MongoDB
 
+    ConnectionString connectionString = new ConnectionString("mongodb://localhost:27017");
     MongoClientSettings settings =
-        MongoClientSettings.builder().codecRegistry(pojoCodecRegistry).build();
+            MongoClientSettings.builder()
+                    .applyConnectionString(connectionString)
+                    .codecRegistry(pojoCodecRegistry)
+                    .build();
 
     //        create a connection to MongoDB Client
     MongoClient mongoClient = MongoClients.create(settings);
     System.out.println("Connected to edu.bu.aditm.database successfully");
 
-    //        fetch the edu.bu.aditm.database for MongoDB
-    database = mongoClient.getDatabase(DATABASE_NAME);
+    try {
+      //        fetch the edu.bu.aditm.database for MongoDB
+      database = mongoClient.getDatabase(DATABASE_NAME);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    System.out.println("MongoDB initialised");
 
     //        TODO: Maybe have to initialise the collections
     //        initialise all the mongoCollections for the Sensors
@@ -84,14 +97,20 @@ public class MongoDBManager implements DbManager, DatabaseQueryRunner {
   /**
    * Use to insert given documents of the given type into the given target collection
    *
-   * @param documents given documents to be inserted
+   * @param documents               given documents to be inserted
+   * @param activitySensorDataClass
    */
-  public <T extends MongoStoreModel> void insertDocumentsIntoCollection(ArrayList<T> documents) {
-    MongoCollection<T> collection =
-        database.getCollection(
-            documents.get(0).getMongoCollectionName(), documents.get(0).getClassObject());
-    collection.insertMany(documents);
-    System.out.println("MongoDB Log: Data Inserted");
+  public <T extends MongoStoreModel> void insertDocumentsIntoCollection(
+          List<T> documents, Class<T> activitySensorDataClass) {
+    try {
+      MongoCollection<T> collection =
+              database.getCollection(
+                      documents.get(0).getMongoCollectionName(), activitySensorDataClass);
+      collection.insertMany(documents);
+      System.out.println("MongoDB Log: Data Inserted");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   @Override

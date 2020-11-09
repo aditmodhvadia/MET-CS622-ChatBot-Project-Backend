@@ -3,27 +3,35 @@ package sensormodels;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import org.apache.lucene.document.Document;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import utils.WebAppConstants;
 
+import javax.persistence.Transient;
 import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
-/** @author Adit Modhvadia */
+/**
+ * @author Adit Modhvadia
+ */
 public class BluetoothSensorData extends DatabaseModel {
-  public static final String MY_SQL_TABLE_NAME = "BluetoothSensorData";
-  public static final String FILE_NAME = "Bluetooth";
+    @Transient
+    @BsonIgnore
+    public static final String MY_SQL_TABLE_NAME = "BluetoothSensorData";
+    @Transient
+    @BsonIgnore
+    public static final String FILE_NAME = "Bluetooth";
 
-  @SerializedName("sensor_name")
-  @Expose
-  private String sensorName;
+    @SerializedName("sensor_name")
+    @Expose
+    private String sensorName;
 
-  @SerializedName("timestamp")
-  @Expose
-  private String timestamp;
+    @SerializedName("timestamp")
+    @Expose
+    private String timestamp;
 
-  @SerializedName("sensor_data")
+    @SerializedName("sensor_data")
   @Expose
   private SensorData sensorData;
 
@@ -67,23 +75,31 @@ public class BluetoothSensorData extends DatabaseModel {
     return formatted_date;
   }
 
-  @Override
-  public String getMongoCollectionName() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getMongoCollectionName() {
     return "BluetoothSensorData";
   }
 
-  @Override
-  public Class<BluetoothSensorData> getClassObject() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public Class<BluetoothSensorData> getClassObject() {
     return BluetoothSensorData.class;
   }
 
-  @Override
-  public String getTableName() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getTableName() {
     return MY_SQL_TABLE_NAME;
   }
 
-  @Override
-  public String getCreateTableQuery() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getCreateTableQuery() {
     return "CREATE TABLE "
         + this.getTableName()
         + "(timestamp VARCHAR(30) , "
@@ -92,39 +108,51 @@ public class BluetoothSensorData extends DatabaseModel {
         + " state CHAR (225)) ";
   }
 
-  @Override
-  public String getInsertIntoTableQuery() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getInsertIntoTableQuery() {
     return " insert into "
         + this.getTableName()
         + " (timestamp,formatted_date,sensor_name,state)"
         + " values (?, ?, ?, ?)";
   }
 
-  @Override
-  public void setQueryData(PreparedStatement preparedStmt) throws SQLException {
-    preparedStmt.setString(1, this.getTimestamp());
-    preparedStmt.setString(2, this.getFormatted_date());
-    preparedStmt.setString(3, this.getSensorName());
-    preparedStmt.setString(4, this.getSensorData().getState());
+    @Override
+    @Transient
+    @BsonIgnore
+    public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
+        preparedStmt.setString(1, this.getTimestamp());
+        preparedStmt.setString(2, this.getFormatted_date());
+        preparedStmt.setString(3, this.getSensorName());
+        preparedStmt.setString(4, this.getSensorData().getState());
   }
 
-  @Override
-  public String getFileName() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getFileName() {
     return FILE_NAME;
   }
 
-  @Override
-  public void setFile(File file) {
+    @Override
+    @Transient
+    @BsonIgnore
+    public void setFile(File file) {
     this.file = file;
   }
 
-  @Override
-  public File getFile() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public File getFile() {
     return this.file;
   }
 
-  @Override
-  public Document getDocument() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public Document getDocument() {
     return new Document();
   }
 

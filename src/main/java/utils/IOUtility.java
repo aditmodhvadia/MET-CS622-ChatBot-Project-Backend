@@ -34,7 +34,7 @@ public class IOUtility {
       String readText; // holds file content line by line
       while ((readText = br.readLine()) != null) { // read file line by line
         //                System.out.println(readText);
-        fileTextStringBuilder.append(readText + "\n"); // append file contents
+        fileTextStringBuilder.append(readText).append("\n"); // append file contents
       }
     } catch (IOException e) {
       e.printStackTrace(); // IOException occurred

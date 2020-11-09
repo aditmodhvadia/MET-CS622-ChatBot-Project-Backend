@@ -1,7 +1,6 @@
 package servlets.startup;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import database.FileCumulator;
 import database.LuceneManager;
 import database.MongoDBManager;
@@ -12,11 +11,13 @@ import utils.IOUtility;
 import utils.UnzipUtility;
 
 import javax.servlet.http.HttpServlet;
-import java.io.*;
-import java.lang.reflect.Type;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class StartUpServlet extends HttpServlet {
   private static final UnzipUtility unZipper = new UnzipUtility(); // unzips zip folder and files
@@ -45,7 +46,7 @@ public class StartUpServlet extends HttpServlet {
     luceneManager.updateServletContext(getServletContext());
     mySqlManager = MySqlManager.getInstance();
 
-    unzipDataSource();
+      //    unzipDataSource();
 
     //        Now store all data into MongoDB, MySQL and Lucene
     storeDataInDatabases(); // store JSON data from file storage
@@ -82,165 +83,196 @@ public class StartUpServlet extends HttpServlet {
     storeBluetoothSensorData();
     storeHeartRateSensorData();
     storeLightSensorData();
-    storeScreenUsageSensorData();
+      storeScreenUsageSensorData();
+      System.out.println("*****************Storing data into Databases complete******************");
   }
 
   /** Use to store Sensor Data into mongoDB */
   private void storeActivitySensorData() {
-    // store Activity Sensor data into MongoDB
-    File activityFile = fileCumulator.getActivityFile();
-    InputStreamReader reader = null;
-    try {
-      reader = new InputStreamReader(new FileInputStream(activityFile));
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
+      // store Activity Sensor data into MongoDB
+      File activityFile = fileCumulator.getActivityFile();
 
-    // use gson to map it to the model
-    //        TODO: Check this and implement for all the sensor data methods
-    Type heartRateListType = new TypeToken<ArrayList<ActivitySensorData>>() {}.getType();
-    ArrayList<ActivitySensorData> sensorDataList = new Gson().fromJson(reader, heartRateListType);
+      Gson gson = new Gson();
+      List<ActivitySensorData> sensorDataList =
+              IOUtility.getFileContentsLineByLine(activityFile).stream()
+                      .map(
+                              s -> {
+                                  try {
+                                      return gson.fromJson(s, ActivitySensorData.class);
+                                  } catch (Exception e) {
+                                      //        e.printStackTrace();
+                                  }
+                                  return null;
+                              })
+                      .filter(Objects::nonNull)
+                      .collect(Collectors.toList());
 
-    mongoDBManager.insertDocumentsIntoCollection(sensorDataList);
-    //        store activity sensor data in lucene at once
-    luceneManager.storeSensorDataList(sensorDataList);
-    //        insert data into MYSQL for Activity sensor
-    mySqlManager.storeSensorDataList(sensorDataList);
+      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, ActivitySensorData.class);
+      //        store activity sensor data in lucene at once
+      //        luceneManager.storeSensorDataList(sensorDataList);
+      //        insert data into MYSQL for Activity sensor
+      mySqlManager.storeSensorDataList(sensorDataList);
   }
 
   /** Use to store Sensor Data into mongoDB */
   private void storeActivFitSensorData() {
-    // store ActivityFit Sensor data into MongoDB
-    File activFitFile = fileCumulator.getActivFitFile();
+      // store ActivityFit Sensor data into MongoDB
+      File activFitFile = fileCumulator.getActivFitFile();
 
-    InputStreamReader reader = null;
-    try {
-      reader = new InputStreamReader(new FileInputStream(activFitFile));
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-    Type activFitType = new TypeToken<ArrayList<ActivFitSensorData>>() {}.getType();
-    ArrayList<ActivFitSensorData> sensorDataList = new Gson().fromJson(reader, activFitType);
+      Gson gson = new Gson();
+      List<ActivFitSensorData> sensorDataList =
+              IOUtility.getFileContentsLineByLine(activFitFile).stream()
+                      .map(
+                              s -> {
+                                  try {
+                                      return gson.fromJson(s, ActivFitSensorData.class);
+                                  } catch (Exception e) {
+                                      //                        e.printStackTrace();
+                                  }
+                                  return null;
+                              })
+                      .filter(Objects::nonNull)
+                      .collect(Collectors.toList());
 
-    mongoDBManager.insertDocumentsIntoCollection(sensorDataList);
-    //        store data in lucene
-    luceneManager.storeSensorDataList(sensorDataList);
-    // insert data into MYSQL for ActivFit sensor
-    mySqlManager.storeSensorDataList(sensorDataList);
+      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, ActivFitSensorData.class);
+      //        store data in lucene
+      //    luceneManager.storeSensorDataList(sensorDataList);
+      // insert data into MYSQL for ActivFit sensor
+      mySqlManager.storeSensorDataList(sensorDataList);
   }
 
   /** Use to store battery sensor data in databases */
   private void storeBatterySensorData() {
-    // store Battery Sensor data into MongoDB
-    File batterySensorFile = fileCumulator.getBatterySensorFile();
-    ArrayList<BatterySensorData> sensorDataList = new ArrayList<>();
-    for (String fileLine : ioUtility.getFileContentsLineByLine(batterySensorFile)) {
+      // store Battery Sensor data into MongoDB
+      File batterySensorFile = fileCumulator.getBatterySensorFile();
       Gson g = new Gson();
-      try {
-        //                converts JSON string into POJO
-        BatterySensorData batterySensorData = g.fromJson(fileLine, BatterySensorData.class);
-        batterySensorData.setFormattedDate();
-        sensorDataList.add(batterySensorData);
-      } catch (Exception ignored) {
-        // don't store data in mongodb
-      }
-    }
-    mongoDBManager.insertDocumentsIntoCollection(sensorDataList);
-    // insert data into MYSQL for battery sensor
-    mySqlManager.storeSensorDataList(sensorDataList);
+      List<BatterySensorData> sensorDataList =
+              IOUtility.getFileContentsLineByLine(batterySensorFile).stream()
+                      .map(
+                              s -> {
+                                  try {
+                                      BatterySensorData batterySensorData = g.fromJson(s, BatterySensorData.class);
+                                      batterySensorData.setFormattedDate();
+                                      return batterySensorData;
+                                  } catch (Exception e) {
+                                      //                    e.printStackTrace();
+                                  }
+                                  return null;
+                              })
+                      .filter(Objects::nonNull)
+                      .collect(Collectors.toList());
+
+      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, BatterySensorData.class);
+      // insert data into MYSQL for battery sensor
+      mySqlManager.storeSensorDataList(sensorDataList);
   }
 
   /** Use to store bluetooth sensor data in databases */
   private void storeBluetoothSensorData() {
-    // store Bluetooth Sensor data into MongoDB
-    File bluetoothSensorFile = fileCumulator.getBluetoothFile();
-    ArrayList<BluetoothSensorData> sensorDataList = new ArrayList<>();
-    for (String fileLine : ioUtility.getFileContentsLineByLine(bluetoothSensorFile)) {
+      // store Bluetooth Sensor data into MongoDB
+      File bluetoothSensorFile = fileCumulator.getBluetoothFile();
       Gson g = new Gson();
-      try {
-        //                converts JSON string into POJO
-        BluetoothSensorData bluetoothSensorData = g.fromJson(fileLine, BluetoothSensorData.class);
-        bluetoothSensorData.setFormattedDate();
-        sensorDataList.add(bluetoothSensorData);
-      } catch (Exception e) {
-        //                e.printStackTrace();
-        //                System.out.println("Incorrect JSON format");    // don't store data in
-        // mongodb
-      }
-    }
-    mongoDBManager.insertDocumentsIntoCollection(sensorDataList);
-    // insert data into MYSQL for Bluetooth sensor
-    mySqlManager.storeSensorDataList(sensorDataList);
+      List<BluetoothSensorData> sensorDataList =
+              IOUtility.getFileContentsLineByLine(bluetoothSensorFile).stream()
+                      .map(
+                              s -> {
+                                  try {
+                                      BluetoothSensorData bluetoothSensorData =
+                                              g.fromJson(s, BluetoothSensorData.class);
+                                      bluetoothSensorData.setFormattedDate();
+                                      return bluetoothSensorData;
+                                  } catch (Exception e) {
+                                      //                    e.printStackTrace();
+                                  }
+                                  return null;
+                              })
+                      .filter(Objects::nonNull)
+                      .collect(Collectors.toList());
+
+      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, BluetoothSensorData.class);
+      // insert data into MYSQL for Bluetooth sensor
+      mySqlManager.storeSensorDataList(sensorDataList);
   }
 
   /** Use to store heart rate sensor data in databases */
   private void storeHeartRateSensorData() {
-    // store Heart Rate Sensor data into MongoDB
-    File heartRateSensorFile = fileCumulator.getHeartRateFile();
-    ArrayList<HeartRateSensorData> sensorDataList = new ArrayList<>();
-    for (String fileLine : ioUtility.getFileContentsLineByLine(heartRateSensorFile)) {
+      // store Heart Rate Sensor data into MongoDB
+      File heartRateSensorFile = fileCumulator.getHeartRateFile();
       Gson g = new Gson();
-      try {
-        //                converts JSON string into POJO
-        HeartRateSensorData heartRateSensorData = g.fromJson(fileLine, HeartRateSensorData.class);
-        heartRateSensorData.setFormattedDate();
-        sensorDataList.add(heartRateSensorData);
-      } catch (Exception ignored) {
-        // don't store data in mongodb
-      }
-    }
-    mongoDBManager.insertDocumentsIntoCollection(sensorDataList);
-    luceneManager.storeSensorDataList(sensorDataList);
-    // insert data into MYSQL for Heart Rate sensor
-    mySqlManager.storeSensorDataList(sensorDataList);
+      List<HeartRateSensorData> sensorDataList =
+              IOUtility.getFileContentsLineByLine(heartRateSensorFile).stream()
+                      .map(
+                              s -> {
+                                  try {
+                                      HeartRateSensorData heartRateSensorData =
+                                              g.fromJson(s, HeartRateSensorData.class);
+                                      heartRateSensorData.setFormattedDate();
+                                      return heartRateSensorData;
+                                  } catch (Exception e) {
+                                      //                    e.printStackTrace();
+                                  }
+                                  return null;
+                              })
+                      .filter(Objects::nonNull)
+                      .collect(Collectors.toList());
+
+      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, HeartRateSensorData.class);
+      //    luceneManager.storeSensorDataList(sensorDataList);
+      // insert data into MYSQL for Heart Rate sensor
+      mySqlManager.storeSensorDataList(sensorDataList);
   }
 
   /** Use to store light sensor data in databases */
   private void storeLightSensorData() {
-    // store Light Sensor data into MongoDB
-    File lightSensorFile = fileCumulator.getLightSensorFile();
-    ArrayList<LightSensorData> sensorDataList = new ArrayList<>();
-    for (String fileLine : ioUtility.getFileContentsLineByLine(lightSensorFile)) {
+      // store Light Sensor data into MongoDB
+      File lightSensorFile = fileCumulator.getLightSensorFile();
       Gson g = new Gson();
-      try {
-        //                converts JSON string into POJO
-        LightSensorData lightSensorData = g.fromJson(fileLine, LightSensorData.class);
-        lightSensorData.setFormattedDate();
-        sensorDataList.add(lightSensorData);
+      List<LightSensorData> sensorDataList =
+              IOUtility.getFileContentsLineByLine(lightSensorFile).stream()
+                      .map(
+                              s -> {
+                                  try {
+                                      LightSensorData lightSensorData = g.fromJson(s, LightSensorData.class);
+                                      lightSensorData.setFormattedDate();
+                                      return lightSensorData;
+                                  } catch (Exception e) {
+                                      //                    e.printStackTrace();
+                                  }
+                                  return null;
+                              })
+                      .filter(Objects::nonNull)
+                      .collect(Collectors.toList());
 
-      } catch (Exception e) {
-        //                e.printStackTrace();
-        //                System.out.println("Incorrect JSON format");    // don't store data in
-        // mongodb
-      }
-    }
-    mongoDBManager.insertDocumentsIntoCollection(sensorDataList);
-    // insert data into MYSQL for Light sensor
-    mySqlManager.storeSensorDataList(sensorDataList);
+      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, LightSensorData.class);
+      // insert data into MYSQL for Light sensor
+      mySqlManager.storeSensorDataList(sensorDataList);
   }
 
   /** Use to store screen usage sensor data in databases */
   private void storeScreenUsageSensorData() {
-    // store Screen Usage Sensor data into MongoDB
-    File screenUsageFile = fileCumulator.getScreenUsageFile();
-    ArrayList<ScreenUsageSensorData> sensorDataList = new ArrayList<>();
-    for (String fileLine : ioUtility.getFileContentsLineByLine(screenUsageFile)) {
+      // store Screen Usage Sensor data into MongoDB
+      File screenUsageFile = fileCumulator.getScreenUsageFile();
       Gson g = new Gson();
-      try {
-        //                converts JSON string into POJO
-        ScreenUsageSensorData screenUsageSensorData =
-            g.fromJson(fileLine, ScreenUsageSensorData.class);
-        screenUsageSensorData.setFormattedDate();
-        sensorDataList.add(screenUsageSensorData);
-      } catch (Exception e) {
-        //                e.printStackTrace();
-        //                System.out.println("Incorrect JSON format");    // don't store data in
-        // mongodb
-      }
-    }
-    mongoDBManager.insertDocumentsIntoCollection(sensorDataList);
-    // insert data into MYSQL for Screen Usage sensor
-    mySqlManager.storeSensorDataList(sensorDataList);
+      List<ScreenUsageSensorData> sensorDataList =
+              IOUtility.getFileContentsLineByLine(screenUsageFile).stream()
+                      .map(
+                              s -> {
+                                  try {
+                                      ScreenUsageSensorData screenUsageSensorData =
+                                              g.fromJson(s, ScreenUsageSensorData.class);
+                                      screenUsageSensorData.setFormattedDate();
+                                      return screenUsageSensorData;
+                                  } catch (Exception e) {
+                                      //                    e.printStackTrace();
+                                  }
+                                  return null;
+                              })
+                      .filter(Objects::nonNull)
+                      .collect(Collectors.toList());
+
+      //    mongoDBManager.insertDocumentsIntoCollection(sensorDataList, ScreenUsageSensorData.class);
+      // insert data into MYSQL for Screen Usage sensor
+      mySqlManager.storeSensorDataList(sensorDataList);
   }
 
   /** Inner Class which listens for Files and Zip Files/folders when found */

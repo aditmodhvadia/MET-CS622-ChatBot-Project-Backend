@@ -3,28 +3,36 @@ package sensormodels;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import org.apache.lucene.document.Document;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import utils.WebAppConstants;
 
+import javax.persistence.Transient;
 import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
-/** @author Adit Modhvadia */
+/**
+ * @author Adit Modhvadia
+ */
 public class ScreenUsageSensorData extends DatabaseModel {
 
-  public static final String MY_SQL_TABLE_NAME = "";
-  public static final String FILE_NAME = "ScreenUsage";
+    @Transient
+    @BsonIgnore
+    public static final String MY_SQL_TABLE_NAME = "ScreenUsageSensorData";
+    @Transient
+    @BsonIgnore
+    public static final String FILE_NAME = "ScreenUsage";
 
-  @SerializedName("start_hour")
-  @Expose
-  private String startHour;
+    @SerializedName("start_hour")
+    @Expose
+    private String startHour;
 
-  @SerializedName("end_hour")
-  @Expose
-  private String endHour;
+    @SerializedName("end_hour")
+    @Expose
+    private String endHour;
 
-  @SerializedName("start_timestamp")
+    @SerializedName("start_timestamp")
   @Expose
   private String startTimestamp;
 
@@ -44,8 +52,11 @@ public class ScreenUsageSensorData extends DatabaseModel {
   @Expose
   private Integer minEndHour;
 
-  @Expose private String formatted_date;
-  private File file;
+    @Expose
+    private String formatted_date;
+    @Transient
+    @BsonIgnore
+    private File file;
 
   public String getFormatted_date() {
     return formatted_date;
@@ -116,23 +127,31 @@ public class ScreenUsageSensorData extends DatabaseModel {
     return this.getStartTimestamp();
   }
 
-  @Override
-  public String getMongoCollectionName() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getMongoCollectionName() {
     return "ScreenUsageSensorData";
   }
 
-  @Override
-  public Class<ScreenUsageSensorData> getClassObject() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public Class<ScreenUsageSensorData> getClassObject() {
     return ScreenUsageSensorData.class;
   }
 
-  @Override
-  public String getTableName() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getTableName() {
     return MY_SQL_TABLE_NAME;
   }
 
-  @Override
-  public String getCreateTableQuery() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getCreateTableQuery() {
     return "CREATE TABLE "
         + this.getTableName()
         + "(start_hour VARCHAR(40) , "
@@ -145,28 +164,34 @@ public class ScreenUsageSensorData extends DatabaseModel {
         + " min_end_hour INTEGER ) ";
   }
 
-  @Override
-  public String getInsertIntoTableQuery() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getInsertIntoTableQuery() {
     return " insert into "
         + this.getTableName()
         + " (start_hour,end_hour,start_timestamp,end_timestamp, formatted_date, min_elapsed,min_start_hour,min_end_hour)"
         + " values (?, ?, ?, ?, ?,?,?,?)";
   }
 
-  @Override
-  public void setQueryData(PreparedStatement preparedStmt) throws SQLException {
-    preparedStmt.setString(1, this.getStartHour());
-    preparedStmt.setString(2, this.getEndHour());
-    preparedStmt.setString(3, this.getStartTimestamp());
-    preparedStmt.setString(4, this.getEndTimestamp());
-    preparedStmt.setString(5, this.getFormatted_date());
-    preparedStmt.setDouble(6, this.getMinElapsed());
-    preparedStmt.setDouble(7, this.getMinStartHour());
-    preparedStmt.setInt(8, this.getMinEndHour());
+    @Override
+    @Transient
+    @BsonIgnore
+    public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
+        preparedStmt.setString(1, this.getStartHour());
+        preparedStmt.setString(2, this.getEndHour());
+        preparedStmt.setString(3, this.getStartTimestamp());
+        preparedStmt.setString(4, this.getEndTimestamp());
+        preparedStmt.setString(5, this.getFormatted_date());
+        preparedStmt.setDouble(6, this.getMinElapsed());
+        preparedStmt.setDouble(7, this.getMinStartHour());
+        preparedStmt.setInt(8, this.getMinEndHour());
   }
 
-  @Override
-  public String getFileName() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public String getFileName() {
     return FILE_NAME;
   }
 
@@ -175,13 +200,17 @@ public class ScreenUsageSensorData extends DatabaseModel {
     this.file = file;
   }
 
-  @Override
-  public File getFile() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public File getFile() {
     return this.file;
   }
 
-  @Override
-  public Document getDocument() {
+    @Override
+    @Transient
+    @BsonIgnore
+    public Document getDocument() {
     return new Document();
   }
 }

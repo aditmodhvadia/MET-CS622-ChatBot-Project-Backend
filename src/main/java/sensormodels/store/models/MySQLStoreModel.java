@@ -11,5 +11,5 @@ public interface MySQLStoreModel {
 
   String getInsertIntoTableQuery();
 
-  void setQueryData(PreparedStatement preparedStmt) throws SQLException;
+  void fillQueryData(PreparedStatement preparedStmt) throws SQLException;
 }
