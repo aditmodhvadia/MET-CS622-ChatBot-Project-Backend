@@ -24,9 +24,9 @@ public class DatabaseManager implements DbManager<DatabaseModel>, DatabasePublis
 
   @Override
   public void init(ServletContext servletContext) {
-    databases.add(MongoDBManager.getInstance());
-    databases.add(MySqlManager.getInstance());
-    databases.add(LuceneManager.getInstance(servletContext));
+    //    databases.add(MongoDBManager.getInstance());
+    //    databases.add(MySqlManager.getInstance());
+    //    databases.add(LuceneManager.getInstance(servletContext));
   }
 
   @Override
@@ -59,5 +59,10 @@ public class DatabaseManager implements DbManager<DatabaseModel>, DatabasePublis
   @Override
   public void removeDatabase(DbManager dbManager) {
     this.databases.remove(dbManager);
+  }
+
+  @Override
+  public boolean hasDatabaseManager(DbManager dbManager) {
+    return this.databases.contains(dbManager);
   }
 }
