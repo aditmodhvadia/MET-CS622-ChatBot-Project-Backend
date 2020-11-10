@@ -35,16 +35,18 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
   private String indexDir;
   private IndexWriter indexWriter;
 
-  private LuceneManager() {}
+  private LuceneManager(ServletContext servletContext) {
+    init(servletContext);
+  }
 
   /**
    * Singleton method to get the instance of the class
    *
    * @return singleton instance of the class
    */
-  public static LuceneManager getInstance() {
+  public static LuceneManager getInstance(ServletContext servletContext) {
     if (instance == null) {
-      instance = new LuceneManager();
+      instance = new LuceneManager(servletContext);
     }
     return instance;
   }

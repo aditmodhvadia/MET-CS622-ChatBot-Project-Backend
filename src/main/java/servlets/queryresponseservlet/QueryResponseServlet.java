@@ -27,6 +27,8 @@ public abstract class QueryResponseServlet extends HttpServlet
     this.dbManager = dbManager;
   }
 
+  public QueryResponseServlet() {}
+
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
