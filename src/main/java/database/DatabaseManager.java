@@ -6,7 +6,7 @@ import javax.servlet.ServletContext;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseManager implements DbManager<DatabaseModel> {
+public class DatabaseManager implements DbManager<DatabaseModel>, DatabasePublisher {
 
   private static DatabaseManager instance;
   private final ArrayList<DbManager> databases = new ArrayList<>();
@@ -49,5 +49,15 @@ public class DatabaseManager implements DbManager<DatabaseModel> {
         e.printStackTrace();
       }
     }
+  }
+
+  @Override
+  public void addDatabase(DbManager dbManager) {
+    this.databases.add(dbManager);
+  }
+
+  @Override
+  public void removeDatabase(DbManager dbManager) {
+    this.databases.remove(dbManager);
   }
 }

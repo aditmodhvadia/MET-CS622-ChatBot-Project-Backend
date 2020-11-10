@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import database.DatabaseManager;
 import database.DbManager;
 import database.FileCumulator;
-import database.MongoDBManager;
 import listeners.FileListener;
 import sensormodels.DatabaseModel;
 import utils.IOUtility;
@@ -16,12 +15,13 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class StartUpServlet extends HttpServlet {
-  private static final UnzipUtility unZipper = new UnzipUtility(); // unzips zip folder and files
+  private final UnzipUtility unZipper = new UnzipUtility(); // unzips zip folder and files
   private IOUtility ioUtility; // utility class for IO Operations
   private FileCumulator fileCumulator; // Data cumulator into result files
   private static final String destinationFolder =
@@ -45,7 +45,8 @@ public class StartUpServlet extends HttpServlet {
     //    unzipDataSource();
 
     //        Now store all data into all the databases
-    storeDataInDatabases(); // store JSON data from file storage
+    storeDataInDatabases(
+        fileCumulator.getSensorModelsMap().values()); // store JSON data from file storage
   }
 
   /** Call to unzip data source and create file structure to accumulate sensor data */
@@ -69,41 +70,45 @@ public class StartUpServlet extends HttpServlet {
   /**
    * Use to store all sensor data into MongoDB using
    *
-   * @see MongoDBManager
+   * @see DatabaseManager
    */
-  private void storeDataInDatabases() {
+  private void storeDataInDatabases(Collection<DatabaseModel> sensorModels) {
     System.out.println("*****************Storing data into Databases******************");
-    fileCumulator
-        .getSensorModelsMap()
-        .forEach((s, databaseModel) -> storeSensorData(databaseModel, this.dbManager));
+
+    sensorModels.forEach(
+        databaseModel -> {
+          List<DatabaseModel> sensorData = readSensorData(databaseModel);
+          this.dbManager.insertSensorDataList(sensorData);
+        });
     System.out.println("*****************Storing data into Databases complete******************");
   }
 
-  private <T extends DatabaseModel> void storeSensorData(T sensorModel, DbManager dbManager) {
+  /**
+   * Read sensor data from the file location where the cumulative result is stored and return a
+   * list.
+   *
+   * @param sensorModel Sensor Model whose data is to be read
+   * @param <T> Type of the sensor model
+   * @return list of data read from the file
+   */
+  private <T extends DatabaseModel> List<T> readSensorData(T sensorModel) {
     File file = sensorModel.getFile();
 
     Gson gson = new Gson();
-    List<T> sensorDataList =
-        IOUtility.getFileContentsLineByLine(file).stream()
-            .map(
-                s -> {
-                  try {
-                    T sensorData = gson.fromJson(s, (Type) sensorModel.getClassObject());
-                    sensorData.setFormattedDate();
-                    return sensorData;
-                  } catch (Exception e) {
-                    //        e.printStackTrace();
-                  }
-                  return null;
-                })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-    try {
-      dbManager.insertSensorDataList(sensorDataList);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    return IOUtility.getFileContentsLineByLine(file).stream()
+        .map(
+            s -> {
+              try {
+                T sensorData = gson.fromJson(s, (Type) sensorModel.getClassObject());
+                sensorData.setFormattedDate();
+                return sensorData;
+              } catch (Exception e) {
+                //        e.printStackTrace();
+              }
+              return null;
+            })
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
   }
 
   /** Inner Class which listens for Files and Zip Files/folders when found */
