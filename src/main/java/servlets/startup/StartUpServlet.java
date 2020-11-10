@@ -74,7 +74,7 @@ public class StartUpServlet extends HttpServlet {
   private void storeDataInDatabases() {
     System.out.println("*****************Storing data into Databases******************");
     fileCumulator
-        .getSensorModels()
+        .getSensorModelsMap()
         .forEach((s, databaseModel) -> storeSensorData(databaseModel, this.dbManager));
     System.out.println("*****************Storing data into Databases complete******************");
   }
