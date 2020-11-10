@@ -5,6 +5,11 @@ import java.util.List;
 
 public interface DbManager<T> {
 
+  /**
+   * Initialize the database
+   *
+   * @param servletContext servlet context
+   */
   void init(ServletContext servletContext);
 
   /**
