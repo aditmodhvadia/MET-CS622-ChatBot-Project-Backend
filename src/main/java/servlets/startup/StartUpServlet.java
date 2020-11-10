@@ -6,13 +6,14 @@ import database.DbManager;
 import database.FileCumulator;
 import database.MongoDBManager;
 import listeners.FileListener;
-import sensormodels.*;
+import sensormodels.DatabaseModel;
 import utils.IOUtility;
 import utils.UnzipUtility;
 
 import javax.servlet.http.HttpServlet;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.util.List;
@@ -72,202 +73,26 @@ public class StartUpServlet extends HttpServlet {
    */
   private void storeDataInDatabases() {
     System.out.println("*****************Storing data into Databases******************");
-    storeActivitySensorData();
-    storeActivFitSensorData();
-    storeBatterySensorData();
-    storeBluetoothSensorData();
-    storeHeartRateSensorData();
-    storeLightSensorData();
-    storeScreenUsageSensorData();
+    fileCumulator
+        .getSensorModels()
+        .forEach((s, databaseModel) -> storeSensorData(databaseModel, this.dbManager));
     System.out.println("*****************Storing data into Databases complete******************");
   }
 
-  /** Use to store Sensor Data into mongoDB */
-  private void storeActivitySensorData() {
-    // store Activity Sensor data into MongoDB
-    File activityFile = fileCumulator.getActivityFile();
+  private <T extends DatabaseModel> void storeSensorData(T sensorModel, DbManager dbManager) {
+    File file = sensorModel.getFile();
 
     Gson gson = new Gson();
-    List<ActivitySensorData> sensorDataList =
-        IOUtility.getFileContentsLineByLine(activityFile).stream()
+    List<T> sensorDataList =
+        IOUtility.getFileContentsLineByLine(file).stream()
             .map(
                 s -> {
                   try {
-                    ActivitySensorData sensorData = gson.fromJson(s, ActivitySensorData.class);
+                    T sensorData = gson.fromJson(s, (Type) sensorModel.getClassObject());
                     sensorData.setFormattedDate();
                     return sensorData;
                   } catch (Exception e) {
                     //        e.printStackTrace();
-                  }
-                  return null;
-                })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-    try {
-      dbManager.insertSensorDataList(sensorDataList);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /** Use to store Sensor Data into mongoDB */
-  private void storeActivFitSensorData() {
-    // store ActivityFit Sensor data into MongoDB
-    File activFitFile = fileCumulator.getActivFitFile();
-
-    Gson gson = new Gson();
-    List<ActivFitSensorData> sensorDataList =
-        IOUtility.getFileContentsLineByLine(activFitFile).stream()
-            .map(
-                s -> {
-                  try {
-                    return gson.fromJson(s, ActivFitSensorData.class);
-                  } catch (Exception e) {
-                    //                    e.printStackTrace();
-                  }
-                  return null;
-                })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-    try {
-      dbManager.insertSensorDataList(sensorDataList);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /** Use to store battery sensor data in databases */
-  private void storeBatterySensorData() {
-    // store Battery Sensor data into MongoDB
-    File batterySensorFile = fileCumulator.getBatterySensorFile();
-    Gson g = new Gson();
-    List<BatterySensorData> sensorDataList =
-        IOUtility.getFileContentsLineByLine(batterySensorFile).stream()
-            .map(
-                s -> {
-                  try {
-                    BatterySensorData batterySensorData = g.fromJson(s, BatterySensorData.class);
-                    batterySensorData.setFormattedDate();
-                    return batterySensorData;
-                  } catch (Exception e) {
-                    //                    e.printStackTrace();
-                  }
-                  return null;
-                })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-    try {
-      dbManager.insertSensorDataList(sensorDataList);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /** Use to store bluetooth sensor data in databases */
-  private void storeBluetoothSensorData() {
-    // store Bluetooth Sensor data into MongoDB
-    File bluetoothSensorFile = fileCumulator.getBluetoothFile();
-    Gson g = new Gson();
-    List<BluetoothSensorData> sensorDataList =
-        IOUtility.getFileContentsLineByLine(bluetoothSensorFile).stream()
-            .map(
-                s -> {
-                  try {
-                    BluetoothSensorData bluetoothSensorData =
-                        g.fromJson(s, BluetoothSensorData.class);
-                    bluetoothSensorData.setFormattedDate();
-                    return bluetoothSensorData;
-                  } catch (Exception e) {
-                    //                    e.printStackTrace();
-                  }
-                  return null;
-                })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-    try {
-      dbManager.insertSensorDataList(sensorDataList);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /** Use to store heart rate sensor data in databases */
-  private void storeHeartRateSensorData() {
-    // store Heart Rate Sensor data into MongoDB
-    File heartRateSensorFile = fileCumulator.getHeartRateFile();
-    Gson g = new Gson();
-    List<HeartRateSensorData> sensorDataList =
-        IOUtility.getFileContentsLineByLine(heartRateSensorFile).stream()
-            .map(
-                s -> {
-                  try {
-                    HeartRateSensorData heartRateSensorData =
-                        g.fromJson(s, HeartRateSensorData.class);
-                    heartRateSensorData.setFormattedDate();
-                    return heartRateSensorData;
-                  } catch (Exception e) {
-                    //                    e.printStackTrace();
-                  }
-                  return null;
-                })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-    try {
-      dbManager.insertSensorDataList(sensorDataList);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /** Use to store light sensor data in databases */
-  private void storeLightSensorData() {
-    // store Light Sensor data into MongoDB
-    File lightSensorFile = fileCumulator.getLightSensorFile();
-    Gson g = new Gson();
-    List<LightSensorData> sensorDataList =
-        IOUtility.getFileContentsLineByLine(lightSensorFile).stream()
-            .map(
-                s -> {
-                  try {
-                    LightSensorData lightSensorData = g.fromJson(s, LightSensorData.class);
-                    lightSensorData.setFormattedDate();
-                    return lightSensorData;
-                  } catch (Exception e) {
-                    //                    e.printStackTrace();
-                  }
-                  return null;
-                })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-    try {
-      dbManager.insertSensorDataList(sensorDataList);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /** Use to store screen usage sensor data in databases */
-  private void storeScreenUsageSensorData() {
-    // store Screen Usage Sensor data into MongoDB
-    File screenUsageFile = fileCumulator.getScreenUsageFile();
-    Gson g = new Gson();
-    List<ScreenUsageSensorData> sensorDataList =
-        IOUtility.getFileContentsLineByLine(screenUsageFile).stream()
-            .map(
-                s -> {
-                  try {
-                    ScreenUsageSensorData screenUsageSensorData =
-                        g.fromJson(s, ScreenUsageSensorData.class);
-                    screenUsageSensorData.setFormattedDate();
-                    return screenUsageSensorData;
-                  } catch (Exception e) {
-                    //                    e.printStackTrace();
                   }
                   return null;
                 })
