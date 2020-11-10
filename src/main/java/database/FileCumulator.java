@@ -9,40 +9,22 @@ import utils.WebAppConstants;
 
 import javax.servlet.ServletContext;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.reflect.Type;
 import java.nio.file.FileSystems;
 import java.util.*;
 
 public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRunner {
   private static FileCumulator instance;
-  private static final String ACTIV_FIT = "ActivFit";
-  private static final String ACTIVITY = "Activity";
-  private static final String BATTERY_SENSOR = "BatterySensor";
-  private static final String BLUETOOTH = "Bluetooth";
-  private static final String ERROR = "Error";
-  private static final String HEART_RATE = "HeartRate";
-  private static final String LIGHT_SENSOR = "LightSensor";
-  private static final String SCREEN_USAGE = "ScreenUsage";
-  private static final String MISC = "Misc";
+  private static final String MISC_FILE_NAME = "Misc";
 
   private final IOUtility ioUtility; // to perform IO Operations
 
   private static final String BASE_ADDRESS = "Result" + FileSystems.getDefault().getSeparator();
   private static final String DATA_FILE_NAME = "CumulativeData.txt";
 
-  public static File activityFile,
-      activFitFile,
-      batterySensorFile,
-      bluetoothFile,
-      errorFile,
-      heartRateFile,
-      lightSensorFile,
-      screenUsageFile,
-      miscFile;
-  private final ArrayList<File> files = new ArrayList<>();
-  private final HashMap<String, DatabaseModel> sensorModels =
+  private final HashMap<String, DatabaseModel> sensorModelsMap =
       new HashMap<>(); // <File Name, Sensor Model>
+  public static File miscFile;
 
   private FileCumulator() {
     this.ioUtility = IOUtility.getInstance();
@@ -57,65 +39,35 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
     return instance;
   }
 
-  public HashMap<String, DatabaseModel> getSensorModels() {
-    return sensorModels;
+  public HashMap<String, DatabaseModel> getSensorModelsMap() {
+    return sensorModelsMap;
   }
 
   @Override
   public void init(ServletContext servletContext) {
-    activFitFile =
-        ioUtility.createEmptyFile(
-            BASE_ADDRESS + ACTIV_FIT + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
-    activityFile =
-        ioUtility.createEmptyFile(
-            BASE_ADDRESS + ACTIVITY + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
-    batterySensorFile =
-        ioUtility.createEmptyFile(
-            BASE_ADDRESS + BATTERY_SENSOR + FileSystems.getDefault().getSeparator(),
-            DATA_FILE_NAME);
-    bluetoothFile =
-        ioUtility.createEmptyFile(
-            BASE_ADDRESS + BLUETOOTH + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
-    errorFile =
-        ioUtility.createEmptyFile(
-            BASE_ADDRESS + ERROR + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
-    heartRateFile =
-        ioUtility.createEmptyFile(
-            BASE_ADDRESS + HEART_RATE + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
-    lightSensorFile =
-        ioUtility.createEmptyFile(
-            BASE_ADDRESS + LIGHT_SENSOR + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
-    screenUsageFile =
-        ioUtility.createEmptyFile(
-            BASE_ADDRESS + SCREEN_USAGE + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
     miscFile =
         ioUtility.createEmptyFile(
-            BASE_ADDRESS + MISC + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);
+            BASE_ADDRESS + MISC_FILE_NAME + FileSystems.getDefault().getSeparator(),
+            DATA_FILE_NAME);
 
-    // add files to ArrayList
-    files.add(activityFile);
-    files.add(activFitFile);
-    files.add(batterySensorFile);
-    files.add(bluetoothFile);
-    files.add(errorFile);
-    files.add(heartRateFile);
-    files.add(lightSensorFile);
-    files.add(screenUsageFile);
+    sensorModelsMap.put(ActivFitSensorData.FILE_NAME, new ActivFitSensorData());
+    sensorModelsMap.put(ActivitySensorData.FILE_NAME, new ActivitySensorData());
+    sensorModelsMap.put(BatterySensorData.FILE_NAME, new BatterySensorData());
+    sensorModelsMap.put(BluetoothSensorData.FILE_NAME, new BluetoothSensorData());
+    sensorModelsMap.put(HeartRateSensorData.FILE_NAME, new HeartRateSensorData());
+    sensorModelsMap.put(LightSensorData.FILE_NAME, new LightSensorData());
+    sensorModelsMap.put(ScreenUsageSensorData.FILE_NAME, new ScreenUsageSensorData());
 
-    sensorModels.put(ActivFitSensorData.FILE_NAME, new ActivFitSensorData());
-    sensorModels.put(ActivitySensorData.FILE_NAME, new ActivitySensorData());
-    sensorModels.put(BatterySensorData.FILE_NAME, new BatterySensorData());
-    sensorModels.put(BluetoothSensorData.FILE_NAME, new BluetoothSensorData());
-    sensorModels.put(HeartRateSensorData.FILE_NAME, new HeartRateSensorData());
-    sensorModels.put(LightSensorData.FILE_NAME, new LightSensorData());
-    sensorModels.put(ScreenUsageSensorData.FILE_NAME, new ScreenUsageSensorData());
-
-    for (FileStoreModel sensor : sensorModels.values()) {
-      sensor.setFile(
-          ioUtility.createEmptyFile(
-              BASE_ADDRESS + sensor.getFileName() + FileSystems.getDefault().getSeparator(),
-              DATA_FILE_NAME));
-    }
+    sensorModelsMap
+        .values()
+        .forEach(
+            databaseModel ->
+                databaseModel.setFile(
+                    ioUtility.createEmptyFile(
+                        BASE_ADDRESS
+                            + databaseModel.getFileName()
+                            + FileSystems.getDefault().getSeparator(),
+                        DATA_FILE_NAME)));
   }
 
   @Override
@@ -135,7 +87,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
     //        fetch all record from the collection
     List<ActivFitSensorData> fileData =
         getSensorFileContents(
-            (ActivFitSensorData) sensorModels.get(ActivFitSensorData.FILE_NAME), 1000);
+            (ActivFitSensorData) sensorModelsMap.get(ActivFitSensorData.FILE_NAME), 1000);
     ArrayList<ActivFitSensorData> queryResult =
         new ArrayList<>(); // holds the result from the query
     for (ActivFitSensorData nextData : fileData) {
@@ -171,7 +123,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   public int queryForTotalStepsInDay(Date userDate) {
     List<ActivitySensorData> activitySensorDataList =
         getSensorFileContents(
-            (ActivitySensorData) sensorModels.get(ActivitySensorData.FILE_NAME), 1000);
+            (ActivitySensorData) sensorModelsMap.get(ActivitySensorData.FILE_NAME), 1000);
     int maxStepCount = -1; // Max value of step count for the day
     String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
     for (ActivitySensorData sensorData : activitySensorDataList) {
@@ -193,95 +145,12 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
    * @return the cumulative data file
    */
   public File determineFileCategoryAndGet(File inputFile) {
-    for (String fileName : sensorModels.keySet()) {
+    for (String fileName : sensorModelsMap.keySet()) {
       if (inputFile.getPath().contains(fileName)) {
-        return sensorModels.get(fileName).getFile();
+        return sensorModelsMap.get(fileName).getFile();
       }
     }
     return miscFile;
-  }
-
-  /**
-   * Use to search the given query text in the given sensor name
-   *
-   * @param sensorName given sensor name
-   * @param query given query text
-   * @return search result from running the query
-   * @throws FileNotFoundException if sensor name is incorrect
-   */
-  String searchSensorData(String sensorName, String query) throws FileNotFoundException {
-    if (sensorName.equalsIgnoreCase(ACTIVITY)) {
-
-      return ioUtility.findSearchResultsFromFile(activityFile, query);
-
-    } else if (sensorName.equalsIgnoreCase(ACTIV_FIT)) {
-
-      return ioUtility.findSearchResultsFromFile(activFitFile, query);
-
-    } else if (sensorName.equalsIgnoreCase(BATTERY_SENSOR)) {
-
-      return ioUtility.findSearchResultsFromFile(batterySensorFile, query);
-
-    } else if (sensorName.equalsIgnoreCase(BLUETOOTH)) {
-
-      return ioUtility.findSearchResultsFromFile(bluetoothFile, query);
-
-    } else if (sensorName.equalsIgnoreCase(ERROR)) {
-
-      return ioUtility.findSearchResultsFromFile(errorFile, query);
-
-    } else if (sensorName.equalsIgnoreCase(HEART_RATE)) {
-
-      return ioUtility.findSearchResultsFromFile(heartRateFile, query);
-
-    } else if (sensorName.equalsIgnoreCase(LIGHT_SENSOR)) {
-
-      return ioUtility.findSearchResultsFromFile(lightSensorFile, query);
-
-    } else if (sensorName.equalsIgnoreCase(SCREEN_USAGE)) {
-
-      return ioUtility.findSearchResultsFromFile(screenUsageFile, query);
-
-    } else {
-
-      throw new FileNotFoundException("Illegal file name");
-    }
-  }
-
-  List<File> getAllSensorFiles() {
-    return files;
-  }
-
-  public File getActivityFile() {
-    return activityFile;
-  }
-
-  public File getActivFitFile() {
-    return activFitFile;
-  }
-
-  public File getBatterySensorFile() {
-    return batterySensorFile;
-  }
-
-  public File getBluetoothFile() {
-    return bluetoothFile;
-  }
-
-  public File getErrorFile() {
-    return errorFile;
-  }
-
-  public File getHeartRateFile() {
-    return heartRateFile;
-  }
-
-  public File getLightSensorFile() {
-    return lightSensorFile;
-  }
-
-  public File getScreenUsageFile() {
-    return screenUsageFile;
   }
 
   static <T extends FileStoreModel> List<T> getSensorFileContents(T sensorModel, int numOfDays) {
@@ -320,11 +189,13 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
     return sensorDataList;
   }
 
-  static List<HeartRateSensorData> getHeartRateSensorFileContents() {
+  List<HeartRateSensorData> getHeartRateSensorFileContents() {
     List<HeartRateSensorData> sensorDataList = new ArrayList<>(); // holds the sensor data
     List<String> fileContents =
         IOUtility.getFileContentsLineByLine(
-            heartRateFile); // holds all lines of the cumulativeFile for the sensor
+            sensorModelsMap
+                .get(HeartRateSensorData.FILE_NAME)
+                .getFile()); // holds all lines of the cumulativeFile for the sensor
     String currentDate = ""; // will hold the value of current date
     for (String fileLine : fileContents) {
       Gson g = new Gson();
@@ -358,7 +229,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
     long searchTime = System.currentTimeMillis(); // used to calculate search time for brute force
     for (ActivFitSensorData sensorData :
         getSensorFileContents(
-            (ActivFitSensorData) sensorModels.get(ActivFitSensorData.FILE_NAME),
+            (ActivFitSensorData) sensorModelsMap.get(ActivFitSensorData.FILE_NAME),
             numOfDays)) { // iterate all sensordata and find the result
       if (sensorData.getSensorData().getActivity().equalsIgnoreCase("running")) {
         //                System.out.println("Running event found " +
@@ -381,7 +252,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
     long searchTime = System.currentTimeMillis(); // used to calculate search time for brute force
     for (LightSensorData sensorData :
         getSensorFileContents(
-            (LightSensorData) sensorModels.get(LightSensorData.FILE_NAME),
+            (LightSensorData) sensorModelsMap.get(LightSensorData.FILE_NAME),
             numOfDays)) { // iterate all sensordata and find the result
       if (sensorData.getLuxValue().equalsIgnoreCase("less bright")) {
         //                System.out.println("less bright found " + sensorData.getTimestamp());

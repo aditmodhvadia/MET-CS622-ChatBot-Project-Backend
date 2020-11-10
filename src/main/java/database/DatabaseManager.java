@@ -6,7 +6,7 @@ import javax.servlet.ServletContext;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseManager implements DbManager<DatabaseModel> {
+public class DatabaseManager implements DbManager<DatabaseModel>, DatabasePublisher {
 
   private static DatabaseManager instance;
   private final ArrayList<DbManager> databases = new ArrayList<>();
@@ -24,9 +24,9 @@ public class DatabaseManager implements DbManager<DatabaseModel> {
 
   @Override
   public void init(ServletContext servletContext) {
-    databases.add(MongoDBManager.getInstance());
-    databases.add(MySqlManager.getInstance());
-    databases.add(LuceneManager.getInstance(servletContext));
+    //    databases.add(MongoDBManager.getInstance());
+    //    databases.add(MySqlManager.getInstance());
+    //    databases.add(LuceneManager.getInstance(servletContext));
   }
 
   @Override
@@ -49,5 +49,20 @@ public class DatabaseManager implements DbManager<DatabaseModel> {
         e.printStackTrace();
       }
     }
+  }
+
+  @Override
+  public void addDatabase(DbManager dbManager) {
+    this.databases.add(dbManager);
+  }
+
+  @Override
+  public void removeDatabase(DbManager dbManager) {
+    this.databases.remove(dbManager);
+  }
+
+  @Override
+  public boolean hasDatabaseManager(DbManager dbManager) {
+    return this.databases.contains(dbManager);
   }
 }

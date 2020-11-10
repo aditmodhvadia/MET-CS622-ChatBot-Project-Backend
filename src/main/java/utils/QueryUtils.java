@@ -10,9 +10,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class QueryUtils {
-  public static final String RUNNING_EVENT_REGEX = "([rR]un|[rR]unning)";
-  public static final String STEP_COUNT_EVENT_REGEX = "([sS]teps*|[wW]alk)";
-  public static final String HEART_RATE_EVENT_REGEX = "([hH]eart|[hH]eartrate)";
+  public static final String RUNNING_EVENT_REGEX = "([rR][ua]n(ning)?)";
+  public static final String STEP_COUNT_EVENT_REGEX = "([sS]teps*|[wW]alk(ed)?)";
+  public static final String HEART_RATE_EVENT_REGEX = "([hH]eart([rR]ate)?)";
   public static final String DATE_REGEX = "(\\d{2}[-,/]\\d{2}[-,/]\\d{4})"; //  Regex for Date input
 
   /**
@@ -55,7 +55,7 @@ public class QueryUtils {
    * @param query given query
    * @return <code>true</code> if the pattern matches, else <code>false</code>
    */
-  private static boolean isMatching(String pattern, String query) {
+  public static boolean isMatching(String pattern, String query) {
     Matcher m = Pattern.compile(pattern).matcher(query);
     return m.find();
   }
