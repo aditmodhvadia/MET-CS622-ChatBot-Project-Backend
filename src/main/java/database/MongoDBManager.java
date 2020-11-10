@@ -11,6 +11,7 @@ import sensormodels.HeartRateSensorData;
 import sensormodels.store.models.MongoStoreModel;
 import utils.WebAppConstants;
 
+import javax.servlet.ServletContext;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +30,7 @@ public class MongoDBManager implements DbManager<MongoStoreModel>, DatabaseQuery
   private static MongoDatabase database;
 
   private MongoDBManager() {
-    init();
+    init(null);
   }
 
   /**
@@ -47,8 +48,9 @@ public class MongoDBManager implements DbManager<MongoStoreModel>, DatabaseQuery
   /**
    * Use to initialise the MongoDB Database and Connections corresponding to the Sensors Call only
    * once per execution
+   * @param servletContext
    */
-  public void init() {
+  public void init(ServletContext servletContext) {
     CodecRegistry pojoCodecRegistry =
         fromRegistries(
             MongoClientSettings.getDefaultCodecRegistry(),

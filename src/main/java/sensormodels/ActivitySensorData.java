@@ -15,23 +15,16 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
-/**
- * @author Adit Modhvadia
- */
+/** @author Adit Modhvadia */
 public class ActivitySensorData extends DatabaseModel {
 
+  @BsonIgnore public static final String MY_SQL_TABLE_NAME = "ActivitySensorData";
 
-  @BsonIgnore
-  public static final String MY_SQL_TABLE_NAME = "ActivitySensorData";
+  @BsonIgnore public static final String MONGO_COLLECTION_NAME = "ActivitySensorData";
 
-  @BsonIgnore
-  public static final String MONGO_COLLECTION_NAME = "ActivitySensorData";
+  @BsonIgnore public static final String FILE_NAME = "Activity";
 
-  @BsonIgnore
-  public static final String FILE_NAME = "Activity";
-
-  @BsonIgnore
-  private File file;
+  @BsonIgnore private File file;
 
   @SerializedName("sensor_name")
   @Expose
@@ -67,7 +60,7 @@ public class ActivitySensorData extends DatabaseModel {
 
   public void setTimestamp(String timestamp) {
     this.timestamp = timestamp;
-    this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+    setFormattedDate();
   }
 
   public String getTime_stamp() {
@@ -101,7 +94,6 @@ public class ActivitySensorData extends DatabaseModel {
   }
 
   @Override
-
   @BsonIgnore
   public Document getDocument() {
     Document doc = new Document();
@@ -125,28 +117,24 @@ public class ActivitySensorData extends DatabaseModel {
   }
 
   @Override
-
   @BsonIgnore
   public String getMongoCollectionName() {
     return MONGO_COLLECTION_NAME;
   }
 
   @Override
-
   @BsonIgnore
   public Class<ActivitySensorData> getClassObject() {
     return ActivitySensorData.class;
   }
 
   @Override
-
   @BsonIgnore
   public String getTableName() {
     return MY_SQL_TABLE_NAME;
   }
 
   @Override
-
   @BsonIgnore
   public String getCreateTableQuery() {
     return "CREATE TABLE "
@@ -159,7 +147,6 @@ public class ActivitySensorData extends DatabaseModel {
   }
 
   @Override
-
   @BsonIgnore
   public String getInsertIntoTableQuery() {
     return " insert into "
@@ -169,7 +156,6 @@ public class ActivitySensorData extends DatabaseModel {
   }
 
   @Override
-
   @BsonIgnore
   public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
     preparedStmt.setString(1, this.getTimestamp());
@@ -180,19 +166,16 @@ public class ActivitySensorData extends DatabaseModel {
   }
 
   @Override
-
   @BsonIgnore
   public String getFileName() {
     return FILE_NAME;
   }
 
   @Override
-
   @BsonIgnore
   public void setFile(File file) {
     this.file = file;
   }
-
 
   @BsonIgnore
   public static String getMySqlTableName() {
@@ -204,7 +187,6 @@ public class ActivitySensorData extends DatabaseModel {
   }
 
   @Override
-
   @BsonIgnore
   public File getFile() {
     return this.file;
@@ -212,8 +194,7 @@ public class ActivitySensorData extends DatabaseModel {
 
   public static class SensorData {
 
-    public SensorData() {
-    }
+    public SensorData() {}
 
     @SerializedName("step_counts")
     @Expose

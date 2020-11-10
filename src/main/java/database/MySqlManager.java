@@ -4,6 +4,7 @@ import sensormodels.*;
 import sensormodels.store.models.MySQLStoreModel;
 import utils.WebAppConstants;
 
+import javax.servlet.ServletContext;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,7 +24,7 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
   private static ArrayList<MySQLStoreModel> sensorModels;
 
   private MySqlManager() {
-    init();
+    init(null);
   }
 
   /**
@@ -39,7 +40,7 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
   }
 
   @Override
-  public void init() {
+  public void init(ServletContext servletContext) {
     initSensorModels();
     connection = null;
     Statement stmt = null;

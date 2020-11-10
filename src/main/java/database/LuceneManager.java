@@ -51,6 +51,7 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
 
   public void updateServletContext(ServletContext servletContext) {
     this.indexDir = servletContext.getRealPath(indexDirRelativePath);
+    System.out.println(indexDir);
   }
 
   @Override
@@ -190,7 +191,8 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
   }
 
   @Override
-  public void init() {
+  public void init(ServletContext servletContext) {
+    this.updateServletContext(servletContext);
     System.out.println("<----Lucene initialized.---->");
   }
 
@@ -203,10 +205,13 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
             sensorDataList.stream()
                 .map(LuceneStoreModel::getDocument)
                 .collect(Collectors.toList()));
+        System.out.println(
+            "Lucene Log: Data Inserted for " + sensorDataList.get(0).getClass().getSimpleName());
       }
-      closeWriter();
     } catch (IOException e) {
       e.printStackTrace();
+    } finally {
+      closeWriter();
     }
   }
 
@@ -217,9 +222,10 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
       if (indexWriter != null) {
         indexWriter.addDocument(sensorData.getDocument());
       }
-      closeWriter();
     } catch (IOException e) {
       e.printStackTrace();
+    } finally {
+      closeWriter();
     }
   }
 

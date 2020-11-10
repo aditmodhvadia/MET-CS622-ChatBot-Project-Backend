@@ -7,6 +7,7 @@ import utils.IOUtility;
 import utils.QueryUtils;
 import utils.WebAppConstants;
 
+import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Type;
@@ -46,7 +47,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   private FileCumulator() {
     this.ioUtility = IOUtility.getInstance();
     ioUtility.createDirectory(BASE_ADDRESS);
-    init();
+    init(null);
   }
 
   public static FileCumulator getInstance() {
@@ -61,7 +62,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   }
 
   @Override
-  public void init() {
+  public void init(ServletContext servletContext) {
     activFitFile =
         ioUtility.createEmptyFile(
             BASE_ADDRESS + ACTIV_FIT + FileSystems.getDefault().getSeparator(), DATA_FILE_NAME);

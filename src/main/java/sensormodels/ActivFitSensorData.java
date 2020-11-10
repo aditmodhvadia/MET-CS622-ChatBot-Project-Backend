@@ -15,33 +15,26 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
-/**
- * @author Adit Modhvadia
- */
+/** @author Adit Modhvadia */
 public class ActivFitSensorData extends DatabaseModel {
 
+  @BsonIgnore public static final String MY_SQL_TABLE_NAME = "ActivFitSensorData";
 
-  @BsonIgnore
-    public static final String MY_SQL_TABLE_NAME = "ActivFitSensorData";
+  @BsonIgnore public static final String MONGO_COLLECTION_NAME = "ActivFitSensorData";
 
-  @BsonIgnore
-    public static final String MONGO_COLLECTION_NAME = "ActivFitSensorData";
+  @BsonIgnore public static final String FILE_NAME = "ActivFit";
 
-  @BsonIgnore
-    public static final String FILE_NAME = "ActivFit";
+  @BsonIgnore private File file;
 
-  @BsonIgnore
-    private File file;
+  @SerializedName("sensor_name")
+  @Expose
+  private String sensorName;
 
-    @SerializedName("sensor_name")
-    @Expose
-    private String sensorName;
+  @SerializedName("timestamp")
+  @Expose
+  private Timestamp timestamp;
 
-    @SerializedName("timestamp")
-    @Expose
-    private Timestamp timestamp;
-
-    @SerializedName("sensor_data")
+  @SerializedName("sensor_data")
   @Expose
   private SensorData sensorData;
 
@@ -86,10 +79,9 @@ public class ActivFitSensorData extends DatabaseModel {
     return this.getTimestamp().getStartTime();
   }
 
-    @Override
-
-    @BsonIgnore
-    public Document getDocument() {
+  @Override
+  @BsonIgnore
+  public Document getDocument() {
     Document doc = new Document();
     doc.add(
         new TextField(
@@ -99,21 +91,25 @@ public class ActivFitSensorData extends DatabaseModel {
     doc.add(
         new StringField(
             LuceneManager.LuceneConstants.SENSOR_NAME, this.getSensorName(), Field.Store.YES));
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.FORMATTED_DATE,
-            this.getFormatted_date(),
-            Field.Store.YES));
+    if (this.getFormatted_date() != null) {
+      doc.add(
+          new StringField(
+              LuceneManager.LuceneConstants.FORMATTED_DATE,
+              this.getFormatted_date(),
+              Field.Store.YES));
+    }
     doc.add(
         new StringField(
             LuceneManager.LuceneConstants.START_TIME,
             this.getTimestamp().getStartTime(),
             Field.Store.YES));
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.END_TIME,
-            this.getTimestamp().getEndTime(),
-            Field.Store.YES));
+    if (this.getTimestamp().getEndTime() != null) {
+      doc.add(
+          new StringField(
+              LuceneManager.LuceneConstants.END_TIME,
+              this.getTimestamp().getEndTime(),
+              Field.Store.YES));
+    }
     //         use a string field for timestamp because we don't want it tokenized
     doc.add(
         new StringField(
@@ -123,31 +119,27 @@ public class ActivFitSensorData extends DatabaseModel {
     return doc;
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getMongoCollectionName() {
+  @Override
+  @BsonIgnore
+  public String getMongoCollectionName() {
     return MONGO_COLLECTION_NAME;
   }
 
-    @Override
-
-    @BsonIgnore
-    public Class<ActivFitSensorData> getClassObject() {
+  @Override
+  @BsonIgnore
+  public Class<ActivFitSensorData> getClassObject() {
     return ActivFitSensorData.class;
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getTableName() {
+  @Override
+  @BsonIgnore
+  public String getTableName() {
     return MY_SQL_TABLE_NAME;
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getCreateTableQuery() {
+  @Override
+  @BsonIgnore
+  public String getCreateTableQuery() {
     return "CREATE TABLE "
         + this.getTableName()
         + " (start_time VARCHAR(30) , "
@@ -157,45 +149,40 @@ public class ActivFitSensorData extends DatabaseModel {
         + " activity VARCHAR(55) ) ";
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getInsertIntoTableQuery() {
+  @Override
+  @BsonIgnore
+  public String getInsertIntoTableQuery() {
     return " insert into "
         + this.getTableName()
         + " (start_time, end_time, formatted_date, duration, activity)"
         + " values (?, ?, ?, ?, ?)";
   }
 
-    @Override
-
-    @BsonIgnore
-    public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
-        preparedStmt.setString(1, this.getTimestamp().getStartTime());
-        preparedStmt.setString(2, this.getTimestamp().getEndTime());
-        preparedStmt.setString(3, this.getFormatted_date());
-        preparedStmt.setInt(4, this.getSensorData().getDuration());
-        preparedStmt.setString(5, this.getSensorData().getActivity());
+  @Override
+  @BsonIgnore
+  public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
+    preparedStmt.setString(1, this.getTimestamp().getStartTime());
+    preparedStmt.setString(2, this.getTimestamp().getEndTime());
+    preparedStmt.setString(3, this.getFormatted_date());
+    preparedStmt.setInt(4, this.getSensorData().getDuration());
+    preparedStmt.setString(5, this.getSensorData().getActivity());
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getFileName() {
+  @Override
+  @BsonIgnore
+  public String getFileName() {
     return FILE_NAME;
   }
 
-    @Override
-
-    @BsonIgnore
-    public void setFile(File file) {
+  @Override
+  @BsonIgnore
+  public void setFile(File file) {
     this.file = file;
   }
 
-    @Override
-
-    @BsonIgnore
-    public File getFile() {
+  @Override
+  @BsonIgnore
+  public File getFile() {
     return this.file;
   }
 

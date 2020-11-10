@@ -15,36 +15,29 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
-/**
- * @author Adit Modhvadia
- */
+/** @author Adit Modhvadia */
 public class LightSensorData extends DatabaseModel {
 
+  @BsonIgnore public static final String MY_SQL_TABLE_NAME = "LightSensorData";
 
-  @BsonIgnore
-    public static final String MY_SQL_TABLE_NAME = "LightSensorData";
+  @BsonIgnore public static final String FILE_NAME = "LightSensor";
 
-  @BsonIgnore
-    public static final String FILE_NAME = "LightSensor";
+  @SerializedName("sensor_name")
+  @Expose
+  private String sensorName;
 
-    @SerializedName("sensor_name")
-    @Expose
-    private String sensorName;
+  @SerializedName("timestamp")
+  @Expose
+  private String timestamp;
 
-    @SerializedName("timestamp")
-    @Expose
-    private String timestamp;
-
-    @SerializedName("sensor_data")
+  @SerializedName("sensor_data")
   @Expose
   private SensorData sensorData;
 
   private String luxValue;
-    @Expose
-    private String formatted_date;
+  @Expose private String formatted_date;
 
-  @BsonIgnore
-    private File file;
+  @BsonIgnore private File file;
 
   public String getLuxValue() {
     return luxValue;
@@ -91,12 +84,14 @@ public class LightSensorData extends DatabaseModel {
     return formatted_date;
   }
 
-    @Override
-
-    @BsonIgnore
-    public Document getDocument() {
+  @Override
+  @BsonIgnore
+  public Document getDocument() {
     Document doc = new Document();
-    doc.add(new TextField(LuceneManager.LuceneConstants.LUX, this.getLuxValue(), Field.Store.YES));
+    if (this.getLuxValue() != null) {
+      doc.add(
+          new TextField(LuceneManager.LuceneConstants.LUX, this.getLuxValue(), Field.Store.YES));
+    }
     doc.add(
         new StringField(
             LuceneManager.LuceneConstants.SENSOR_NAME, this.getSensorName(), Field.Store.YES));
@@ -112,31 +107,27 @@ public class LightSensorData extends DatabaseModel {
     return doc;
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getMongoCollectionName() {
+  @Override
+  @BsonIgnore
+  public String getMongoCollectionName() {
     return "LightSensorData";
   }
 
-    @Override
-
-    @BsonIgnore
-    public Class<LightSensorData> getClassObject() {
+  @Override
+  @BsonIgnore
+  public Class<LightSensorData> getClassObject() {
     return LightSensorData.class;
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getTableName() {
+  @Override
+  @BsonIgnore
+  public String getTableName() {
     return MY_SQL_TABLE_NAME;
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getCreateTableQuery() {
+  @Override
+  @BsonIgnore
+  public String getCreateTableQuery() {
     return "CREATE TABLE "
         + this.getTableName()
         + "(timestamp VARCHAR(30) , "
@@ -145,30 +136,27 @@ public class LightSensorData extends DatabaseModel {
         + " lux INTEGER) ";
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getInsertIntoTableQuery() {
+  @Override
+  @BsonIgnore
+  public String getInsertIntoTableQuery() {
     return " insert into "
         + this.getTableName()
         + " (timestamp, formatted_date, sensor_name,lux)"
         + " values (?, ?, ?, ?)";
   }
 
-    @Override
-
-    @BsonIgnore
-    public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
-        preparedStmt.setString(1, this.getTimestamp());
-        preparedStmt.setString(2, this.getFormatted_date());
-        preparedStmt.setString(3, this.getSensorName());
-        preparedStmt.setInt(4, this.getSensorData().getLux());
+  @Override
+  @BsonIgnore
+  public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
+    preparedStmt.setString(1, this.getTimestamp());
+    preparedStmt.setString(2, this.getFormatted_date());
+    preparedStmt.setString(3, this.getSensorName());
+    preparedStmt.setInt(4, this.getSensorData().getLux());
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getFileName() {
+  @Override
+  @BsonIgnore
+  public String getFileName() {
     return FILE_NAME;
   }
 
@@ -177,10 +165,9 @@ public class LightSensorData extends DatabaseModel {
     this.file = file;
   }
 
-    @Override
-
-    @BsonIgnore
-    public File getFile() {
+  @Override
+  @BsonIgnore
+  public File getFile() {
     return this.file;
   }
 

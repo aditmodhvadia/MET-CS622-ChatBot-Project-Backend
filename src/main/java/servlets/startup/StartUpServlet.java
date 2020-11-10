@@ -1,10 +1,10 @@
 package servlets.startup;
 
 import com.google.gson.Gson;
+import database.DatabaseManager;
+import database.DbManager;
 import database.FileCumulator;
-import database.LuceneManager;
 import database.MongoDBManager;
-import database.MySqlManager;
 import listeners.FileListener;
 import sensormodels.*;
 import utils.IOUtility;
@@ -28,9 +28,10 @@ public class StartUpServlet extends HttpServlet {
   private static final String sourceFileName =
       "/WEB-INF/classes/SampleUserSmartwatch.zip"; // datasource file
 
-  private MongoDBManager mongoDBManager;
-  private LuceneManager luceneManager;
-  private MySqlManager mySqlManager;
+  //  private MongoDBManager mongoDBManager;
+  //  private LuceneManager luceneManager;
+  //  private MySqlManager mySqlManager;
+  private DbManager dbManager;
 
   @Override
   public void init() {
@@ -41,10 +42,11 @@ public class StartUpServlet extends HttpServlet {
     ioUtility = IOUtility.getInstance();
     fileCumulator = FileCumulator.getInstance();
 
-    mongoDBManager = MongoDBManager.getInstance();
-    luceneManager = LuceneManager.getInstance();
-    luceneManager.updateServletContext(getServletContext());
-    mySqlManager = MySqlManager.getInstance();
+    dbManager = DatabaseManager.getInstance(getServletContext());
+    //    mongoDBManager = MongoDBManager.getInstance();
+    //    luceneManager = LuceneManager.getInstance();
+    //    luceneManager.updateServletContext(getServletContext());
+    //    mySqlManager = MySqlManager.getInstance();
 
     //    unzipDataSource();
 
@@ -98,7 +100,9 @@ public class StartUpServlet extends HttpServlet {
             .map(
                 s -> {
                   try {
-                    return gson.fromJson(s, ActivitySensorData.class);
+                    ActivitySensorData sensorData = gson.fromJson(s, ActivitySensorData.class);
+                    sensorData.setFormattedDate();
+                    return sensorData;
                   } catch (Exception e) {
                     //        e.printStackTrace();
                   }
@@ -107,11 +111,15 @@ public class StartUpServlet extends HttpServlet {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-    mongoDBManager.insertSensorDataList(sensorDataList);
+    try {
+      dbManager.insertSensorDataList(sensorDataList);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     //        store activity sensor data in lucene at once
     //        luceneManager.insertSensorDataList(sensorDataList);
     //        insert data into MYSQL for Activity sensor
-    mySqlManager.insertSensorDataList(sensorDataList);
+    //    mySqlManager.insertSensorDataList(sensorDataList);
   }
 
   /** Use to store Sensor Data into mongoDB */
@@ -127,18 +135,22 @@ public class StartUpServlet extends HttpServlet {
                   try {
                     return gson.fromJson(s, ActivFitSensorData.class);
                   } catch (Exception e) {
-                    //                        e.printStackTrace();
+                    //                    e.printStackTrace();
                   }
                   return null;
                 })
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-    mongoDBManager.insertSensorDataList(sensorDataList);
+    try {
+      dbManager.insertSensorDataList(sensorDataList);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     //        store data in lucene
     //    luceneManager.insertSensorDataList(sensorDataList);
     // insert data into MYSQL for ActivFit sensor
-    mySqlManager.insertSensorDataList(sensorDataList);
+    //    mySqlManager.insertSensorDataList(sensorDataList);
   }
 
   /** Use to store battery sensor data in databases */
@@ -162,9 +174,13 @@ public class StartUpServlet extends HttpServlet {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-    mongoDBManager.insertSensorDataList(sensorDataList);
+    try {
+      dbManager.insertSensorDataList(sensorDataList);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     // insert data into MYSQL for battery sensor
-    mySqlManager.insertSensorDataList(sensorDataList);
+    //    mySqlManager.insertSensorDataList(sensorDataList);
   }
 
   /** Use to store bluetooth sensor data in databases */
@@ -189,9 +205,13 @@ public class StartUpServlet extends HttpServlet {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-    mongoDBManager.insertSensorDataList(sensorDataList);
+    try {
+      dbManager.insertSensorDataList(sensorDataList);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     // insert data into MYSQL for Bluetooth sensor
-    mySqlManager.insertSensorDataList(sensorDataList);
+    //    mySqlManager.insertSensorDataList(sensorDataList);
   }
 
   /** Use to store heart rate sensor data in databases */
@@ -216,10 +236,14 @@ public class StartUpServlet extends HttpServlet {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-    mongoDBManager.insertSensorDataList(sensorDataList);
+    try {
+      dbManager.insertSensorDataList(sensorDataList);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     //        luceneManager.insertSensorDataList(sensorDataList);
     // insert data into MYSQL for Heart Rate sensor
-    mySqlManager.insertSensorDataList(sensorDataList);
+    //    mySqlManager.insertSensorDataList(sensorDataList);
   }
 
   /** Use to store light sensor data in databases */
@@ -243,9 +267,13 @@ public class StartUpServlet extends HttpServlet {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-    mongoDBManager.insertSensorDataList(sensorDataList);
+    try {
+      dbManager.insertSensorDataList(sensorDataList);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     // insert data into MYSQL for Light sensor
-    mySqlManager.insertSensorDataList(sensorDataList);
+    //    mySqlManager.insertSensorDataList(sensorDataList);
   }
 
   /** Use to store screen usage sensor data in databases */
@@ -270,9 +298,13 @@ public class StartUpServlet extends HttpServlet {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-    mongoDBManager.insertSensorDataList(sensorDataList);
+    try {
+      dbManager.insertSensorDataList(sensorDataList);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     // insert data into MYSQL for Screen Usage sensor
-    mySqlManager.insertSensorDataList(sensorDataList);
+    //    mySqlManager.insertSensorDataList(sensorDataList);
   }
 
   /** Inner Class which listens for Files and Zip Files/folders when found */
