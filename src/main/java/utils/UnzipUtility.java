@@ -2,6 +2,8 @@ package utils;
 
 import listeners.FileListener;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -24,12 +26,15 @@ public class UnzipUtility {
    * Extracts a zip file specified by the zipFilePath to a directory specified by destDirectory
    * (will be created if does not exists)
    *
-   * @param zipFilePath
-   * @param destDirectory
-   * @throws IOException
+   * @param zipFilePath   path for the zip file
+   * @param destDirectory destination of zip extraction
+   * @throws IOException IOException may occur
    */
-  public void unzip(String zipFilePath, String destDirectory, FileListener fileListener)
-      throws IOException {
+  public void unzip(
+          @Nonnull String zipFilePath,
+          @Nonnull String destDirectory,
+          @Nullable FileListener fileListener)
+          throws IOException {
     File destDir = new File(destDirectory); // create destination directory if it does not exist
     if (!destDir.exists()) {
       destDir.mkdir();
@@ -53,7 +58,7 @@ public class UnzipUtility {
         //                InputStream is = file.getInputStream(entry);
         BufferedInputStream bis = new BufferedInputStream(zipIn);
         String uncompressedFileName =
-            destDirectory + FileSystems.getDefault().getSeparator() + entry.getName();
+                destDirectory + FileSystems.getDefault().getSeparator() + entry.getName();
         Path uncompressedFilePath = fileSystem.getPath(uncompressedFileName);
         Files.createFile(uncompressedFilePath);
         FileOutputStream fileOutput = new FileOutputStream(uncompressedFileName);
@@ -61,7 +66,9 @@ public class UnzipUtility {
           fileOutput.write(bis.read());
         }
         fileOutput.close();
-        fileListener.fileFound(new File(uncompressedFilePath.toString()));
+        if (fileListener != null) {
+          fileListener.fileFound(new File(uncompressedFilePath.toString()));
+        }
         System.out.println("Written :" + entry.getName());
       }
       zipIn.closeEntry();
@@ -73,11 +80,12 @@ public class UnzipUtility {
   /**
    * Extracts a zip entry (file entry) using given ZipInputStream at the given filepath
    *
-   * @param zipIn given ZipInputStream
+   * @param zipIn    given ZipInputStream
    * @param filePath given filepath
    * @throws IOException standard IOException
    */
-  private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
+  private void extractFile(@Nonnull ZipInputStream zipIn, @Nonnull String filePath)
+          throws IOException {
     BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
     byte[] bytesIn = new byte[BUFFER_SIZE];
     int read = 0;
