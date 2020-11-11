@@ -63,4 +63,18 @@ public class QueryUtilsTest {
             calendar.getTime().getDate(),
             Objects.requireNonNull(QueryUtils.extractDateFromQuery("10-12-2018")).getDate());
   }
+
+  @Test
+  public void determineQueryType() {
+    assertEquals(
+            QueryUtils.QueryType.HEART_RATE, QueryUtils.determineQueryType("what was my heartrate"));
+
+    assertEquals(QueryUtils.QueryType.STEP_COUNT, QueryUtils.determineQueryType("how many steps?"));
+
+    assertEquals(
+            QueryUtils.QueryType.RUNNING, QueryUtils.determineQueryType("how much did I run today?"));
+
+    assertEquals(
+            QueryUtils.QueryType.UNKNOWN, QueryUtils.determineQueryType("what was my temperature?"));
+  }
 }

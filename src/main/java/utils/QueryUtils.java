@@ -52,36 +52,27 @@ public class QueryUtils {
     return null;
   }
 
+  public enum QueryType {
+    RUNNING,
+    HEART_RATE,
+    STEP_COUNT,
+    UNKNOWN
+  }
+
   /**
    * Call to determine the category of the given query and get the callback for the same
    *
-   * @param query    given query
-   * @param callback callback for the query type
+   * @param query given query
    */
-  public static void determineQueryType(String query, OnQueryResolvedCallback callback) {
-    Matcher m = Pattern.compile(DATE_REGEX).matcher(query);
-    Date date;
-    if (m.find()) { //  find if user entered date in the query
-      try {
-        date =
-            WebAppConstants.inputDateFormat.parse(
-                m.group(1)); //  get the first recognised date from query
-
-        if (isMatching(RUNNING_EVENT_REGEX, query)) {
-          callback.onDisplayRunningEventSelected(date);
-        } else if (isMatching(STEP_COUNT_EVENT_REGEX, query)) {
-          callback.onDisplayTotalStepsInDayEventSelected(date);
-        } else if (isMatching(HEART_RATE_EVENT_REGEX, query)) {
-          callback.onDisplayHeartRateEventSelected(date);
-        } else {
-          callback.onNoEventResolved();
-        }
-      } catch (ParseException e) {
-        e.printStackTrace();
-        callback.onDateNotParsed();
-      }
-    } else { //  Bad input
-      callback.onDateNotParsed();
+  public static QueryType determineQueryType(@Nonnull String query) {
+    if (isMatching(RUNNING_EVENT_REGEX, query)) {
+      return QueryType.RUNNING;
+    } else if (isMatching(STEP_COUNT_EVENT_REGEX, query)) {
+      return QueryType.STEP_COUNT;
+    } else if (isMatching(HEART_RATE_EVENT_REGEX, query)) {
+      return QueryType.HEART_RATE;
+    } else {
+      return QueryType.UNKNOWN;
     }
   }
 

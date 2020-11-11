@@ -16,8 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-public abstract class QueryResponseServlet extends HttpServlet
-    implements QueryUtils.OnQueryResolvedCallback {
+public abstract class QueryResponseServlet extends HttpServlet {
 
   private HttpServletResponse response;
   private final Gson g = new Gson();
@@ -27,23 +26,44 @@ public abstract class QueryResponseServlet extends HttpServlet
     this.dbManager = dbManager;
   }
 
-  public QueryResponseServlet() {}
-
-  @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
-    this.response = resp;
-    String requestHeaderString =
-        req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-    System.out.println(getServletName() + " POST request called with request ");
-    System.out.println(requestHeaderString);
-    MessageQueryRequestModel queryMessage =
-        g.fromJson(requestHeaderString, MessageQueryRequestModel.class);
-
-    QueryUtils.determineQueryType(queryMessage.getQuery(), this);
+  public QueryResponseServlet() {
   }
 
   @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+          throws ServletException, IOException {
+    this.response = resp;
+    String requestHeaderString =
+            req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+    System.out.println(getServletName() + " POST request called with request ");
+    System.out.println(requestHeaderString);
+    MessageQueryRequestModel queryMessage =
+            g.fromJson(requestHeaderString, MessageQueryRequestModel.class);
+
+    Date userDate = QueryUtils.extractDateFromQuery(queryMessage.getQuery());
+
+    if (userDate == null) {
+      onDateNotParsed();
+    }
+
+    QueryUtils.QueryType queryType = QueryUtils.determineQueryType(queryMessage.getQuery());
+
+    switch (queryType) {
+      case RUNNING:
+        onDisplayRunningEventSelected(userDate);
+        break;
+      case HEART_RATE:
+        onDisplayHeartRateEventSelected(userDate);
+        break;
+      case STEP_COUNT:
+        onDisplayTotalStepsInDayEventSelected(userDate);
+        break;
+      case UNKNOWN:
+        onNoEventResolved();
+        break;
+    }
+  }
+
   public void onDisplayRunningEventSelected(Date date) {
     ArrayList<ActivFitSensorData> queryResult = this.dbManager.queryForRunningEvent(date);
     String queryResultString = QueryUtils.getFormattedRunningResultData(queryResult);
@@ -68,7 +88,6 @@ public abstract class QueryResponseServlet extends HttpServlet
     }
   }
 
-  @Override
   public void onDisplayHeartRateEventSelected(Date date) {
     String queryResultString =
         QueryUtils.getFormattedHeartRatesForTheDays(
@@ -78,7 +97,6 @@ public abstract class QueryResponseServlet extends HttpServlet
 
   //    public abstract int queryHeartRatesForDay(Date date);
 
-  @Override
   public void onDisplayTotalStepsInDayEventSelected(Date date) {
     int queryResult = this.dbManager.queryForTotalStepsInDay(date);
     String queryResultString = QueryUtils.getFormattedTotalStepsForTheDay(queryResult, date);
@@ -87,12 +105,10 @@ public abstract class QueryResponseServlet extends HttpServlet
 
   //    public abstract int queryForTotalStepsInDay(Date userDate);
 
-  @Override
   public void onDateNotParsed() {
     sendResponse("Incorrect date, enter in this format: MM/dd/YYYY");
   }
 
-  @Override
   public void onNoEventResolved() {
     sendResponse("Could not recognise the query");
   }
