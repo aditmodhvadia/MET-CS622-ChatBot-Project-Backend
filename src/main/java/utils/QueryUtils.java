@@ -2,10 +2,13 @@ package utils;
 
 import sensormodels.ActivFitSensorData;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,12 +16,46 @@ public class QueryUtils {
   public static final String RUNNING_EVENT_REGEX = "([rR][ua]n(ning)?)";
   public static final String STEP_COUNT_EVENT_REGEX = "([sS]teps*|[wW]alk(ed)?)";
   public static final String HEART_RATE_EVENT_REGEX = "([hH]eart([rR]ate)?)";
-  public static final String DATE_REGEX = "(\\d{2}[-,/]\\d{2}[-,/]\\d{4})"; //  Regex for Date input
+  public static final String DATE_REGEX = "(\\d{2}[-/]\\d{2}[-/]\\d{4})"; //  Regex for Date input
+
+  @Nullable
+  public static Date extractDateFromQuery(@Nonnull String query) {
+    if (query.isEmpty()) {
+      return null;
+    }
+    if (query.contains("today")) {
+      Calendar today = Calendar.getInstance();
+      today.set(Calendar.HOUR_OF_DAY, 0);
+      today.set(Calendar.MINUTE, 0);
+      today.set(Calendar.MILLISECOND, 0);
+      return today.getTime();
+    }
+    if (query.contains("yesterday")) {
+      Calendar calendar = Calendar.getInstance(Locale.getDefault());
+      calendar.add(Calendar.DATE, -1);
+      calendar.set(Calendar.HOUR_OF_DAY, 0);
+      calendar.set(Calendar.MINUTE, 0);
+      calendar.set(Calendar.MILLISECOND, 0);
+      return calendar.getTime();
+    }
+    Matcher dateMatcher = Pattern.compile(DATE_REGEX).matcher(query);
+    if (dateMatcher.find()) {
+      System.out.println("Found date: " + dateMatcher.group(1));
+      try {
+        return WebAppConstants.inputDateFormat.parse(dateMatcher.group(1).replaceAll("-", "/"));
+      } catch (ParseException e) {
+        e.printStackTrace();
+        System.out.println("Date not parsed");
+      }
+    }
+
+    return null;
+  }
 
   /**
    * Call to determine the category of the given query and get the callback for the same
    *
-   * @param query given query
+   * @param query    given query
    * @param callback callback for the query type
    */
   public static void determineQueryType(String query, OnQueryResolvedCallback callback) {

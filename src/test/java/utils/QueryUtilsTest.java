@@ -2,6 +2,11 @@ package utils;
 
 import org.junit.Test;
 
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.Objects;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class QueryUtilsTest {
@@ -36,5 +41,26 @@ public class QueryUtilsTest {
     assertTrue(QueryUtils.isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "Heart Rate"));
     assertTrue(QueryUtils.isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "Heart"));
     assertTrue(QueryUtils.isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "heart"));
+  }
+
+  @Test
+  public void extractsDateFromQuery() {
+    Calendar today = Calendar.getInstance();
+    today.set(Calendar.HOUR_OF_DAY, 0);
+    today.set(Calendar.MINUTE, 0);
+    today.set(Calendar.MILLISECOND, 0);
+    assertEquals(today.getTime().getDate(), QueryUtils.extractDateFromQuery("today").getDate());
+
+    today.add(Calendar.DATE, -1);
+    assertEquals(
+            today.getTime().getDate(),
+            Objects.requireNonNull(QueryUtils.extractDateFromQuery("yesterday")).getDate());
+    Calendar calendar = Calendar.getInstance(Locale.getDefault());
+    calendar.set(Calendar.YEAR, 2018);
+    calendar.set(Calendar.MONTH, 9);
+    calendar.set(Calendar.DAY_OF_MONTH, 12);
+    assertEquals(
+            calendar.getTime().getDate(),
+            Objects.requireNonNull(QueryUtils.extractDateFromQuery("10-12-2018")).getDate());
   }
 }
