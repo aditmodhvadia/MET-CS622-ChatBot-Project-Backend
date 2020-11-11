@@ -20,13 +20,22 @@ public abstract class QueryResponseServlet extends HttpServlet {
 
   private HttpServletResponse response;
   private final Gson g = new Gson();
-  private DatabaseQueryRunner dbManager;
+  private DatabaseQueryRunner databaseQueryRunner;
 
-  public QueryResponseServlet(DatabaseQueryRunner dbManager) {
-    this.dbManager = dbManager;
+  public QueryResponseServlet(DatabaseQueryRunner databaseQueryRunner) {
+    this.databaseQueryRunner = databaseQueryRunner;
   }
 
   public QueryResponseServlet() {
+  }
+
+  /**
+   * Change the database query runner at runtime
+   *
+   * @param dbManager database query runner
+   */
+  protected void changeDatabaseQueryRunner(DatabaseQueryRunner dbManager) {
+    this.databaseQueryRunner = dbManager;
   }
 
   @Override
@@ -47,7 +56,6 @@ public abstract class QueryResponseServlet extends HttpServlet {
     }
 
     QueryUtils.QueryType queryType = QueryUtils.determineQueryType(queryMessage.getQuery());
-
     switch (queryType) {
       case RUNNING:
         onDisplayRunningEventSelected(userDate);
@@ -65,12 +73,10 @@ public abstract class QueryResponseServlet extends HttpServlet {
   }
 
   public void onDisplayRunningEventSelected(Date date) {
-    ArrayList<ActivFitSensorData> queryResult = this.dbManager.queryForRunningEvent(date);
+    ArrayList<ActivFitSensorData> queryResult = this.databaseQueryRunner.queryForRunningEvent(date);
     String queryResultString = QueryUtils.getFormattedRunningResultData(queryResult);
     sendResponse(queryResultString);
   }
-
-  //    public abstract ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate);
 
   /**
    * Call to send back the response with given query response data
@@ -90,20 +96,16 @@ public abstract class QueryResponseServlet extends HttpServlet {
 
   public void onDisplayHeartRateEventSelected(Date date) {
     String queryResultString =
-        QueryUtils.getFormattedHeartRatesForTheDays(
-            date, this.dbManager.queryHeartRatesForDay(date));
+            QueryUtils.getFormattedHeartRatesForTheDays(
+                    date, this.databaseQueryRunner.queryHeartRatesForDay(date));
     sendResponse(queryResultString);
   }
 
-  //    public abstract int queryHeartRatesForDay(Date date);
-
   public void onDisplayTotalStepsInDayEventSelected(Date date) {
-    int queryResult = this.dbManager.queryForTotalStepsInDay(date);
+    int queryResult = this.databaseQueryRunner.queryForTotalStepsInDay(date);
     String queryResultString = QueryUtils.getFormattedTotalStepsForTheDay(queryResult, date);
     sendResponse(queryResultString);
   }
-
-  //    public abstract int queryForTotalStepsInDay(Date userDate);
 
   public void onDateNotParsed() {
     sendResponse("Incorrect date, enter in this format: MM/dd/YYYY");
