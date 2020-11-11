@@ -39,7 +39,6 @@ public class StartUpServlet extends HttpServlet {
 
     ioUtility = IOUtility.getInstance();
     fileCumulator = FileCumulator.getInstance();
-
     dbManager = DatabaseManager.getInstance(getServletContext());
 
     //    unzipDataSource();
@@ -63,7 +62,6 @@ public class StartUpServlet extends HttpServlet {
     } catch (Exception ex) {
       ex.printStackTrace(); // some error occurred
     }
-    //            Unzipping complete
     System.out.println("\n\n*************** Unzipping complete***************\n\n");
   }
 
@@ -74,7 +72,6 @@ public class StartUpServlet extends HttpServlet {
    */
   private void storeDataInDatabases(Collection<DatabaseModel> sensorModels) {
     System.out.println("*****************Storing data into Databases******************");
-
     sensorModels.forEach(
         databaseModel -> {
           List<DatabaseModel> sensorData = readSensorData(databaseModel);
@@ -93,7 +90,6 @@ public class StartUpServlet extends HttpServlet {
    */
   private <T extends DatabaseModel> List<T> readSensorData(T sensorModel) {
     File file = sensorModel.getFile();
-
     Gson gson = new Gson();
     return IOUtility.getFileContentsLineByLine(file).stream()
         .map(
@@ -102,8 +98,7 @@ public class StartUpServlet extends HttpServlet {
                 T sensorData = gson.fromJson(s, (Type) sensorModel.getClassObject());
                 sensorData.setFormattedDate();
                 return sensorData;
-              } catch (Exception e) {
-                //        e.printStackTrace();
+              } catch (Exception ignored) {
               }
               return null;
             })
