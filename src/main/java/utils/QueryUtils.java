@@ -109,7 +109,6 @@ public class QueryUtils {
    */
   public static String getFormattedRunningResultData(ArrayList<ActivFitSensorData> queryResult) {
     if (queryResult.isEmpty()) {
-      System.out.println("No, there is no running activity.");
       return "No, there is no running activity.";
     } else {
       StringBuilder builder = new StringBuilder();
@@ -156,8 +155,8 @@ public class QueryUtils {
   /**
    * Call to get formatted output for HeartRates for the days
    *
-   * @param date
-   * @param heartRateCount
+   * @param date           date
+   * @param heartRateCount total heart rate count
    */
   public static String getFormattedHeartRatesForTheDays(Date date, int heartRateCount) {
     StringBuilder builder = new StringBuilder();
@@ -172,17 +171,5 @@ public class QueryUtils {
           .append(formattedDate);
     }
     return builder.toString();
-  }
-
-  public interface OnQueryResolvedCallback {
-    void onDisplayRunningEventSelected(Date date);
-
-    void onDisplayHeartRateEventSelected(Date date);
-
-    void onDisplayTotalStepsInDayEventSelected(Date date);
-
-    void onDateNotParsed();
-
-    void onNoEventResolved();
   }
 }
