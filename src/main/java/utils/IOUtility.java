@@ -13,8 +13,10 @@ public class IOUtility {
   private IOUtility() {}
 
   public static IOUtility getInstance() {
-    if (instance == null) {
-      instance = new IOUtility();
+    synchronized (IOUtility.class) {
+      if (instance == null) {
+        instance = new IOUtility();
+      }
     }
     return instance;
   }
@@ -33,7 +35,6 @@ public class IOUtility {
       br = new BufferedReader(new FileReader(inputFile)); // BufferedReader now points to the file
       String readText; // holds file content line by line
       while ((readText = br.readLine()) != null) { // read file line by line
-        //                System.out.println(readText);
         fileTextStringBuilder.append(readText).append("\n"); // append file contents
       }
     } catch (IOException e) {
@@ -73,8 +74,6 @@ public class IOUtility {
       br.write(readFile(sourceFile));
 
     } catch (IOException e) {
-      System.out.println(destinationFile.getPath());
-      System.out.println(sourceFile.getPath());
       e.printStackTrace();
     } finally {
       try {
