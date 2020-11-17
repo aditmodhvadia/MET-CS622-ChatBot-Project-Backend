@@ -13,8 +13,10 @@ public class IOUtility {
   private IOUtility() {}
 
   public static IOUtility getInstance() {
-    if (instance == null) {
-      instance = new IOUtility();
+    synchronized (IOUtility.class) {
+      if (instance == null) {
+        instance = new IOUtility();
+      }
     }
     return instance;
   }
