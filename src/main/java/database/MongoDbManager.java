@@ -1,8 +1,23 @@
 package database;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Sorts.descending;
+import static com.mongodb.client.model.Sorts.orderBy;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
-import com.mongodb.client.*;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javax.servlet.ServletContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import sensormodels.ActivFitSensorData;
@@ -11,44 +26,32 @@ import sensormodels.HeartRateSensorData;
 import sensormodels.store.models.MongoStoreModel;
 import utils.WebAppConstants;
 
-import javax.servlet.ServletContext;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Sorts.descending;
-import static com.mongodb.client.model.Sorts.orderBy;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
-
-/** @author Adit Modhvadia */
-public class MongoDBManager implements DbManager<MongoStoreModel>, DatabaseQueryRunner {
-  private static MongoDBManager instance;
+public class MongoDbManager implements DbManager<MongoStoreModel>, DatabaseQueryRunner {
+  private static MongoDbManager instance;
   public static final String DATABASE_NAME = "SensorData";
   private static MongoDatabase database;
 
-  private MongoDBManager() {
+  private MongoDbManager() {
     init(null);
   }
 
   /**
-   * Singleton method to get the instance of the class
+   * Singleton method to get the instance of the class.
    *
    * @return singleton instance of the class
    */
-  public static MongoDBManager getInstance() {
+  public static MongoDbManager getInstance() {
     if (instance == null) {
-      instance = new MongoDBManager();
+      instance = new MongoDbManager();
     }
     return instance;
   }
 
   /**
    * Use to initialise the MongoDB Database and Connections corresponding to the Sensors Call only
-   * once per execution
-   * @param servletContext
+   * once per execution.
+   *
+   * @param servletContext servlet context
    */
   public void init(ServletContext servletContext) {
     CodecRegistry pojoCodecRegistry =

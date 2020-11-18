@@ -1,23 +1,33 @@
 package database;
 
 import com.google.gson.Gson;
-import sensormodels.*;
-import sensormodels.store.models.FileStoreModel;
-import utils.IOUtility;
-import utils.QueryUtils;
-import utils.WebAppConstants;
-
-import javax.servlet.ServletContext;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.nio.file.FileSystems;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import javax.servlet.ServletContext;
+import sensormodels.ActivFitSensorData;
+import sensormodels.ActivitySensorData;
+import sensormodels.BatterySensorData;
+import sensormodels.BluetoothSensorData;
+import sensormodels.DatabaseModel;
+import sensormodels.HeartRateSensorData;
+import sensormodels.LightSensorData;
+import sensormodels.ScreenUsageSensorData;
+import sensormodels.store.models.FileStoreModel;
+import utils.IoUtility;
+import utils.QueryUtils;
+import utils.WebAppConstants;
 
 public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRunner {
   private static FileCumulator instance;
   private static final String MISC_FILE_NAME = "Misc";
 
-  private final IOUtility ioUtility; // to perform IO Operations
+  private final IoUtility ioUtility; // to perform IO Operations
 
   private static final String BASE_ADDRESS = "Result" + FileSystems.getDefault().getSeparator();
   private static final String DATA_FILE_NAME = "CumulativeData.txt";
@@ -27,11 +37,16 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   public static File miscFile;
 
   private FileCumulator() {
-    this.ioUtility = IOUtility.getInstance();
+    this.ioUtility = IoUtility.getInstance();
     ioUtility.createDirectory(BASE_ADDRESS);
     init(null);
   }
 
+  /**
+   * Get singleton instance.
+   *
+   * @return instance
+   */
   public static FileCumulator getInstance() {
     if (instance == null) {
       instance = new FileCumulator();
@@ -112,7 +127,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
     int heartRateCount = 0;
     String formattedDate = WebAppConstants.inputDateFormat.format(date);
     for (HeartRateSensorData data : sensorData) {
-      if (data.getFormatted_date().equals(formattedDate)) {
+      if (data.getFormattedDate().equals(formattedDate)) {
         heartRateCount++;
       }
     }
@@ -127,7 +142,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
     int maxStepCount = -1; // Max value of step count for the day
     String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
     for (ActivitySensorData sensorData : activitySensorDataList) {
-      if (sensorData.getFormatted_date().equals(userFormattedDate)) { // both dates are equal
+      if (sensorData.getFormattedDate().equals(userFormattedDate)) { // both dates are equal
         if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
           //                    found a step count larger than the maxStepCount, so update it
           maxStepCount = sensorData.getSensorData().getStepCounts();
@@ -139,7 +154,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
 
   /**
    * Use to determine the category of sensor for the given file and returns the cumulative data txt
-   * file
+   * file.
    *
    * @param inputFile given file
    * @return the cumulative data file
@@ -156,7 +171,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   static <T extends FileStoreModel> List<T> getSensorFileContents(T sensorModel, int numOfDays) {
     List<T> sensorDataList = new ArrayList<>(); // holds the sensor data
     List<String> fileContents =
-        IOUtility.getFileContentsLineByLine(
+        IoUtility.getFileContentsLineByLine(
             sensorModel.getFile()); // holds all lines of the cumulativeFile for the sensor
     String currentDate = ""; // will hold the value of current date
     for (String fileLine : fileContents) {
@@ -192,7 +207,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   List<HeartRateSensorData> getHeartRateSensorFileContents() {
     List<HeartRateSensorData> sensorDataList = new ArrayList<>(); // holds the sensor data
     List<String> fileContents =
-        IOUtility.getFileContentsLineByLine(
+        IoUtility.getFileContentsLineByLine(
             sensorModelsMap
                 .get(HeartRateSensorData.FILE_NAME)
                 .getFile()); // holds all lines of the cumulativeFile for the sensor
@@ -220,7 +235,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   }
 
   /**
-   * Call to calculate brute force search time for running activity in given number of days
+   * Call to calculate brute force search time for running activity in given number of days.
    *
    * @param numOfDays given number of days
    * @return time taken to search the data through brute force
@@ -244,7 +259,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
 
   /**
    * Call to search for less bright data in given number of days and calculate brute force search
-   * time
+   * time.
    *
    * @param numOfDays given number of days
    */
@@ -265,7 +280,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   }
 
   /**
-   * Call to search for 100 bpm data in given number of days and calculate brute force search time
+   * Call to search for 100 bpm data in given number of days and calculate brute force search time.
    *
    * @param numOfDays given number of days
    */

@@ -1,12 +1,11 @@
 package database;
 
-import sensormodels.DatabaseModel;
-
-import javax.servlet.ServletContext;
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.ServletContext;
+import sensormodels.DatabaseModel;
 
-public class DatabaseManager implements DbManager<DatabaseModel>, DatabasePublisher {
+public final class DatabaseManager implements DbManager<DatabaseModel>, DatabasePublisher {
 
   private static DatabaseManager instance;
   private final ArrayList<DbManager> databases = new ArrayList<>();
@@ -15,6 +14,12 @@ public class DatabaseManager implements DbManager<DatabaseModel>, DatabasePublis
     init(servletContext);
   }
 
+  /**
+   * Get singleton instance of DatabaseManager.
+   *
+   * @param servletContext servlet context
+   * @return singleton instance
+   */
   public static DatabaseManager getInstance(ServletContext servletContext) {
     if (instance == null) {
       instance = new DatabaseManager(servletContext);
@@ -24,9 +29,7 @@ public class DatabaseManager implements DbManager<DatabaseModel>, DatabasePublis
 
   @Override
   public void init(ServletContext servletContext) {
-    //    databases.add(MongoDBManager.getInstance());
-    //    databases.add(MySqlManager.getInstance());
-    //    databases.add(LuceneManager.getInstance(servletContext));
+    databases.forEach(database -> database.init(servletContext));
   }
 
   @Override

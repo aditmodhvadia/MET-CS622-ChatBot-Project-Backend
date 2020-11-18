@@ -3,7 +3,7 @@ package sensormodels.store.models;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public interface MySQLStoreModel {
+public interface MySqlStoreModel {
 
   String getTableName();
 

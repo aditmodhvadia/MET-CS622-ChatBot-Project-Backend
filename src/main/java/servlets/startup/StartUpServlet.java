@@ -4,12 +4,6 @@ import com.google.gson.Gson;
 import database.DatabaseManager;
 import database.DbManager;
 import database.FileCumulator;
-import listeners.FileListener;
-import sensormodels.DatabaseModel;
-import utils.IOUtility;
-import utils.UnzipUtility;
-
-import javax.servlet.http.HttpServlet;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -19,10 +13,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServlet;
+import listeners.FileListener;
+import sensormodels.DatabaseModel;
+import utils.IoUtility;
+import utils.UnzipUtility;
 
 public class StartUpServlet extends HttpServlet {
   private final UnzipUtility unZipper = new UnzipUtility(); // unzips zip folder and files
-  private IOUtility ioUtility; // utility class for IO Operations
+  private IoUtility ioUtility; // utility class for IO Operations
   private FileCumulator fileCumulator; // Data cumulator into result files
   private static final String destinationFolder =
       "UncompressedData" + FileSystems.getDefault().getSeparator(); // destination folder
@@ -37,7 +36,7 @@ public class StartUpServlet extends HttpServlet {
     System.out.println("        Server started      ");
     System.out.println("--------#####--------");
 
-    ioUtility = IOUtility.getInstance();
+    ioUtility = IoUtility.getInstance();
     fileCumulator = FileCumulator.getInstance();
 
     dbManager = DatabaseManager.getInstance(getServletContext());
@@ -49,7 +48,7 @@ public class StartUpServlet extends HttpServlet {
         fileCumulator.getSensorModelsMap().values()); // store JSON data from file storage
   }
 
-  /** Call to unzip data source and create file structure to accumulate sensor data */
+  /** Call to unzip data source and create file structure to accumulate sensor data. */
   private void unzipDataSource() {
     try {
       String absoluteDiskPath = getServletContext().getRealPath(sourceFileName);
@@ -68,7 +67,7 @@ public class StartUpServlet extends HttpServlet {
   }
 
   /**
-   * Use to store all sensor data into MongoDB using
+   * Use to store all sensor data into MongoDB using.
    *
    * @see DatabaseManager
    */
@@ -95,7 +94,7 @@ public class StartUpServlet extends HttpServlet {
     File file = sensorModel.getFile();
 
     Gson gson = new Gson();
-    return IOUtility.getFileContentsLineByLine(file).stream()
+    return IoUtility.getFileContentsLineByLine(file).stream()
         .map(
             s -> {
               try {
@@ -111,7 +110,7 @@ public class StartUpServlet extends HttpServlet {
         .collect(Collectors.toList());
   }
 
-  /** Inner Class which listens for Files and Zip Files/folders when found */
+  /** Inner Class which listens for Files and Zip Files/folders when found. */
   class ListenerClass implements FileListener {
 
     @Override
