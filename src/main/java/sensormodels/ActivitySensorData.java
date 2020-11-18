@@ -3,6 +3,10 @@ package sensormodels;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import database.LuceneManager;
+import java.io.File;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Date;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntPoint;
@@ -10,12 +14,6 @@ import org.apache.lucene.document.StringField;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import utils.WebAppConstants;
 
-import java.io.File;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-
-/** @author Adit Modhvadia */
 public class ActivitySensorData extends DatabaseModel {
 
   @BsonIgnore public static final String MY_SQL_TABLE_NAME = "ActivitySensorData";
@@ -36,11 +34,11 @@ public class ActivitySensorData extends DatabaseModel {
 
   @SerializedName("time_stamp")
   @Expose
-  private String time_stamp;
+  private String timeStamp;
 
   @SerializedName("formatted_date")
   @Expose
-  private String formatted_date;
+  private String formattedDate;
 
   @SerializedName("sensor_data")
   @Expose
@@ -63,26 +61,30 @@ public class ActivitySensorData extends DatabaseModel {
     setFormattedDate();
   }
 
-  public String getTime_stamp() {
-    return time_stamp;
+  public String getTimeStamp() {
+    return timeStamp;
   }
 
-  public String getFormatted_date() {
-    return formatted_date;
+  public String getFormattedDate() {
+    return formattedDate;
   }
 
   public void setFormattedDate() {
-    this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+  }
+
+  public void setFormattedDate(String formattedDate) {
+    this.formattedDate = formattedDate;
   }
 
   @Override
   public String getStartTime() {
-    return this.getTime_stamp();
+    return this.getTimeStamp();
   }
 
-  public void setTime_stamp(String time_stamp) {
-    this.time_stamp = time_stamp;
-    this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(time_stamp));
+  public void setTimeStamp(String timeStamp) {
+    this.timeStamp = timeStamp;
+    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timeStamp));
   }
 
   public SensorData getSensorData() {
@@ -159,7 +161,7 @@ public class ActivitySensorData extends DatabaseModel {
   @BsonIgnore
   public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
     preparedStmt.setString(1, this.getTimestamp());
-    preparedStmt.setString(2, this.getFormatted_date());
+    preparedStmt.setString(2, this.getFormattedDate());
     preparedStmt.setString(3, this.getSensorName());
     preparedStmt.setInt(4, this.getSensorData().getStepCounts());
     preparedStmt.setInt(5, this.getSensorData().getStepDelta());
@@ -180,10 +182,6 @@ public class ActivitySensorData extends DatabaseModel {
   @BsonIgnore
   public static String getMySqlTableName() {
     return MY_SQL_TABLE_NAME;
-  }
-
-  public void setFormatted_date(String formatted_date) {
-    this.formatted_date = formatted_date;
   }
 
   @Override

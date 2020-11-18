@@ -2,25 +2,24 @@ package servlets.queryresponseservlet;
 
 import com.google.gson.Gson;
 import database.DatabaseQueryRunner;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.stream.Collectors;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import requestmodel.MessageQueryRequestModel;
 import responsemodels.QueryResponseMessage;
 import sensormodels.ActivFitSensorData;
 import utils.QueryUtils;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.stream.Collectors;
-
 public abstract class QueryResponseServlet extends HttpServlet
     implements QueryUtils.OnQueryResolvedCallback {
 
   private HttpServletResponse response;
-  private final Gson g = new Gson();
+  private final Gson gson = new Gson();
   private DatabaseQueryRunner dbManager;
 
   public QueryResponseServlet(DatabaseQueryRunner dbManager) {
@@ -38,7 +37,7 @@ public abstract class QueryResponseServlet extends HttpServlet
     System.out.println(getServletName() + " POST request called with request ");
     System.out.println(requestHeaderString);
     MessageQueryRequestModel queryMessage =
-        g.fromJson(requestHeaderString, MessageQueryRequestModel.class);
+        gson.fromJson(requestHeaderString, MessageQueryRequestModel.class);
 
     QueryUtils.determineQueryType(queryMessage.getQuery(), this);
   }
@@ -53,7 +52,7 @@ public abstract class QueryResponseServlet extends HttpServlet
   //    public abstract ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate);
 
   /**
-   * Call to send back the response with given query response data
+   * Call to send back the response with given query response data.
    *
    * @param queryResponseData given query response data
    */
@@ -62,7 +61,7 @@ public abstract class QueryResponseServlet extends HttpServlet
     QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResponseData);
     msg.setData(data);
     try {
-      response.getOutputStream().print(g.toJson(msg));
+      response.getOutputStream().print(gson.toJson(msg));
     } catch (IOException e) {
       e.printStackTrace();
     }

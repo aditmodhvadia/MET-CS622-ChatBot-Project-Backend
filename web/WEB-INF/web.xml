@@ -7,7 +7,7 @@
     <!--    MongoDB Query resolver Servlet-->
     <servlet>
         <servlet-name>MongoDBServlet</servlet-name>
-        <servlet-class>servlets.mongodb.MongoDBServlet</servlet-class>
+        <servlet-class>servlets.mongodb.MongoDbServlet</servlet-class>
     </servlet>
     <!--    Lucene Query resolver Servlet-->
     <servlet>
@@ -22,7 +22,7 @@
     <!--    MySQL Query resolver Servlet-->
     <servlet>
         <servlet-name>MySQLServlet</servlet-name>
-        <servlet-class>servlets.mysql.MySQLServlet</servlet-class>
+        <servlet-class>servlets.mysql.MySqlServlet</servlet-class>
     </servlet>
 
     <!--    Startup Servlet, runs on startup-->

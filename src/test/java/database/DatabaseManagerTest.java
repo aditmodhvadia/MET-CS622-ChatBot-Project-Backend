@@ -16,16 +16,16 @@ public class DatabaseManagerTest {
 
   @Test
   public void testAddDatabase() {
-    dbManager.addDatabase(MongoDBManager.getInstance());
-    assertTrue(dbManager.hasDatabaseManager(MongoDBManager.getInstance()));
+    dbManager.addDatabase(MongoDbManager.getInstance());
+    assertTrue(dbManager.hasDatabaseManager(MongoDbManager.getInstance()));
     assertFalse(dbManager.hasDatabaseManager(MySqlManager.getInstance()));
   }
 
   @Test
   public void testRemoveDatabase() {
-    dbManager.addDatabase(MongoDBManager.getInstance());
-    assertTrue(dbManager.hasDatabaseManager(MongoDBManager.getInstance()));
-    dbManager.removeDatabase(MongoDBManager.getInstance());
-    assertFalse(dbManager.hasDatabaseManager(MongoDBManager.getInstance()));
+    dbManager.addDatabase(MongoDbManager.getInstance());
+    assertTrue(dbManager.hasDatabaseManager(MongoDbManager.getInstance()));
+    dbManager.removeDatabase(MongoDbManager.getInstance());
+    assertFalse(dbManager.hasDatabaseManager(MongoDbManager.getInstance()));
   }
 }

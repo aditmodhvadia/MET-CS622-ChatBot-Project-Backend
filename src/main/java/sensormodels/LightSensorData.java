@@ -3,6 +3,10 @@ package sensormodels;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import database.LuceneManager;
+import java.io.File;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Date;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -10,12 +14,6 @@ import org.apache.lucene.document.TextField;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import utils.WebAppConstants;
 
-import java.io.File;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-
-/** @author Adit Modhvadia */
 public class LightSensorData extends DatabaseModel {
 
   @BsonIgnore public static final String MY_SQL_TABLE_NAME = "LightSensorData";
@@ -35,7 +33,10 @@ public class LightSensorData extends DatabaseModel {
   private SensorData sensorData;
 
   private String luxValue;
-  @Expose private String formatted_date;
+
+  @SerializedName("formatted_date")
+  @Expose
+  private String formattedDate;
 
   @BsonIgnore private File file;
 
@@ -72,7 +73,7 @@ public class LightSensorData extends DatabaseModel {
   }
 
   public void setFormattedDate() {
-    this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timestamp));
   }
 
   @Override
@@ -80,8 +81,8 @@ public class LightSensorData extends DatabaseModel {
     return this.getTimestamp();
   }
 
-  public String getFormatted_date() {
-    return formatted_date;
+  public String getFormattedDate() {
+    return formattedDate;
   }
 
   @Override
@@ -98,7 +99,7 @@ public class LightSensorData extends DatabaseModel {
     doc.add(
         new StringField(
             LuceneManager.LuceneConstants.FORMATTED_DATE,
-            this.getFormatted_date(),
+            this.getFormattedDate(),
             Field.Store.YES));
     //         use a string field for timestamp because we don't want it tokenized
     doc.add(
@@ -149,7 +150,7 @@ public class LightSensorData extends DatabaseModel {
   @BsonIgnore
   public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
     preparedStmt.setString(1, this.getTimestamp());
-    preparedStmt.setString(2, this.getFormatted_date());
+    preparedStmt.setString(2, this.getFormattedDate());
     preparedStmt.setString(3, this.getSensorName());
     preparedStmt.setInt(4, this.getSensorData().getLux());
   }

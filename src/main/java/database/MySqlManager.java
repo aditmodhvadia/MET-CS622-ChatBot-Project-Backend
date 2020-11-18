@@ -1,16 +1,27 @@
 package database;
 
-import sensormodels.*;
-import sensormodels.store.models.MySQLStoreModel;
-import utils.WebAppConstants;
-
-import javax.servlet.ServletContext;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.servlet.ServletContext;
+import sensormodels.ActivFitSensorData;
+import sensormodels.ActivitySensorData;
+import sensormodels.BatterySensorData;
+import sensormodels.BluetoothSensorData;
+import sensormodels.HeartRateSensorData;
+import sensormodels.LightSensorData;
+import sensormodels.ScreenUsageSensorData;
+import sensormodels.store.models.MySqlStoreModel;
+import utils.WebAppConstants;
 
-public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRunner {
+public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRunner {
   private static MySqlManager instance;
   // JDBC driver name and database URL TODO: Not using this one in init()
   static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
@@ -21,14 +32,14 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
   static final String USER = "admin";
   static final String PASS = "admin";
   private static Connection connection;
-  private static ArrayList<MySQLStoreModel> sensorModels;
+  private static ArrayList<MySqlStoreModel> sensorModels;
 
   private MySqlManager() {
     init(null);
   }
 
   /**
-   * Singleton method to get the instance of the class
+   * Singleton method to get the instance of the class.
    *
    * @return singleton instance of the class
    */
@@ -63,15 +74,20 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
     } catch (Exception se) {
       // Handle errors for JDBC
       se.printStackTrace();
-    } // Handle errors for Class.forName
-    finally {
+      // Handle errors for Class.forName
+    } finally {
       // finally block used to close resources
       try {
-        if (stmt != null) stmt.close();
+        if (stmt != null) {
+          stmt.close();
+        }
       } catch (SQLException ignored) {
-      } // nothing we can do
+        // nothing we can do
+      }
       try {
-        if (connection != null) connection.close();
+        if (connection != null) {
+          connection.close();
+        }
       } catch (SQLException se) {
         se.printStackTrace();
       }
@@ -79,13 +95,13 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
   }
 
   @Override
-  public <V extends MySQLStoreModel> void insertSensorDataList(List<V> sensorDataList) {
+  public <V extends MySqlStoreModel> void insertSensorDataList(List<V> sensorDataList) {
     //    sensorDataList.forEach(this::insertSensorData);
     connection = getConnection();
     // create the mysql insert prepared statement
     PreparedStatement preparedStmt;
     try {
-      for (MySQLStoreModel sensorData : sensorDataList) {
+      for (MySqlStoreModel sensorData : sensorDataList) {
         preparedStmt = connection.prepareStatement(sensorData.getInsertIntoTableQuery());
         sensorData.fillQueryData(preparedStmt);
         // execute the prepared statement
@@ -107,7 +123,7 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
   }
 
   @Override
-  public <V extends MySQLStoreModel> void insertSensorData(V sensorData) {
+  public <V extends MySqlStoreModel> void insertSensorData(V sensorData) {
     connection = getConnection();
     // create the mysql insert prepared statement
     PreparedStatement preparedStmt;
@@ -164,7 +180,7 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
   }
 
   private void createAllTables(Statement stmt) throws SQLException {
-    for (MySQLStoreModel sensorData : sensorModels) {
+    for (MySqlStoreModel sensorData : sensorModels) {
       try {
         stmt.executeUpdate(sensorData.getCreateTableQuery());
       } catch (SQLSyntaxErrorException exception) {
@@ -175,7 +191,7 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
   }
 
   /**
-   * Call to get a reference to a connection with MySQL Server with the credentials
+   * Call to get a reference to a connection with MySQL Server with the credentials.
    *
    * @return reference to connection
    */
@@ -206,7 +222,7 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
       while (rs.next()) {
         ActivitySensorData data = new ActivitySensorData();
         data.setTimestamp(rs.getString("time_stamp"));
-        data.setTime_stamp(rs.getString("time_stamp"));
+        data.setTimeStamp(rs.getString("time_stamp"));
         data.setSensorName(rs.getString("sensor_name"));
         ActivitySensorData.SensorData sensorData = new ActivitySensorData.SensorData();
         sensorData.setStepCounts(rs.getInt("step_counts"));
@@ -218,6 +234,8 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
 
     } catch (SQLException e) {
       e.printStackTrace();
+    } finally {
+      closeConnection(connection);
     }
 
     // execute the query, and get a java resultset
@@ -225,7 +243,7 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
   }
 
   /**
-   * Call to search for running event for the given date in the activ fit sensor data
+   * Call to search for running event for the given date in the activfit sensor data.
    *
    * @param date given date
    * @return all instances of running event recorded for the given date
@@ -261,16 +279,30 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
       }
     } catch (SQLException e) {
       e.printStackTrace();
+    } finally {
+      closeConnection(connection);
     }
 
     // execute the query, and get a java result set
     return resultSet;
   }
 
+  /**
+   * Close database connection
+   *
+   * @param connection database connection
+   */
+  private void closeConnection(Connection connection) {
+    try {
+      connection.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
   private ArrayList<HeartRateSensorData> getHeartRateSensorDataForGivenDate(Date date) {
     connection = getConnection();
     ArrayList<HeartRateSensorData> results = new ArrayList<>();
-    // if you only need a few columns, specify them by name instead of using "*"
     String query =
         "SELECT * FROM "
             + HeartRateSensorData.MY_SQL_TABLE_NAME
@@ -279,7 +311,7 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
             + "'";
 
     // create the java statement
-    Statement st = null;
+    Statement st;
     try {
       st = connection.createStatement();
       ResultSet rs = st.executeQuery(query);
@@ -299,6 +331,8 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
 
     } catch (SQLException e) {
       e.printStackTrace();
+    } finally {
+      closeConnection(connection);
     }
 
     // execute the query, and get a java resultset
@@ -328,9 +362,10 @@ public class MySqlManager implements DbManager<MySQLStoreModel>, DatabaseQueryRu
         batterySensor.setSensorData(sensorData);
         results.add(batterySensor);
       }
-
     } catch (SQLException e) {
       e.printStackTrace();
+    } finally {
+      closeConnection(connection);
     }
 
     // execute the query, and get a java resultset

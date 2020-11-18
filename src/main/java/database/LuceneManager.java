@@ -1,5 +1,12 @@
 package database;
 
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.servlet.ServletContext;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -18,15 +25,6 @@ import sensormodels.ActivFitSensorData;
 import sensormodels.store.models.LuceneStoreModel;
 import utils.WebAppConstants;
 
-import javax.servlet.ServletContext;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-/** @author Adit Modhvadia */
 public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStoreModel> {
   public static String indexDirRelativePath = "luceneIndex";
 
@@ -40,7 +38,7 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
   }
 
   /**
-   * Singleton method to get the instance of the class
+   * Singleton method to get the instance of the class.
    *
    * @return singleton instance of the class
    */
@@ -112,7 +110,7 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
   }
 
   /**
-   * Call to get instance of IndexWriter
+   * Call to get instance of IndexWriter.
    *
    * @return index writer
    */
@@ -133,6 +131,7 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
     return null;
   }
 
+  /** Close the writer to release write lock. */
   private void closeWriter() {
     if (indexWriter != null) {
       try {
@@ -145,7 +144,7 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
 
   /**
    * Called to perform search in Lucene in the given indexDirectory for the given query string and
-   * the given Index Value
+   * the given Index Value.
    *
    * @param queryStr given query string
    * @param indexValue given index value
@@ -170,16 +169,10 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
       ScoreDoc[] hits = docs.scoreDocs;
 
       //            System.out.println("Found " + hits.length + " hits.");
-      for (int i = 0; i < hits.length; ++i) {
-        int docId = hits[i].doc;
+      for (ScoreDoc hit : hits) {
+        int docId = hit.doc;
         Document d = searcher.doc(docId);
         results.add(d);
-        //                System.out.println((i + 1) + ". " + d.get("isbn") + "\t" +
-        // d.get("title"));
-        //                System.out.println((i + 1) + ". " + d.get(LuceneConstants.BPM) + "\t" +
-        // d.get(LuceneConstants.SENSOR_NAME));
-        /*System.out.println((i + 1) + ". " + d.get(LuceneConstants.SENSOR_NAME) + "\t" + d.get(indexValue)
-        + "\t" + d.get(LuceneConstants.TIMESTAMP));*/
       }
       // reader can only be closed when there
       // is no need to access the documents any more.
@@ -231,7 +224,7 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
     }
   }
 
-  /** Constants class */
+  /** Constants class. */
   public static class LuceneConstants {
 
     public static final String LUX = "lux";

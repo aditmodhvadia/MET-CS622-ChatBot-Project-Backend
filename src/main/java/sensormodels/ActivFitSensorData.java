@@ -3,6 +3,10 @@ package sensormodels;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import database.LuceneManager;
+import java.io.File;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Date;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -10,12 +14,6 @@ import org.apache.lucene.document.TextField;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import utils.WebAppConstants;
 
-import java.io.File;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-
-/** @author Adit Modhvadia */
 public class ActivFitSensorData extends DatabaseModel {
 
   @BsonIgnore public static final String MY_SQL_TABLE_NAME = "ActivFitSensorData";
@@ -38,10 +36,12 @@ public class ActivFitSensorData extends DatabaseModel {
   @Expose
   private SensorData sensorData;
 
-  @Expose private String formatted_date;
+  @Expose
+  @SerializedName("formatted_date")
+  private String formattedDate;
 
-  public String getFormatted_date() {
-    return formatted_date;
+  public String getFormattedDate() {
+    return formattedDate;
   }
 
   public String getSensorName() {
@@ -70,8 +70,7 @@ public class ActivFitSensorData extends DatabaseModel {
 
   @Override
   public void setFormattedDate() {
-    this.formatted_date =
-        WebAppConstants.inputDateFormat.format(new Date(timestamp.getStartTime()));
+    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timestamp.getStartTime()));
   }
 
   @Override
@@ -91,11 +90,11 @@ public class ActivFitSensorData extends DatabaseModel {
     doc.add(
         new StringField(
             LuceneManager.LuceneConstants.SENSOR_NAME, this.getSensorName(), Field.Store.YES));
-    if (this.getFormatted_date() != null) {
+    if (this.getFormattedDate() != null) {
       doc.add(
           new StringField(
               LuceneManager.LuceneConstants.FORMATTED_DATE,
-              this.getFormatted_date(),
+              this.getFormattedDate(),
               Field.Store.YES));
     }
     doc.add(
@@ -163,7 +162,7 @@ public class ActivFitSensorData extends DatabaseModel {
   public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
     preparedStmt.setString(1, this.getTimestamp().getStartTime());
     preparedStmt.setString(2, this.getTimestamp().getEndTime());
-    preparedStmt.setString(3, this.getFormatted_date());
+    preparedStmt.setString(3, this.getFormattedDate());
     preparedStmt.setInt(4, this.getSensorData().getDuration());
     preparedStmt.setString(5, this.getSensorData().getActivity());
   }
