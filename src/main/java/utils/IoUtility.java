@@ -1,28 +1,37 @@
 package utils;
 
-import listeners.FileListener;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import listeners.FileListener;
 
-public class IOUtility {
-  private static IOUtility instance;
+public class IoUtility {
+  private static IoUtility instance;
 
-  private IOUtility() {}
+  private IoUtility() {}
 
-  public static IOUtility getInstance() {
-    synchronized (IOUtility.class) {
+  /**
+   * Get singleton instance.
+   *
+   * @return instance
+   */
+  public static IoUtility getInstance() {
+    synchronized (IoUtility.class) {
       if (instance == null) {
-        instance = new IOUtility();
+        instance = new IoUtility();
       }
     }
     return instance;
   }
 
   /**
-   * Use to read/get contents of the given file
+   * Use to read/get contents of the given file.
    *
    * @param inputFile given file
    * @return contents of file from given file path
@@ -44,7 +53,7 @@ public class IOUtility {
   }
 
   /**
-   * Use to read/get contents of the given file line by line in a List
+   * Use to read/get contents of the given file line by line in a List.
    *
    * @param inputFile given file
    * @return contents of file from given file path line by line
@@ -65,6 +74,12 @@ public class IOUtility {
     return fileContents; // return file contents
   }
 
+  /**
+   * Append the contents of source file into destination file.
+   *
+   * @param destinationFile file to append data to
+   * @param sourceFile file from which data will be appended
+   */
   public void appendToFile(File destinationFile, File sourceFile) {
     FileWriter fr = null;
     BufferedWriter br = null;
@@ -91,7 +106,7 @@ public class IOUtility {
 
   /**
    * Use to iterate through all the files and directories from the given folder and listen for any
-   * zip files or files found
+   * zip files or files found.
    *
    * @param folder given folder
    * @param fileListener given File Listener
@@ -112,19 +127,20 @@ public class IOUtility {
   }
 
   /**
-   * Use to create a Directory with the given name
+   * Use to create a Directory with the given name.
    *
    * @param dirName given name
    */
-  public void createDirectory(String dirName) {
+  public boolean createDirectory(String dirName) {
     File dir = new File(dirName);
     if (!dir.exists()) {
-      dir.mkdir();
+      return dir.mkdir();
     }
+    return false;
   }
 
   /**
-   * Use to create a file with given name at the given path and return the said file
+   * Use to create a file with given name at the given path and return the said file.
    *
    * @param path given path
    * @param fileName given file name
@@ -146,7 +162,7 @@ public class IOUtility {
   }
 
   /**
-   * Use to find the sensor data entries that match with the given query string in the given file
+   * Use to find the sensor data entries that match with the given query string in the given file.
    *
    * @param file given file
    * @param query given query

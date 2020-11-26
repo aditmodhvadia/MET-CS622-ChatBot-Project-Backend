@@ -19,15 +19,14 @@ import java.util.stream.Collectors;
 public abstract class QueryResponseServlet extends HttpServlet {
 
   private HttpServletResponse response;
-  private final Gson g = new Gson();
+  private final Gson gson = new Gson();
   private DatabaseQueryRunner databaseQueryRunner;
 
   public QueryResponseServlet(DatabaseQueryRunner databaseQueryRunner) {
     this.databaseQueryRunner = databaseQueryRunner;
   }
 
-  public QueryResponseServlet() {
-  }
+  public QueryResponseServlet() {}
 
   /**
    * Change the database query runner at runtime
@@ -47,7 +46,7 @@ public abstract class QueryResponseServlet extends HttpServlet {
     System.out.println(getServletName() + " POST request called with request ");
     System.out.println(requestHeaderString);
     MessageQueryRequestModel queryMessage =
-            g.fromJson(requestHeaderString, MessageQueryRequestModel.class);
+        gson.fromJson(requestHeaderString, MessageQueryRequestModel.class);
 
     Date userDate = QueryUtils.extractDateFromQuery(queryMessage.getQuery());
 
@@ -79,7 +78,7 @@ public abstract class QueryResponseServlet extends HttpServlet {
   }
 
   /**
-   * Call to send back the response with given query response data
+   * Call to send back the response with given query response data.
    *
    * @param queryResponseData given query response data
    */
@@ -88,7 +87,7 @@ public abstract class QueryResponseServlet extends HttpServlet {
     QueryResponseMessage.Data data = new QueryResponseMessage.Data(queryResponseData);
     msg.setData(data);
     try {
-      response.getOutputStream().print(g.toJson(msg));
+      response.getOutputStream().print(gson.toJson(msg));
     } catch (IOException e) {
       e.printStackTrace();
     }

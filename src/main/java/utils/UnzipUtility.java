@@ -19,22 +19,22 @@ import java.util.zip.ZipInputStream;
  * @author Adit Modhvadia
  */
 public class UnzipUtility {
-  /** Size of the buffer to read/write data */
+  /** Size of the buffer to read/write data. */
   private static final int BUFFER_SIZE = 4096;
 
   /**
    * Extracts a zip file specified by the zipFilePath to a directory specified by destDirectory
-   * (will be created if does not exists)
+   * (will be created if does not exists).
    *
-   * @param zipFilePath   path for the zip file
-   * @param destDirectory destination of zip extraction
-   * @throws IOException IOException may occur
+   * @param zipFilePath zip file path
+   * @param destDirectory destination directory path
+   * @throws IOException File may not be created
    */
   public void unzip(
-          @Nonnull String zipFilePath,
-          @Nonnull String destDirectory,
-          @Nullable FileListener fileListener)
-          throws IOException {
+      @Nonnull String zipFilePath,
+      @Nonnull String destDirectory,
+      @Nullable FileListener fileListener)
+      throws IOException {
     File destDir = new File(destDirectory); // create destination directory if it does not exist
     if (!destDir.exists()) {
       destDir.mkdir();
@@ -58,7 +58,7 @@ public class UnzipUtility {
         //                InputStream is = file.getInputStream(entry);
         BufferedInputStream bis = new BufferedInputStream(zipIn);
         String uncompressedFileName =
-                destDirectory + FileSystems.getDefault().getSeparator() + entry.getName();
+            destDirectory + FileSystems.getDefault().getSeparator() + entry.getName();
         Path uncompressedFilePath = fileSystem.getPath(uncompressedFileName);
         Files.createFile(uncompressedFilePath);
         FileOutputStream fileOutput = new FileOutputStream(uncompressedFileName);
@@ -78,14 +78,14 @@ public class UnzipUtility {
   }
 
   /**
-   * Extracts a zip entry (file entry) using given ZipInputStream at the given filepath
+   * Extracts a zip entry (file entry) using given ZipInputStream at the given filepath.
    *
-   * @param zipIn    given ZipInputStream
+   * @param zipIn given ZipInputStream
    * @param filePath given filepath
    * @throws IOException standard IOException
    */
   private void extractFile(@Nonnull ZipInputStream zipIn, @Nonnull String filePath)
-          throws IOException {
+      throws IOException {
     BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
     byte[] bytesIn = new byte[BUFFER_SIZE];
     int read = 0;

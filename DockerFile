@@ -1,0 +1,5 @@
+FROM tomcat:latest
+
+COPY . ./$CATALINA_BASE/webapps
+
+CMD ["catalina.sh","run"]

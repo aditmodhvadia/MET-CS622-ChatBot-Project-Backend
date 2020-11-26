@@ -62,7 +62,7 @@ public class QueryUtils {
   }
 
   /**
-   * Call to determine the category of the given query and get the callback for the same
+   * Call to determine the category of the given query and get the callback for the same.
    *
    * @param query given query
    */
@@ -79,7 +79,7 @@ public class QueryUtils {
   }
 
   /**
-   * Call to check if the given query matches with given pattern
+   * Call to check if the given query matches with given pattern.
    *
    * @param pattern given pattern
    * @param query given query
@@ -91,7 +91,7 @@ public class QueryUtils {
   }
 
   /**
-   * Use to add given number of days to the given Date
+   * Use to add given number of days to the given Date.
    *
    * @param userDate given Date
    * @param days given number of days
@@ -105,7 +105,7 @@ public class QueryUtils {
   }
 
   /**
-   * Use to print the Query result data for running activity on the given Date
+   * Use to print the Query result data for running activity on the given Date.
    *
    * @param queryResult the given Result from the Query
    */
@@ -138,7 +138,7 @@ public class QueryUtils {
   }
 
   /**
-   * Use to print the Query result from counting the total steps of the day
+   * Use to print the Query result from counting the total steps of the day.
    *
    * @param stepCount given step count
    * @param userDate given Date of the step count
@@ -155,8 +155,10 @@ public class QueryUtils {
   }
 
   /**
-   * Call to get formatted output for HeartRates for the days
+   * Call to get formatted output for HeartRates for the days.
    *
+   * @param date date
+   * @param heartRateCount heart rate count
    * @param date date
    * @param heartRateCount total heart rate count
    */

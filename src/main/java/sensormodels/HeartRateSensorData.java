@@ -3,6 +3,10 @@ package sensormodels;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import database.LuceneManager;
+import java.io.File;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Date;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntPoint;
@@ -10,43 +14,31 @@ import org.apache.lucene.document.StringField;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import utils.WebAppConstants;
 
-import java.io.File;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-
-/**
- * @author Adit Modhvadia
- */
 public class HeartRateSensorData extends DatabaseModel {
 
+  @BsonIgnore public static final String MY_SQL_TABLE_NAME = "HeartRateSensorData";
 
-  @BsonIgnore
-    public static final String MY_SQL_TABLE_NAME = "HeartRateSensorData";
+  @BsonIgnore public static final String MONGO_COLLECTION_NAME = "HeartRateSensorData";
 
-  @BsonIgnore
-    public static final String MONGO_COLLECTION_NAME = "HeartRateSensorData";
+  @BsonIgnore public static final String FILE_NAME = "HeartRate";
 
-  @BsonIgnore
-    public static final String FILE_NAME = "HeartRate";
+  @SerializedName("sensor_name")
+  @Expose
+  private String sensorName;
 
-    @SerializedName("sensor_name")
-    @Expose
-    private String sensorName;
+  @SerializedName("timestamp")
+  @Expose
+  private String timestamp;
 
-    @SerializedName("timestamp")
-    @Expose
-    private String timestamp;
-
-    @SerializedName("sensor_data")
+  @SerializedName("sensor_data")
   @Expose
   private SensorData sensorData;
 
-    @Expose
-    private String formatted_date;
+  @SerializedName("formatted_date")
+  @Expose
+  private String formattedDate;
 
-  @BsonIgnore
-    private File file;
+  @BsonIgnore private File file;
 
   public String getSensorName() {
     return sensorName;
@@ -73,7 +65,7 @@ public class HeartRateSensorData extends DatabaseModel {
   }
 
   public void setFormattedDate() {
-    this.formatted_date = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timestamp));
   }
 
   @Override
@@ -81,14 +73,13 @@ public class HeartRateSensorData extends DatabaseModel {
     return this.getTimestamp();
   }
 
-  public String getFormatted_date() {
-    return formatted_date;
+  public String getFormattedDate() {
+    return formattedDate;
   }
 
-    @Override
-
-    @BsonIgnore
-    public Document getDocument() {
+  @Override
+  @BsonIgnore
+  public Document getDocument() {
     Document doc = new Document();
     //        doc.add(new TextField(LuceneConstants.BPM,
     // String.valueOf(sensorData.getSensorData().getBpm()), Field.Store.YES));
@@ -99,7 +90,7 @@ public class HeartRateSensorData extends DatabaseModel {
     doc.add(
         new StringField(
             LuceneManager.LuceneConstants.FORMATTED_DATE,
-            this.getFormatted_date(),
+            this.getFormattedDate(),
             Field.Store.YES));
     //         use a string field for timestamp because we don't want it tokenized
     doc.add(
@@ -108,31 +99,27 @@ public class HeartRateSensorData extends DatabaseModel {
     return doc;
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getMongoCollectionName() {
+  @Override
+  @BsonIgnore
+  public String getMongoCollectionName() {
     return MONGO_COLLECTION_NAME;
   }
 
-    @Override
-
-    @BsonIgnore
-    public Class<HeartRateSensorData> getClassObject() {
+  @Override
+  @BsonIgnore
+  public Class<HeartRateSensorData> getClassObject() {
     return HeartRateSensorData.class;
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getTableName() {
+  @Override
+  @BsonIgnore
+  public String getTableName() {
     return MY_SQL_TABLE_NAME;
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getCreateTableQuery() {
+  @Override
+  @BsonIgnore
+  public String getCreateTableQuery() {
     return "CREATE TABLE "
         + this.getTableName()
         + "(timestamp VARCHAR(30) , "
@@ -141,30 +128,27 @@ public class HeartRateSensorData extends DatabaseModel {
         + " bpm INTEGER)";
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getInsertIntoTableQuery() {
+  @Override
+  @BsonIgnore
+  public String getInsertIntoTableQuery() {
     return " insert into "
         + this.getTableName()
         + " (timestamp, formatted_date, sensor_name,bpm)"
         + " values (?, ?, ?, ?)";
   }
 
-    @Override
-
-    @BsonIgnore
-    public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
-        preparedStmt.setString(1, this.getTimestamp());
-        preparedStmt.setString(2, this.getFormatted_date());
-        preparedStmt.setString(3, this.getSensorName());
-        preparedStmt.setInt(4, this.getSensorData().getBpm());
+  @Override
+  @BsonIgnore
+  public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
+    preparedStmt.setString(1, this.getTimestamp());
+    preparedStmt.setString(2, this.getFormattedDate());
+    preparedStmt.setString(3, this.getSensorName());
+    preparedStmt.setInt(4, this.getSensorData().getBpm());
   }
 
-    @Override
-
-    @BsonIgnore
-    public String getFileName() {
+  @Override
+  @BsonIgnore
+  public String getFileName() {
     return FILE_NAME;
   }
 
@@ -173,10 +157,9 @@ public class HeartRateSensorData extends DatabaseModel {
     this.file = file;
   }
 
-    @Override
-
-    @BsonIgnore
-    public File getFile() {
+  @Override
+  @BsonIgnore
+  public File getFile() {
     return this.file;
   }
 
