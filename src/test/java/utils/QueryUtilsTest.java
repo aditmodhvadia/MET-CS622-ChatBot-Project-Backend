@@ -3,11 +3,14 @@ package utils;
 import org.junit.Test;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static utils.QueryUtils.getFormattedHeartRatesForTheDays;
+import static utils.WebAppConstants.NO_HEART_RATE_DATA;
 
 public class QueryUtilsTest {
 
@@ -53,28 +56,44 @@ public class QueryUtilsTest {
 
     today.add(Calendar.DATE, -1);
     assertEquals(
-            today.getTime().getDate(),
-            Objects.requireNonNull(QueryUtils.extractDateFromQuery("yesterday")).getDate());
+        today.getTime().getDate(),
+        Objects.requireNonNull(QueryUtils.extractDateFromQuery("yesterday")).getDate());
     Calendar calendar = Calendar.getInstance(Locale.getDefault());
     calendar.set(Calendar.YEAR, 2018);
     calendar.set(Calendar.MONTH, 9);
     calendar.set(Calendar.DAY_OF_MONTH, 12);
     assertEquals(
-            calendar.getTime().getDate(),
-            Objects.requireNonNull(QueryUtils.extractDateFromQuery("10-12-2018")).getDate());
+        calendar.getTime().getDate(),
+        Objects.requireNonNull(QueryUtils.extractDateFromQuery("10-12-2018")).getDate());
   }
 
   @Test
   public void determineQueryType() {
     assertEquals(
-            QueryUtils.QueryType.HEART_RATE, QueryUtils.determineQueryType("what was my heartrate"));
+        QueryUtils.QueryType.HEART_RATE, QueryUtils.determineQueryType("what was my heartrate"));
 
     assertEquals(QueryUtils.QueryType.STEP_COUNT, QueryUtils.determineQueryType("how many steps?"));
 
     assertEquals(
-            QueryUtils.QueryType.RUNNING, QueryUtils.determineQueryType("how much did I run today?"));
+        QueryUtils.QueryType.RUNNING, QueryUtils.determineQueryType("how much did I run today?"));
 
     assertEquals(
-            QueryUtils.QueryType.UNKNOWN, QueryUtils.determineQueryType("what was my temperature?"));
+        QueryUtils.QueryType.UNKNOWN, QueryUtils.determineQueryType("what was my temperature?"));
+  }
+
+  @Test
+  public void formattedHeartRateCountResult() {
+    //    No heart rate data found
+    assertEquals(getFormattedHeartRatesForTheDays(new Date(), 0), NO_HEART_RATE_DATA);
+
+    assertEquals(
+        getFormattedHeartRatesForTheDays(new Date("11/25/2020"), 10),
+        "You received 10 heart rate notifications on 11/25/2020.");
+    assertEquals(
+        getFormattedHeartRatesForTheDays(new Date("11/25/2020"), 1997),
+        "You received 1997 heart rate notifications on 11/25/2020.");
+    assertEquals(
+        getFormattedHeartRatesForTheDays(new Date("11/25/2020"), 1),
+        "You received 1 heart rate notifications on 11/25/2020.");
   }
 }

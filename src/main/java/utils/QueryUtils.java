@@ -12,6 +12,8 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static utils.WebAppConstants.NO_HEART_RATE_DATA;
+
 public class QueryUtils {
   public static final String RUNNING_EVENT_REGEX = "([rR][ua]n(ning)?)";
   public static final String STEP_COUNT_EVENT_REGEX = "([sS]teps*|[wW]alk(ed)?)";
@@ -155,21 +157,16 @@ public class QueryUtils {
   /**
    * Call to get formatted output for HeartRates for the days
    *
-   * @param date           date
+   * @param date date
    * @param heartRateCount total heart rate count
    */
   public static String getFormattedHeartRatesForTheDays(Date date, int heartRateCount) {
-    StringBuilder builder = new StringBuilder();
     if (heartRateCount == 0) {
-      builder.append("No data found or some error occurred.");
+      return NO_HEART_RATE_DATA;
     } else {
       String formattedDate = WebAppConstants.inputDateFormat.format(date);
-      builder
-          .append("You received ")
-          .append(heartRateCount)
-          .append(" HeartRate notifications on ")
-          .append(formattedDate);
+      return String.format(
+          "You received %s heart rate notifications on %s.", heartRateCount, formattedDate);
     }
-    return builder.toString();
   }
 }
