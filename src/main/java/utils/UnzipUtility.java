@@ -1,18 +1,16 @@
 package utils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import listeners.FileListener;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.*;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import listeners.FileListener;
 
 /**
  * This utility extracts files and directories of a standard zip file to a destination directory.
@@ -32,7 +30,10 @@ public class UnzipUtility {
    * @param destDirectory destination directory path
    * @throws IOException File may not be created
    */
-  public void unzip(String zipFilePath, String destDirectory, FileListener fileListener)
+  public void unzip(
+      @Nonnull String zipFilePath,
+      @Nonnull String destDirectory,
+      @Nullable FileListener fileListener)
       throws IOException {
     File destDir = new File(destDirectory); // create destination directory if it does not exist
     if (!destDir.exists()) {
@@ -65,7 +66,9 @@ public class UnzipUtility {
           fileOutput.write(bis.read());
         }
         fileOutput.close();
-        fileListener.fileFound(new File(uncompressedFilePath.toString()));
+        if (fileListener != null) {
+          fileListener.fileFound(new File(uncompressedFilePath.toString()));
+        }
         System.out.println("Written :" + entry.getName());
       }
       zipIn.closeEntry();
@@ -81,7 +84,8 @@ public class UnzipUtility {
    * @param filePath given filepath
    * @throws IOException standard IOException
    */
-  private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
+  private void extractFile(@Nonnull ZipInputStream zipIn, @Nonnull String filePath)
+      throws IOException {
     BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
     byte[] bytesIn = new byte[BUFFER_SIZE];
     int read = 0;
