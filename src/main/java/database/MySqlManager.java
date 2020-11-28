@@ -12,13 +12,14 @@ import java.util.Date;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
-import sensormodels.activfit.ActivFitSensorData;
 import sensormodels.ActivitySensorData;
 import sensormodels.BatterySensorData;
 import sensormodels.BluetoothSensorData;
 import sensormodels.HeartRateSensorData;
 import sensormodels.LightSensorData;
 import sensormodels.ScreenUsageSensorData;
+import sensormodels.activfit.ActivFitSensorData;
+import sensormodels.activfit.ActivFitSensorDataBuilder;
 import sensormodels.store.models.MySqlStoreModel;
 import utils.WebAppConstants;
 
@@ -266,17 +267,15 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
       st = connection.createStatement();
       ResultSet rs = st.executeQuery(query);
       while (rs.next()) {
-        ActivFitSensorData data = new ActivFitSensorData();
-        ActivFitSensorData.Timestamp timeStamp = new ActivFitSensorData.Timestamp();
-        timeStamp.setStartTime(rs.getString("start_time"));
-        timeStamp.setEndTime(rs.getString("end_time"));
-        data.setTimestamp(timeStamp);
-        ActivFitSensorData.SensorData sensorData = new ActivFitSensorData.SensorData();
-        sensorData.setActivity(rs.getString("activity"));
-        sensorData.setDuration(rs.getInt("duration"));
-        data.setSensorData(sensorData);
-        data.setFormattedDate();
-        resultSet.add(data);
+        ActivFitSensorData activFitSensorData =
+            new ActivFitSensorDataBuilder()
+                .setStartTime(rs.getString("start_time"))
+                .setEndTime(rs.getString("end_time"))
+                .setActivity(rs.getString("activity"))
+                .setDuration(rs.getInt("duration"))
+                .build();
+
+        resultSet.add(activFitSensorData);
       }
     } catch (SQLException e) {
       e.printStackTrace();

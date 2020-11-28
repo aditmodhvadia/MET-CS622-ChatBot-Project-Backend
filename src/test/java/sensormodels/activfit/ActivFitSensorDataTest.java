@@ -16,7 +16,7 @@ public class ActivFitSensorDataTest {
   @Before
   public void setUp() {
     activFitSensorData =
-        new ActivFitSensorData.ActivFitSensorDataBuilder()
+        new ActivFitSensorDataBuilder()
             .setSensorName(sensorName)
             .setActivity(activity)
             .setDuration(duration)

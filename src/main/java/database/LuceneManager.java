@@ -24,6 +24,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import sensormodels.activfit.ActivFitSensorData;
+import sensormodels.activfit.ActivFitSensorDataBuilder;
 import sensormodels.store.models.LuceneStoreModel;
 import utils.WebAppConstants;
 
@@ -64,7 +65,7 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
     for (Document doc : getLuceneQueryTime("running", LuceneConstants.ACTIVITY)) {
       if (doc.get(LuceneConstants.FORMATTED_DATE).equals(formattedDate)) {
         ActivFitSensorData activFitSensorData =
-            new ActivFitSensorData.ActivFitSensorDataBuilder()
+            new ActivFitSensorDataBuilder()
                 .setStartTime(doc.get(LuceneConstants.START_TIME))
                 .setEndTime(doc.get(LuceneConstants.END_TIME))
                 .setActivity(doc.get(LuceneConstants.ACTIVITY))
