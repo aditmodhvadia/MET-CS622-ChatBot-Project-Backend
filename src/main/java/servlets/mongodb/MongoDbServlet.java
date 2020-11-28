@@ -8,4 +8,9 @@ public class MongoDbServlet extends QueryResponseServlet {
   public MongoDbServlet() {
     super(MongoDbManager.getInstance());
   }
+
+  @Override
+  protected void onPostResponse() {
+    System.out.println("MongoDB ran a query.");
+  }
 }

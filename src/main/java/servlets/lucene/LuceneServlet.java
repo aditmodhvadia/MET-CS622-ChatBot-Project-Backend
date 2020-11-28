@@ -7,6 +7,6 @@ public class LuceneServlet extends QueryResponseServlet {
 
   public LuceneServlet() {
     super();
-    LuceneManager.getInstance(this.getServletContext());
+    changeDatabaseQueryRunner(LuceneManager.getInstance(this.getServletContext()));
   }
 }
