@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import sensormodels.ActivFitSensorData;
+import sensormodels.activfit.ActivFitSensorData;
 import sensormodels.ActivitySensorData;
 import sensormodels.HeartRateSensorData;
 import sensormodels.store.models.MongoStoreModel;

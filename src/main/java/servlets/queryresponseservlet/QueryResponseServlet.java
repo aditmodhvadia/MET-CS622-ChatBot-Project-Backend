@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import requestmodel.MessageQueryRequestModel;
 import responsemodels.QueryResponseMessage;
-import sensormodels.ActivFitSensorData;
+import sensormodels.activfit.ActivFitSensorData;
 import utils.QueryUtils;
 
 public abstract class QueryResponseServlet extends HttpServlet {

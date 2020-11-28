@@ -2,7 +2,7 @@ package database;
 
 import java.util.ArrayList;
 import java.util.Date;
-import sensormodels.ActivFitSensorData;
+import sensormodels.activfit.ActivFitSensorData;
 
 public interface DatabaseQueryRunner {
 

@@ -1,4 +1,4 @@
-package sensormodels;
+package sensormodels.activfit;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -12,6 +12,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
+import sensormodels.DatabaseModel;
 import utils.WebAppConstants;
 
 public class ActivFitSensorData extends DatabaseModel {
@@ -241,6 +242,63 @@ public class ActivFitSensorData extends DatabaseModel {
 
     public void setDuration(Integer duration) {
       this.duration = duration;
+    }
+  }
+
+  public static class ActivFitSensorDataBuilder implements ActivFitSensorBuilder {
+    private final ActivFitSensorData activFitSensorData;
+
+    public ActivFitSensorDataBuilder() {
+      activFitSensorData = new ActivFitSensorData();
+      activFitSensorData.setTimestamp(new Timestamp());
+      activFitSensorData.setSensorData(new SensorData());
+    }
+
+    @Override
+    public ActivFitSensorBuilder setSensorName(String sensorName) {
+      this.activFitSensorData.setSensorName(sensorName);
+      return this;
+    }
+
+    @Override
+    public ActivFitSensorBuilder setTimeStamp(Timestamp timeStamp) {
+      this.activFitSensorData.setTimestamp(timeStamp);
+      return this;
+    }
+
+    @Override
+    public ActivFitSensorBuilder setSensorData(SensorData sensorData) {
+      this.activFitSensorData.setSensorData(sensorData);
+      return this;
+    }
+
+    @Override
+    public ActivFitSensorBuilder setStartTime(String startTime) {
+      this.activFitSensorData.getTimestamp().setStartTime(startTime);
+      return this;
+    }
+
+    @Override
+    public ActivFitSensorBuilder setEndTime(String endTime) {
+      this.activFitSensorData.getTimestamp().setEndTime(endTime);
+      return this;
+    }
+
+    @Override
+    public ActivFitSensorBuilder setActivity(String activity) {
+      this.activFitSensorData.getSensorData().setActivity(activity);
+      return this;
+    }
+
+    @Override
+    public ActivFitSensorBuilder setDuration(Integer duration) {
+      this.activFitSensorData.getSensorData().setDuration(duration);
+      return this;
+    }
+
+    @Override
+    public ActivFitSensorData build() {
+      return this.activFitSensorData;
     }
   }
 }

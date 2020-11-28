@@ -1,6 +1,6 @@
 package utils;
 
-import sensormodels.ActivFitSensorData;
+import sensormodels.activfit.ActivFitSensorData;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

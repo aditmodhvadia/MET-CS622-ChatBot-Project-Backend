@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
-import sensormodels.ActivFitSensorData;
+import sensormodels.activfit.ActivFitSensorData;
 import sensormodels.ActivitySensorData;
 import sensormodels.BatterySensorData;
 import sensormodels.BluetoothSensorData;

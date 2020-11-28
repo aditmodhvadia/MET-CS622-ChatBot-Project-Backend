@@ -23,7 +23,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import sensormodels.ActivFitSensorData;
+import sensormodels.activfit.ActivFitSensorData;
 import sensormodels.store.models.LuceneStoreModel;
 import utils.WebAppConstants;
 
