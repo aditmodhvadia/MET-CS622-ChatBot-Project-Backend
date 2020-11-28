@@ -63,16 +63,15 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
     String formattedDate = WebAppConstants.inputDateFormat.format(userDate);
     for (Document doc : getLuceneQueryTime("running", LuceneConstants.ACTIVITY)) {
       if (doc.get(LuceneConstants.FORMATTED_DATE).equals(formattedDate)) {
-        ActivFitSensorData data = new ActivFitSensorData();
-        ActivFitSensorData.Timestamp timeStamp = new ActivFitSensorData.Timestamp();
-        timeStamp.setStartTime(doc.get(LuceneConstants.START_TIME));
-        timeStamp.setEndTime(doc.get(LuceneConstants.END_TIME));
-        data.setTimestamp(timeStamp);
-        ActivFitSensorData.SensorData sensorData = new ActivFitSensorData.SensorData();
-        sensorData.setActivity(doc.get(LuceneConstants.ACTIVITY));
-        data.setSensorData(sensorData);
-        data.setFormattedDate();
-        queryResult.add(data);
+        ActivFitSensorData activFitSensorData =
+            new ActivFitSensorData.ActivFitSensorDataBuilder()
+                .setStartTime(doc.get(LuceneConstants.START_TIME))
+                .setEndTime(doc.get(LuceneConstants.END_TIME))
+                .setActivity(doc.get(LuceneConstants.ACTIVITY))
+                .build();
+
+        activFitSensorData.setFormattedDate();
+        queryResult.add(activFitSensorData);
       }
     }
     return queryResult;
