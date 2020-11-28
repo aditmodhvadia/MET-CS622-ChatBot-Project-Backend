@@ -71,7 +71,6 @@ public abstract class QueryResponseServlet extends HttpServlet {
   }
 
   private void logPostRequest(String requestHeaderString) {
-
     System.out.printf(
         "%s POST request called with request\n%s", getServletName(), requestHeaderString);
   }
