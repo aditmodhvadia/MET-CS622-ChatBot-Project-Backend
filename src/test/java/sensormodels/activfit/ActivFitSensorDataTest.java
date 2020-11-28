@@ -8,7 +8,7 @@ import org.junit.Test;
 public class ActivFitSensorDataTest {
   private final String sensorName = "ActivFitSensorData";
   private final String activity = "Activity";
-  private final String startTime = "startTime";
+  private final String startTime = "12/12/2020";
   private final String endTime = "endTime";
   private final Integer duration = 100;
   private ActivFitSensorData activFitSensorData;
@@ -48,5 +48,10 @@ public class ActivFitSensorDataTest {
   @Test
   public void getDuration() {
     assertEquals(duration, activFitSensorData.getSensorData().getDuration());
+  }
+
+  @Test
+  public void getFormattedDate() {
+    assertEquals(startTime, activFitSensorData.getFormattedDate());
   }
 }

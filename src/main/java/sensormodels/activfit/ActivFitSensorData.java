@@ -275,6 +275,7 @@ public class ActivFitSensorData extends DatabaseModel {
     @Override
     public ActivFitSensorBuilder setStartTime(String startTime) {
       this.activFitSensorData.getTimestamp().setStartTime(startTime);
+      this.activFitSensorData.setFormattedDate();
       return this;
     }
 

@@ -70,7 +70,6 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
                 .setActivity(doc.get(LuceneConstants.ACTIVITY))
                 .build();
 
-        activFitSensorData.setFormattedDate();
         queryResult.add(activFitSensorData);
       }
     }
