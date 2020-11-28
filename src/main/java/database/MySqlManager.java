@@ -10,6 +10,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import sensormodels.ActivFitSensorData;
 import sensormodels.ActivitySensorData;
@@ -51,7 +52,7 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
   }
 
   @Override
-  public void init(ServletContext servletContext) {
+  public void init(@Nullable ServletContext servletContext) {
     initSensorModels();
     connection = null;
     Statement stmt = null;

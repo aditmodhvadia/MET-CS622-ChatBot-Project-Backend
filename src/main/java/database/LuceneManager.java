@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -42,14 +44,14 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
    *
    * @return singleton instance of the class
    */
-  public static LuceneManager getInstance(ServletContext servletContext) {
+  public static LuceneManager getInstance(@Nonnull ServletContext servletContext) {
     if (instance == null) {
       instance = new LuceneManager(servletContext);
     }
     return instance;
   }
 
-  public void updateServletContext(ServletContext servletContext) {
+  public void updateServletContext(@Nonnull ServletContext servletContext) {
     this.indexDir = servletContext.getRealPath(indexDirRelativePath);
     System.out.println(indexDir);
   }
@@ -186,8 +188,10 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
   }
 
   @Override
-  public void init(ServletContext servletContext) {
-    this.updateServletContext(servletContext);
+  public void init(@Nullable ServletContext servletContext) {
+    if (servletContext != null) {
+      this.updateServletContext(servletContext);
+    }
     System.out.println("<----Lucene initialized.---->");
   }
 

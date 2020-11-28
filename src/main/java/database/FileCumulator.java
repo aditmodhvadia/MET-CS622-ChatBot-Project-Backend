@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import sensormodels.ActivFitSensorData;
 import sensormodels.ActivitySensorData;
@@ -59,7 +60,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   }
 
   @Override
-  public void init(ServletContext servletContext) {
+  public void init(@Nullable ServletContext servletContext) {
     miscFile =
         ioUtility.createEmptyFile(
             BASE_ADDRESS + MISC_FILE_NAME + FileSystems.getDefault().getSeparator(),

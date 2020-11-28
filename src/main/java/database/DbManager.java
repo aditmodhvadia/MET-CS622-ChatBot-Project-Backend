@@ -1,6 +1,7 @@
 package database;
 
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 
 public interface DbManager<T> {
@@ -10,7 +11,7 @@ public interface DbManager<T> {
    *
    * @param servletContext servlet context
    */
-  void init(ServletContext servletContext);
+  void init(@Nullable ServletContext servletContext);
 
   /**
    * Use to insert given documents of the given type into the given target collection.

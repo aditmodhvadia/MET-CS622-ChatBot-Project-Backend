@@ -2,6 +2,7 @@ package database;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import sensormodels.DatabaseModel;
 
@@ -28,7 +29,7 @@ public final class DatabaseManager implements DbManager<DatabaseModel>, Database
   }
 
   @Override
-  public void init(ServletContext servletContext) {
+  public void init(@Nullable ServletContext servletContext) {
     databases.forEach(database -> database.init(servletContext));
   }
 

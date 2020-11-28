@@ -17,6 +17,7 @@ import com.mongodb.client.MongoDatabase;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -53,7 +54,7 @@ public class MongoDbManager implements DbManager<MongoStoreModel>, DatabaseQuery
    *
    * @param servletContext servlet context
    */
-  public void init(ServletContext servletContext) {
+  public void init(@Nullable ServletContext servletContext) {
     CodecRegistry pojoCodecRegistry =
         fromRegistries(
             MongoClientSettings.getDefaultCodecRegistry(),
