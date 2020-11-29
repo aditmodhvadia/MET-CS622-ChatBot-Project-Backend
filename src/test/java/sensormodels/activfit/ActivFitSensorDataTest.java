@@ -2,6 +2,9 @@ package sensormodels.activfit;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,5 +56,25 @@ public class ActivFitSensorDataTest {
   @Test
   public void getFormattedDate() {
     assertEquals(startTime, activFitSensorData.getFormattedDate());
+  }
+
+  @Test
+  public void filterSensorData() {
+    List<ActivFitSensorData> sensorDataList = new ArrayList<>();
+    sensorDataList.add(activFitSensorData);
+    sensorDataList.add(activFitSensorData);
+    sensorDataList.add(activFitSensorData);
+
+    assertEquals(
+        sensorDataList,
+        sensorDataList.stream()
+            .filter(sensorData -> sensorData.getSensorName().equals(sensorName))
+            .collect(Collectors.toList()));
+
+    assertEquals(
+        new ArrayList<>(),
+        sensorDataList.stream()
+            .filter(sensorData -> !sensorData.getSensorName().equals(sensorName))
+            .collect(Collectors.toList()));
   }
 }

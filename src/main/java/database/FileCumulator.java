@@ -8,10 +8,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
-import sensormodels.activfit.ActivFitSensorData;
 import sensormodels.ActivitySensorData;
 import sensormodels.BatterySensorData;
 import sensormodels.BluetoothSensorData;
@@ -19,7 +18,9 @@ import sensormodels.DatabaseModel;
 import sensormodels.HeartRateSensorData;
 import sensormodels.LightSensorData;
 import sensormodels.ScreenUsageSensorData;
+import sensormodels.activfit.ActivFitSensorData;
 import sensormodels.store.models.FileStoreModel;
+import utils.DatabaseUtils;
 import utils.IoUtility;
 import utils.QueryUtils;
 import utils.WebAppConstants;
@@ -97,29 +98,22 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   }
 
   @Override
-  public ArrayList<ActivFitSensorData> queryForRunningEvent(Date date) {
-    //        get the next Day Date as well
-    Date nextDate = QueryUtils.addDayToDate(date, 1);
+  public ArrayList<ActivFitSensorData> queryForRunningEvent(Date today) {
+    Date tomorrow = QueryUtils.addDayToDate(today, 1); //        get the next Day Date as well
     //        fetch all record from the collection
-    List<ActivFitSensorData> fileData =
+    List<ActivFitSensorData> allSensorData =
         getSensorFileContents(
             (ActivFitSensorData) sensorModelsMap.get(ActivFitSensorData.FILE_NAME), 1000);
-    ArrayList<ActivFitSensorData> queryResult =
-        new ArrayList<>(); // holds the result from the query
-    for (ActivFitSensorData nextData : fileData) {
-      //            get startDate of the SensorData entry and then check if it lies between the user
-      // entered Date and the next day or not
-      Date startDate = new Date(nextData.getTimestamp().getStartTime());
-      if (startDate.after(date) && startDate.before(nextDate)) { // check it lies within range
-        if (!nextData.getSensorData().getActivity().equals("unknown")
-            && Objects.equals(nextData.getSensorData().getActivity(), "running")) {
-          //                    SensorData entry lies between the dates and is for running, so add
-          // it to the result List
-          queryResult.add(nextData);
-        }
-      }
-    }
-    return queryResult;
+
+    return allSensorData.stream()
+        .filter(
+            sensorData -> {
+              Date sensorDataStartTime = new Date(sensorData.getTimestamp().getStartTime());
+              return DatabaseUtils.isWithinDateRange(today, tomorrow, sensorDataStartTime)
+                  && DatabaseUtils.shouldBeRunningAndNotUnknown(
+                      sensorData.getSensorData().getActivity());
+            })
+        .collect(Collectors.toCollection(ArrayList::new));
   }
 
   @Override
