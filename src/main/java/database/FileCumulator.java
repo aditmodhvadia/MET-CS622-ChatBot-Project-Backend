@@ -120,6 +120,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   public int queryHeartRatesForDay(Date date) {
     List<HeartRateSensorData> sensorData = getHeartRateSensorFileContents();
     int heartRateCount = 0;
+
     String formattedDate = WebAppConstants.inputDateFormat.format(date);
     for (HeartRateSensorData data : sensorData) {
       if (data.getFormattedDate().equals(formattedDate)) {
@@ -136,12 +137,13 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
             (ActivitySensorData) sensorModelsMap.get(ActivitySensorData.FILE_NAME), 1000);
     int maxStepCount = -1; // Max value of step count for the day
     String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
-    for (ActivitySensorData sensorData : activitySensorDataList) {
-      if (sensorData.getFormattedDate().equals(userFormattedDate)) { // both dates are equal
-        if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
-          //                    found a step count larger than the maxStepCount, so update it
-          maxStepCount = sensorData.getSensorData().getStepCounts();
-        }
+    for (ActivitySensorData sensorData :
+        activitySensorDataList.stream()
+            .filter(sensorData -> sensorData.getFormattedDate().equals(userFormattedDate))
+            .collect(Collectors.toList())) {
+      if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
+        //                    found a step count larger than the maxStepCount, so update it
+        maxStepCount = sensorData.getSensorData().getStepCounts();
       }
     }
     return maxStepCount;
