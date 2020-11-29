@@ -13,13 +13,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import sensormodels.ActivitySensorData;
-import sensormodels.BatterySensorData;
 import sensormodels.BluetoothSensorData;
 import sensormodels.HeartRateSensorData;
 import sensormodels.LightSensorData;
 import sensormodels.ScreenUsageSensorData;
 import sensormodels.activfit.ActivFitSensorData;
 import sensormodels.activfit.ActivFitSensorDataBuilder;
+import sensormodels.battery.BatterySensorData;
+import sensormodels.battery.BatterySensorDataBuilder;
 import sensormodels.store.models.MySqlStoreModel;
 import utils.WebAppConstants;
 
@@ -351,14 +352,14 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
       ResultSet rs = st.executeQuery(query);
 
       while (rs.next()) {
-        BatterySensorData batterySensor = new BatterySensorData();
-        batterySensor.setSensorName(rs.getString("sensor_name"));
-        batterySensor.setTimestamp(rs.getString("timestamp"));
-        batterySensor.setSensorName(rs.getString("sensor_data"));
-        BatterySensorData.SensorData sensorData = new BatterySensorData.SensorData();
-        sensorData.setPercent(rs.getInt("percent"));
-        sensorData.setCharging(rs.getBoolean("duration"));
-        batterySensor.setSensorData(sensorData);
+        BatterySensorData batterySensor =
+            new BatterySensorDataBuilder()
+                .setSensorName(rs.getString("sensor_name"))
+                .setTimeStamp(rs.getString("timestamp"))
+                .setPercent(rs.getInt("percent"))
+                .setCharging(rs.getBoolean("charging")) // duration if charging doesn't work
+                .build();
+
         results.add(batterySensor);
       }
     } catch (SQLException e) {

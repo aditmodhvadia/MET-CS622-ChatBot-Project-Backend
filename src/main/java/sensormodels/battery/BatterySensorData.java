@@ -1,4 +1,4 @@
-package sensormodels;
+package sensormodels.battery;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import org.apache.lucene.document.Document;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
+import sensormodels.DatabaseModel;
 import utils.WebAppConstants;
 
 public class BatterySensorData extends DatabaseModel {
