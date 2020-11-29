@@ -17,13 +17,14 @@ import com.mongodb.client.MongoDatabase;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import sensormodels.activfit.ActivFitSensorData;
 import sensormodels.ActivitySensorData;
 import sensormodels.HeartRateSensorData;
+import sensormodels.activfit.ActivFitSensorData;
 import sensormodels.store.models.MongoStoreModel;
 import utils.WebAppConstants;
 
@@ -83,13 +84,10 @@ public class MongoDbManager implements DbManager<MongoStoreModel>, DatabaseQuery
     }
 
     System.out.println("MongoDB initialised");
-
-    //        TODO: Maybe have to initialise the collections
-    //        initialise all the mongoCollections for the Sensors
   }
 
   @Override
-  public <V extends MongoStoreModel> void insertSensorDataList(List<V> sensorDataList) {
+  public <V extends MongoStoreModel> void insertSensorDataList(@Nonnull List<V> sensorDataList) {
     try {
       MongoCollection<V> collection =
           database.getCollection(

@@ -10,6 +10,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import sensormodels.ActivitySensorData;
@@ -97,7 +98,7 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
   }
 
   @Override
-  public <V extends MySqlStoreModel> void insertSensorDataList(List<V> sensorDataList) {
+  public <V extends MySqlStoreModel> void insertSensorDataList(@Nonnull List<V> sensorDataList) {
     //    sensorDataList.forEach(this::insertSensorData);
     connection = getConnection();
     // create the mysql insert prepared statement

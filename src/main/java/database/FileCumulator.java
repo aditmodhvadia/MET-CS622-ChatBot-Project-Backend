@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import sensormodels.ActivitySensorData;
@@ -88,7 +89,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   }
 
   @Override
-  public <V extends FileStoreModel> void insertSensorDataList(List<V> sensorDataList) {
+  public <V extends FileStoreModel> void insertSensorDataList(@Nonnull List<V> sensorDataList) {
     System.out.println("No need to store in the file system again.");
   }
 
