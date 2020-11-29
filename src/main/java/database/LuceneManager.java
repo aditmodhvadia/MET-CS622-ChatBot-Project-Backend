@@ -59,31 +59,25 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
 
   @Override
   public ArrayList<ActivFitSensorData> queryForRunningEvent(Date userDate) {
-    ArrayList<ActivFitSensorData> queryResult =
-        new ArrayList<>(); // holds the result from the query
     String formattedDate = WebAppConstants.inputDateFormat.format(userDate);
-    for (Document doc : getLuceneQueryTime("running", LuceneConstants.ACTIVITY)) {
-      if (doc.get(LuceneConstants.FORMATTED_DATE).equals(formattedDate)) {
-        ActivFitSensorData activFitSensorData =
-            new ActivFitSensorDataBuilder()
-                .setStartTime(doc.get(LuceneConstants.START_TIME))
-                .setEndTime(doc.get(LuceneConstants.END_TIME))
-                .setActivity(doc.get(LuceneConstants.ACTIVITY))
-                .build();
 
-        queryResult.add(activFitSensorData);
-      }
-    }
-    return queryResult;
+    return getLuceneQueryTime("running", LuceneConstants.ACTIVITY).stream()
+        .filter(document -> document.get(LuceneConstants.FORMATTED_DATE).equals(formattedDate))
+        .map(
+            doc ->
+                new ActivFitSensorDataBuilder()
+                    .setStartTime(doc.get(LuceneConstants.START_TIME))
+                    .setEndTime(doc.get(LuceneConstants.END_TIME))
+                    .setActivity(doc.get(LuceneConstants.ACTIVITY))
+                    .build())
+        .collect(Collectors.toCollection(ArrayList::new));
   }
 
   @Override
   public int queryHeartRatesForDay(Date date) {
     List<Document> results = getLuceneQueryTime("HeartRate", LuceneConstants.SENSOR_NAME);
-    System.out.println(results.size());
     int heartRateCounter = 0;
     for (Document doc : results) {
-      System.out.println("Document found");
       if (doc.get(LuceneConstants.FORMATTED_DATE) != null
           && doc.get(LuceneConstants.FORMATTED_DATE)
               .equals(WebAppConstants.inputDateFormat.format(date))) {
@@ -99,7 +93,6 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
     String formattedDate = WebAppConstants.inputDateFormat.format(userDate);
     int maxStepCount = -1; // Max value of step count for the day
     for (Document doc : results) {
-      System.out.println("Document found");
       if (doc.get(LuceneConstants.FORMATTED_DATE) != null
           && doc.get(LuceneConstants.FORMATTED_DATE).equals(formattedDate)
           && doc.get(LuceneConstants.STEP_COUNT) != null
@@ -120,7 +113,6 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
       // 0. Specify the analyzer for tokenizing text.
       // 1. create the index
       Directory dir = FSDirectory.open(Paths.get(indexDir));
-
       // The same analyzer should be used for indexing and searching
       StandardAnalyzer analyzer = new StandardAnalyzer();
       IndexWriterConfig config = new IndexWriterConfig(analyzer);
