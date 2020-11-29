@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
@@ -108,7 +107,6 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
         preparedStmt = connection.prepareStatement(sensorData.getInsertIntoTableQuery());
         sensorData.fillQueryData(preparedStmt);
         // execute the prepared statement
-        //        System.out.println(preparedStmt);
         preparedStmt.execute();
       }
     } catch (Exception e) {
@@ -183,14 +181,14 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
   }
 
   private void createAllTables(Statement stmt) throws SQLException {
-    for (MySqlStoreModel sensorData : sensorModels) {
-      try {
-        stmt.executeUpdate(sensorData.getCreateTableQuery());
-      } catch (SQLSyntaxErrorException exception) {
-        System.out.println("Table " + sensorData.getTableName() + " already exists");
-        //        System.out.println("exception = " + exception);
-      }
-    }
+    sensorModels.forEach(
+        sensorModel -> {
+          try {
+            stmt.executeUpdate(sensorModel.getCreateTableQuery());
+          } catch (SQLException exception) {
+            System.out.println("Table " + sensorModel.getTableName() + " already exists");
+          }
+        });
   }
 
   /**
