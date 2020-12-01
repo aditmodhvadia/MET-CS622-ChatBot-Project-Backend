@@ -3,8 +3,10 @@ package database;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,7 +32,6 @@ import utils.WebAppConstants;
 
 public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStoreModel> {
   public static String indexDirRelativePath = "luceneIndex";
-
   private static LuceneManager instance;
 
   private String indexDir;
@@ -76,31 +77,29 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
   @Override
   public int queryHeartRatesForDay(Date date) {
     List<Document> results = getLuceneQueryTime("HeartRate", LuceneConstants.SENSOR_NAME);
-    int heartRateCounter = 0;
-    for (Document doc : results) {
-      if (doc.get(LuceneConstants.FORMATTED_DATE) != null
-          && doc.get(LuceneConstants.FORMATTED_DATE)
-              .equals(WebAppConstants.inputDateFormat.format(date))) {
-        heartRateCounter++;
-      }
-    }
-    return heartRateCounter;
+    String formattedDate = WebAppConstants.inputDateFormat.format(date);
+
+    return (int)
+        results.stream()
+            .filter(
+                document ->
+                    Objects.equals(document.get(LuceneConstants.FORMATTED_DATE), formattedDate))
+            .count();
   }
 
   @Override
   public int queryForTotalStepsInDay(Date userDate) {
     List<Document> results = getLuceneQueryTime("Activity", LuceneConstants.SENSOR_NAME);
     String formattedDate = WebAppConstants.inputDateFormat.format(userDate);
-    int maxStepCount = -1; // Max value of step count for the day
-    for (Document doc : results) {
-      if (doc.get(LuceneConstants.FORMATTED_DATE) != null
-          && doc.get(LuceneConstants.FORMATTED_DATE).equals(formattedDate)
-          && doc.get(LuceneConstants.STEP_COUNT) != null
-          && Integer.parseInt(doc.get(LuceneConstants.STEP_COUNT)) > maxStepCount) {
-        maxStepCount = Integer.parseInt(doc.get(LuceneConstants.STEP_COUNT));
-      }
-    }
-    return maxStepCount;
+
+    return Integer.parseInt(
+        results.stream()
+            .filter(doc -> Objects.equals(doc.get(LuceneConstants.FORMATTED_DATE), formattedDate))
+            .max(
+                Comparator.comparingInt(
+                    doc -> Integer.parseInt(doc.get(LuceneConstants.STEP_COUNT))))
+            .get()
+            .get(LuceneConstants.STEP_COUNT));
   }
 
   /**
