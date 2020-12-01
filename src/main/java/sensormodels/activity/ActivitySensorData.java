@@ -71,7 +71,9 @@ public class ActivitySensorData extends DatabaseModel {
   }
 
   public void setFormattedDate() {
-    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+    if (timestamp != null) {
+      this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timestamp));
+    }
   }
 
   public void setFormattedDate(String formattedDate) {

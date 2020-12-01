@@ -17,6 +17,7 @@ public class ActivitySensorDataBuilder implements ActivitySensorBuilder {
   @Override
   public ActivitySensorBuilder setTimeStamp(String timeStamp) {
     this.activitySensorData.setTimeStamp(timeStamp);
+    this.activitySensorData.setFormattedDate();
     return this;
   }
 

@@ -14,13 +14,14 @@ import java.util.NoSuchElementException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
-import sensormodels.activity.ActivitySensorData;
 import sensormodels.BluetoothSensorData;
 import sensormodels.HeartRateSensorData;
 import sensormodels.LightSensorData;
 import sensormodels.ScreenUsageSensorData;
 import sensormodels.activfit.ActivFitSensorData;
 import sensormodels.activfit.ActivFitSensorDataBuilder;
+import sensormodels.activity.ActivitySensorData;
+import sensormodels.activity.ActivitySensorDataBuilder;
 import sensormodels.battery.BatterySensorData;
 import sensormodels.battery.BatterySensorDataBuilder;
 import sensormodels.store.models.MySqlStoreModel;
@@ -225,15 +226,14 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
       ResultSet rs = st.executeQuery(query);
 
       while (rs.next()) {
-        ActivitySensorData data = new ActivitySensorData();
-        data.setTimestamp(rs.getString("time_stamp"));
-        data.setTimeStamp(rs.getString("time_stamp"));
-        data.setSensorName(rs.getString("sensor_name"));
-        ActivitySensorData.SensorData sensorData = new ActivitySensorData.SensorData();
-        sensorData.setStepCounts(rs.getInt("step_counts"));
-        sensorData.setStepDelta(rs.getInt("step_delta"));
-        data.setSensorData(sensorData);
-        data.setFormattedDate();
+        ActivitySensorData data =
+            new ActivitySensorDataBuilder()
+                .setTimeStamp(rs.getString("time_stamp"))
+                .setTimestamp(rs.getString("time_stamp"))
+                .setSensorName(rs.getString("sensor_name"))
+                .setStepCounts(rs.getInt("step_counts"))
+                .setStepDelta(rs.getInt("step_delta"))
+                .build();
         resultSet.add(data);
       }
 
