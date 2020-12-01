@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import sensormodels.ActivitySensorData;
+import sensormodels.activity.ActivitySensorData;
 import sensormodels.HeartRateSensorData;
 import sensormodels.activfit.ActivFitSensorData;
 import sensormodels.store.models.MongoStoreModel;

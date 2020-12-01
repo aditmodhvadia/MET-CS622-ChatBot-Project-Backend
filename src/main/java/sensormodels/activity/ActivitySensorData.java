@@ -1,4 +1,4 @@
-package sensormodels;
+package sensormodels.activity;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -12,6 +12,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.StringField;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
+import sensormodels.DatabaseModel;
 import utils.WebAppConstants;
 
 public class ActivitySensorData extends DatabaseModel {

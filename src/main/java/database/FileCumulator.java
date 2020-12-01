@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
-import sensormodels.ActivitySensorData;
+import sensormodels.activity.ActivitySensorData;
 import sensormodels.BluetoothSensorData;
 import sensormodels.DatabaseModel;
 import sensormodels.HeartRateSensorData;
