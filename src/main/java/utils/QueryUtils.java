@@ -1,9 +1,7 @@
 package utils;
 
-import sensormodels.activfit.ActivFitSensorData;
+import static utils.WebAppConstants.NO_HEART_RATE_DATA;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,8 +9,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static utils.WebAppConstants.NO_HEART_RATE_DATA;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import sensormodels.activfit.ActivFitSensorData;
 
 public class QueryUtils {
   public static final String RUNNING_EVENT_REGEX = "([rR][ua]n(ning)?)";
@@ -157,8 +156,6 @@ public class QueryUtils {
   /**
    * Call to get formatted output for HeartRates for the days.
    *
-   * @param date date
-   * @param heartRateCount heart rate count
    * @param date date
    * @param heartRateCount total heart rate count
    */
