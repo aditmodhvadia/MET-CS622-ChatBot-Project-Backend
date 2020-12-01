@@ -2,7 +2,6 @@ package responsemodels;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
 import javax.annotation.Nonnull;
 
 public class QueryResponseMessage {
@@ -37,17 +36,23 @@ public class QueryResponseMessage {
     }
   }
 
-  public static class Builder implements QueryResponseBuilder {
+  public static class QueryResponseMessageBuilder implements QueryResponseBuilder {
     private final QueryResponseMessage queryResponseMessage;
 
-    public Builder() {
+    public QueryResponseMessageBuilder() {
       this.queryResponseMessage = new QueryResponseMessage();
     }
 
     @Nonnull
     @Override
     public QueryResponseBuilder setResponseMessage(@Nonnull String queryResponseMsg) {
-      this.queryResponseMessage.setData(new Data(queryResponseMsg));
+      Data data = this.queryResponseMessage.getData();
+      if (data == null) {
+        data = new Data(queryResponseMsg);
+      } else {
+        data.setResponseMsg(queryResponseMsg);
+      }
+      this.queryResponseMessage.setData(data);
       return this;
     }
 

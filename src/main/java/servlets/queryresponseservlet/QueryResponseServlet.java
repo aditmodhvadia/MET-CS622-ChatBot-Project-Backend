@@ -88,7 +88,7 @@ public abstract class QueryResponseServlet extends HttpServlet {
    */
   private void sendResponse(@Nonnull String queryResponseData) {
     QueryResponseMessage queryResponseMessage =
-        new QueryResponseMessage.Builder().setResponseMessage(queryResponseData).build();
+        new QueryResponseMessage.QueryResponseMessageBuilder().setResponseMessage(queryResponseData).build();
     try {
       response.getOutputStream().print(gson.toJson(queryResponseMessage));
     } catch (IOException e) {
