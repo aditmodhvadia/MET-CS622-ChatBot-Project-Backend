@@ -5,6 +5,7 @@ import java.io.File;
 import java.lang.reflect.Type;
 import java.nio.file.FileSystems;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,13 +14,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import sensormodels.ActivitySensorData;
-import sensormodels.battery.BatterySensorData;
 import sensormodels.BluetoothSensorData;
 import sensormodels.DatabaseModel;
 import sensormodels.HeartRateSensorData;
 import sensormodels.LightSensorData;
 import sensormodels.ScreenUsageSensorData;
 import sensormodels.activfit.ActivFitSensorData;
+import sensormodels.battery.BatterySensorData;
 import sensormodels.store.models.FileStoreModel;
 import utils.DatabaseUtils;
 import utils.IoUtility;
@@ -119,16 +120,13 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
 
   @Override
   public int queryHeartRatesForDay(Date date) {
-    List<HeartRateSensorData> sensorData = getHeartRateSensorFileContents();
-    int heartRateCount = 0;
-
+    List<HeartRateSensorData> sensorDataList = getHeartRateSensorFileContents();
     String formattedDate = WebAppConstants.inputDateFormat.format(date);
-    for (HeartRateSensorData data : sensorData) {
-      if (data.getFormattedDate().equals(formattedDate)) {
-        heartRateCount++;
-      }
-    }
-    return heartRateCount;
+
+    return (int)
+        sensorDataList.stream()
+            .filter(sensorData -> sensorData.getFormattedDate().equals(formattedDate))
+            .count();
   }
 
   @Override
@@ -136,18 +134,14 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
     List<ActivitySensorData> activitySensorDataList =
         getSensorFileContents(
             (ActivitySensorData) sensorModelsMap.get(ActivitySensorData.FILE_NAME), 1000);
-    int maxStepCount = -1; // Max value of step count for the day
     String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
-    for (ActivitySensorData sensorData :
-        activitySensorDataList.stream()
-            .filter(sensorData -> sensorData.getFormattedDate().equals(userFormattedDate))
-            .collect(Collectors.toList())) {
-      if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
-        //                    found a step count larger than the maxStepCount, so update it
-        maxStepCount = sensorData.getSensorData().getStepCounts();
-      }
-    }
-    return maxStepCount;
+
+    return activitySensorDataList.stream()
+        .filter(sensorData -> sensorData.getFormattedDate().equals(userFormattedDate))
+        .max(Comparator.comparingInt(sensorData -> sensorData.getSensorData().getStepCounts()))
+        .get()
+        .getSensorData()
+        .getStepCounts();
   }
 
   /**
