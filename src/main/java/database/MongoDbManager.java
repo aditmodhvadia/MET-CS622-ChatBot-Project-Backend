@@ -56,22 +56,9 @@ public class MongoDbManager implements DbManager<MongoStoreModel>, DatabaseQuery
    * @param servletContext servlet context
    */
   public void init(@Nullable ServletContext servletContext) {
-    CodecRegistry pojoCodecRegistry =
-        fromRegistries(
-            MongoClientSettings.getDefaultCodecRegistry(),
-            fromProviders(
-                PojoCodecProvider.builder()
-                    //                    .register(ActivFitSensorData.class)
-                    .automatic(true)
-                    .build())); // custom codec required to store POJO in MongoDB
+    CodecRegistry pojoCodecRegistry = getCodecRegistry();
 
-    ConnectionString connectionString = new ConnectionString("mongodb://localhost:27017");
-    MongoClientSettings settings =
-        MongoClientSettings.builder()
-            .applyConnectionString(connectionString)
-            .codecRegistry(pojoCodecRegistry)
-            .build();
-
+    MongoClientSettings settings = getMongoClientSettings(pojoCodecRegistry);
     //        create a connection to MongoDB Client
     MongoClient mongoClient = MongoClients.create(settings);
     System.out.println("Connected to edu.bu.aditm.database successfully");
@@ -79,11 +66,31 @@ public class MongoDbManager implements DbManager<MongoStoreModel>, DatabaseQuery
     try {
       //        fetch the edu.bu.aditm.database for MongoDB
       database = mongoClient.getDatabase(DATABASE_NAME);
+      System.out.println("MongoDB initialised");
     } catch (Exception e) {
       e.printStackTrace();
+      System.out.println("Failed to initialise MongoDB");
     }
+  }
 
-    System.out.println("MongoDB initialised");
+  @Nonnull
+  private MongoClientSettings getMongoClientSettings(CodecRegistry pojoCodecRegistry) {
+    ConnectionString connectionString = new ConnectionString("mongodb://localhost:27017");
+    return MongoClientSettings.builder()
+        .applyConnectionString(connectionString)
+        .codecRegistry(pojoCodecRegistry)
+        .build();
+  }
+
+  @Nonnull
+  private CodecRegistry getCodecRegistry() {
+    return fromRegistries(
+        MongoClientSettings.getDefaultCodecRegistry(),
+        fromProviders(
+            PojoCodecProvider.builder()
+                //                    .register(ActivFitSensorData.class)
+                .automatic(true)
+                .build()));
   }
 
   @Override

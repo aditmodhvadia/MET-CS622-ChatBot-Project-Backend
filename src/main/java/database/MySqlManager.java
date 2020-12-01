@@ -7,8 +7,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
@@ -101,25 +103,24 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
   public <V extends MySqlStoreModel> void insertSensorDataList(@Nonnull List<V> sensorDataList) {
     //    sensorDataList.forEach(this::insertSensorData);
     connection = getConnection();
-    // create the mysql insert prepared statement
-    PreparedStatement preparedStmt;
     try {
-      for (MySqlStoreModel sensorData : sensorDataList) {
-        preparedStmt = connection.prepareStatement(sensorData.getInsertIntoTableQuery());
-        sensorData.fillQueryData(preparedStmt);
-        // execute the prepared statement
-        preparedStmt.execute();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
+      sensorDataList.forEach(
+          sensorData -> {
+            try {
+              PreparedStatement preparedStmt =
+                  connection.prepareStatement(sensorData.getInsertIntoTableQuery());
+              sensorData.fillQueryData(preparedStmt);
+              preparedStmt.execute();
+            } catch (SQLException exception) {
+              exception.printStackTrace();
+            }
+          });
     } finally {
       System.out.println("MySQL Log: Data Inserted for " + sensorDataList.get(0).getTableName());
       try {
-        if (connection != null) {
-          connection.close();
-        }
-      } catch (SQLException e) {
-        e.printStackTrace();
+        connection.close();
+      } catch (SQLException exception) {
+        exception.printStackTrace();
       }
     }
   }
@@ -154,15 +155,17 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
 
   @Override
   public int queryForTotalStepsInDay(Date userDate) {
-    //        fetch all documents from the collection
-    ArrayList<ActivitySensorData> sensorDataList = getActivitySensorDataForGivenDate(userDate);
-    int maxStepCount = -1; // Max value of step count for the day
-    for (ActivitySensorData sensorData : sensorDataList) {
-      if (sensorData.getSensorData().getStepCounts() > maxStepCount) {
-        maxStepCount = sensorData.getSensorData().getStepCounts();
-      }
+    try {
+      ActivitySensorData maxSensorData =
+          getActivitySensorDataForGivenDate(userDate).stream()
+              .max(
+                  Comparator.comparingInt(
+                      sensorModel -> sensorModel.getSensorData().getStepCounts()))
+              .get();
+      return maxSensorData.getSensorData().getStepCounts();
+    } catch (NoSuchElementException exception) {
+      return 0;
     }
-    return maxStepCount;
   }
 
   @Override
@@ -267,15 +270,7 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
       st = connection.createStatement();
       ResultSet rs = st.executeQuery(query);
       while (rs.next()) {
-        ActivFitSensorData activFitSensorData =
-            new ActivFitSensorDataBuilder()
-                .setStartTime(rs.getString("start_time"))
-                .setEndTime(rs.getString("end_time"))
-                .setActivity(rs.getString("activity"))
-                .setDuration(rs.getInt("duration"))
-                .build();
-
-        resultSet.add(activFitSensorData);
+        resultSet.add(getActivFitSensorDataFromResultSet(rs));
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -285,6 +280,15 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
 
     // execute the query, and get a java result set
     return resultSet;
+  }
+
+  private ActivFitSensorData getActivFitSensorDataFromResultSet(ResultSet rs) throws SQLException {
+    return new ActivFitSensorDataBuilder()
+        .setStartTime(rs.getString("start_time"))
+        .setEndTime(rs.getString("end_time"))
+        .setActivity(rs.getString("activity"))
+        .setDuration(rs.getInt("duration"))
+        .build();
   }
 
   /**
