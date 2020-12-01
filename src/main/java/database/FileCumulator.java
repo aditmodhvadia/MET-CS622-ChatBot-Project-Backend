@@ -166,8 +166,9 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
         IoUtility.getFileContentsLineByLine(
             sensorModel.getFile()); // holds all lines of the cumulativeFile for the sensor
     String currentDate = ""; // will hold the value of current date
+    Gson g = new Gson();
+
     for (String fileLine : fileContents) {
-      Gson g = new Gson();
       try {
         //                converts JSON string into POJO
         T sensorData = g.fromJson(fileLine, (Type) sensorModel.getClassObject());
@@ -187,10 +188,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
             return sensorDataList;
           }
         }
-      } catch (Exception e) {
-        //                e.printStackTrace();
-        //                System.out.println("Incorrect JSON format");    // don't store data in
-        // mongodb
+      } catch (Exception ignored) {
       }
     }
     return sensorDataList;
@@ -222,8 +220,7 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   }
 
   public static String getFormattedDateFromTimeStamp(String timestamp) {
-    Date sensorDate = new Date(timestamp);
-    return WebAppConstants.inputDateFormat.format(sensorDate);
+    return WebAppConstants.inputDateFormat.format(new Date(timestamp));
   }
 
   /**
