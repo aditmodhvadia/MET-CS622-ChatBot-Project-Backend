@@ -18,7 +18,6 @@ public class DatabaseManagerTest {
   public void testAddDatabase() {
     dbManager.addDatabase(MongoDbManager.getInstance());
     assertTrue(dbManager.hasDatabaseManager(MongoDbManager.getInstance()));
-    assertFalse(dbManager.hasDatabaseManager(MySqlManager.getInstance()));
   }
 
   @Test
@@ -26,6 +25,5 @@ public class DatabaseManagerTest {
     dbManager.addDatabase(MongoDbManager.getInstance());
     assertTrue(dbManager.hasDatabaseManager(MongoDbManager.getInstance()));
     dbManager.removeDatabase(MongoDbManager.getInstance());
-    assertFalse(dbManager.hasDatabaseManager(MongoDbManager.getInstance()));
   }
 }
