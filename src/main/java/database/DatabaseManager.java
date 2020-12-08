@@ -31,6 +31,9 @@ public final class DatabaseManager implements DbManager<DatabaseModel>, Database
 
   @Override
   public void init(@Nullable ServletContext servletContext) {
+    databases.add(MongoDbManager.getInstance());
+    databases.add(LuceneManager.getInstance(servletContext));
+    databases.add(MySqlManager.getInstance());
     databases.forEach(database -> database.init(servletContext));
   }
 
