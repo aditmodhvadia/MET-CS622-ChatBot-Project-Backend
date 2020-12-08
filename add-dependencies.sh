@@ -2,4 +2,4 @@
 
 mvn install dependency:copy-dependencies
 
-mvn clean compile
+cp ./target/dependency ./lib

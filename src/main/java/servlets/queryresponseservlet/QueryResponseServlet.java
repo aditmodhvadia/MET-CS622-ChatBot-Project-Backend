@@ -54,6 +54,10 @@ public abstract class QueryResponseServlet extends HttpServlet {
       onDateNotParsed();
     }
 
+    handleQuery(queryMessage, userDate);
+  }
+
+  private void handleQuery(MessageQueryRequestModel queryMessage, Date userDate) {
     switch (QueryUtils.determineQueryType(queryMessage.getQuery())) {
       case RUNNING:
         onDisplayRunningEventSelected(userDate);
