@@ -101,7 +101,8 @@ public class MySqlManager implements DbManager<MySqlStoreModel>, DatabaseQueryRu
   }
 
   @Override
-  public <V extends MySqlStoreModel> void insertSensorDataList(@Nonnull List<V> sensorDataList) {
+  public <V extends MySqlStoreModel> void insertSensorDataList(
+      @Nonnull List<? extends V> sensorDataList) {
     //    sensorDataList.forEach(this::insertSensorData);
     connection = getConnection();
     try {

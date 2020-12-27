@@ -38,7 +38,8 @@ public final class DatabaseManager implements DbManager<DatabaseModel>, Database
   }
 
   @Override
-  public <V extends DatabaseModel> void insertSensorDataList(@Nonnull List<V> sensorDataList) {
+  public <V extends DatabaseModel> void insertSensorDataList(
+      @Nonnull List<? extends V> sensorDataList) {
     for (DbManager dbManager : databases) {
       try {
         dbManager.insertSensorDataList(sensorDataList);

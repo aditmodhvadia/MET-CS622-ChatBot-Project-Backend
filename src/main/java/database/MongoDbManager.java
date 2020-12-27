@@ -22,9 +22,9 @@ import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import sensormodels.activity.ActivitySensorData;
 import sensormodels.HeartRateSensorData;
 import sensormodels.activfit.ActivFitSensorData;
+import sensormodels.activity.ActivitySensorData;
 import sensormodels.store.models.MongoStoreModel;
 import utils.WebAppConstants;
 
@@ -94,7 +94,8 @@ public class MongoDbManager implements DbManager<MongoStoreModel>, DatabaseQuery
   }
 
   @Override
-  public <V extends MongoStoreModel> void insertSensorDataList(@Nonnull List<V> sensorDataList) {
+  public <V extends MongoStoreModel> void insertSensorDataList(
+      @Nonnull List<? extends V> sensorDataList) {
     try {
       MongoCollection<V> collection =
           database.getCollection(

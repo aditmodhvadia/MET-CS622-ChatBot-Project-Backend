@@ -1,10 +1,8 @@
-package listeners;
+package listeners
 
-import java.io.File;
+import java.io.File
 
-public interface FileListener {
-
-  void fileFound(File file);
-
-  void zipFileFound(String path);
+interface FileListener {
+    fun fileFound(file: File?)
+    fun zipFileFound(path: String?)
 }

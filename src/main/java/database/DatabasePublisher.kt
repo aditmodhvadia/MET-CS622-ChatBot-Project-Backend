@@ -1,11 +1,9 @@
-package database;
+package database
 
-import sensormodels.DatabaseModel;
+import sensormodels.DatabaseModel
 
-public interface DatabasePublisher<T extends DbManager<DatabaseModel>> {
-  void addDatabase(T dbManager);
-
-  void removeDatabase(T dbManager);
-
-  boolean hasDatabaseManager(T dbManager);
+interface DatabasePublisher<T : DbManager<DatabaseModel?>?> {
+    fun addDatabase(dbManager: T)
+    fun removeDatabase(dbManager: T)
+    fun hasDatabaseManager(dbManager: T): Boolean
 }

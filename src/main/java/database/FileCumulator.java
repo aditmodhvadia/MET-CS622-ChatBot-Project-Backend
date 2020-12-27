@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
-import sensormodels.activity.ActivitySensorData;
 import sensormodels.BluetoothSensorData;
 import sensormodels.DatabaseModel;
 import sensormodels.HeartRateSensorData;
 import sensormodels.LightSensorData;
 import sensormodels.ScreenUsageSensorData;
 import sensormodels.activfit.ActivFitSensorData;
+import sensormodels.activity.ActivitySensorData;
 import sensormodels.battery.BatterySensorData;
 import sensormodels.store.models.FileStoreModel;
 import utils.DatabaseUtils;
@@ -90,7 +90,8 @@ public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRu
   }
 
   @Override
-  public <V extends FileStoreModel> void insertSensorDataList(@Nonnull List<V> sensorDataList) {
+  public <V extends FileStoreModel> void insertSensorDataList(
+      @Nonnull List<? extends V> sensorDataList) {
     System.out.println("No need to store in the file system again.");
   }
 

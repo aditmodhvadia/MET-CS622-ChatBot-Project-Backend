@@ -186,7 +186,8 @@ public class LuceneManager implements DatabaseQueryRunner, DbManager<LuceneStore
   }
 
   @Override
-  public <V extends LuceneStoreModel> void insertSensorDataList(@Nonnull List<V> sensorDataList) {
+  public <V extends LuceneStoreModel> void insertSensorDataList(
+      @Nonnull List<? extends V> sensorDataList) {
     try {
       IndexWriter indexWriter = getIndexWriter();
       if (indexWriter != null) {
