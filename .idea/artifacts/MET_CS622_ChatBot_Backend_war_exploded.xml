@@ -42,6 +42,11 @@
           <element id="library" level="project" name="Maven: org.apache.logging.log4j:log4j-1.2-api:2.13.1" />
           <element id="library" level="project" name="Maven: org.apache.logging.log4j:log4j-api:2.13.1" />
           <element id="library" level="project" name="Maven: org.apache.logging.log4j:log4j-core:2.14.0" />
+          <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.30-M1" />
+          <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.4.30-M1" />
+          <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-common:1.4.30-M1" />
+          <element id="library" level="project" name="Maven: org.jetbrains:annotations:13.0" />
+          <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.30-M1" />
         </element>
       </element>
       <element id="directory" name="META-INF">
