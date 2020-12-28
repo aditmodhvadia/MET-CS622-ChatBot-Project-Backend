@@ -1,18 +1,11 @@
-package sensormodels.activity;
+package sensormodels.activity
 
-public interface ActivitySensorBuilder {
-
-  ActivitySensorBuilder setSensorName(String sensorName);
-
-  ActivitySensorBuilder setTimeStamp(String timeStamp);
-
-  ActivitySensorBuilder setTimestamp(String timeStamp);
-
-  ActivitySensorBuilder setSensorData(ActivitySensorData.SensorData sensorData);
-
-  ActivitySensorBuilder setStepCounts(Integer stepCounts);
-
-  ActivitySensorBuilder setStepDelta(Integer stepDelta);
-
-  ActivitySensorData build();
+interface ActivitySensorBuilder {
+    fun setSensorName(sensorName: String?): ActivitySensorBuilder
+    fun setTimeStamp(timeStamp: String?): ActivitySensorBuilder
+    fun setTimestamp(timeStamp: String?): ActivitySensorBuilder
+    fun setSensorData(sensorData: ActivitySensorData.SensorData?): ActivitySensorBuilder
+    fun setStepCounts(stepCounts: Int?): ActivitySensorBuilder
+    fun setStepDelta(stepDelta: Int?): ActivitySensorBuilder
+    fun build(): ActivitySensorData
 }

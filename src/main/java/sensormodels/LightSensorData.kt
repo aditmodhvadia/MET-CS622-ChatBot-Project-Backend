@@ -1,193 +1,150 @@
-package sensormodels;
+package sensormodels
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import database.LuceneManager;
-import java.io.File;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
-import org.bson.codecs.pojo.annotations.BsonIgnore;
-import sensormodels.store.models.FileStoreModel;
-import sensormodels.store.models.LuceneStoreModel;
-import sensormodels.store.models.MongoStoreModel;
-import sensormodels.store.models.MySqlStoreModel;
-import utils.WebAppConstants;
+import com.google.gson.annotations.Expose
+import com.google.gson.annotations.SerializedName
+import sensormodels.store.models.MongoStoreModel
+import sensormodels.store.models.LuceneStoreModel
+import sensormodels.store.models.FileStoreModel
+import sensormodels.store.models.MySqlStoreModel
+import org.bson.codecs.pojo.annotations.BsonIgnore
+import utils.WebAppConstants
+import database.LuceneManager
+import org.apache.lucene.document.Document
+import org.apache.lucene.document.Field
+import org.apache.lucene.document.StringField
+import org.apache.lucene.document.TextField
+import sensormodels.LightSensorData
+import java.io.File
+import kotlin.Throws
+import java.sql.SQLException
+import java.sql.PreparedStatement
+import java.util.*
 
-public class LightSensorData
-    implements MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
-
-  @BsonIgnore public static final String MY_SQL_TABLE_NAME = "LightSensorData";
-
-  @BsonIgnore public static final String FILE_NAME = "LightSensor";
-
-  @SerializedName("sensor_name")
-  @Expose
-  private String sensorName;
-
-  @SerializedName("timestamp")
-  @Expose
-  private String timestamp;
-
-  @SerializedName("sensor_data")
-  @Expose
-  private SensorData sensorData;
-
-  private String luxValue;
-
-  @SerializedName("formatted_date")
-  @Expose
-  private String formattedDate;
-
-  @BsonIgnore private File file;
-
-  public String getLuxValue() {
-    return luxValue;
-  }
-
-  public void setLuxValue(String luxValue) {
-    this.luxValue = luxValue;
-  }
-
-  public String getSensorName() {
-    return sensorName;
-  }
-
-  public void setSensorName(String sensorName) {
-    this.sensorName = sensorName;
-  }
-
-  public String getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(String timestamp) {
-    this.timestamp = timestamp;
-  }
-
-  public SensorData getSensorData() {
-    return sensorData;
-  }
-
-  public void setSensorData(SensorData sensorData) {
-    this.sensorData = sensorData;
-  }
-
-  public void setFormattedDate() {
-    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timestamp));
-  }
-
-  @Override
-  public String getStartTime() {
-    return this.getTimestamp();
-  }
-
-  public String getFormattedDate() {
-    return formattedDate;
-  }
-
-  @Override
-  @BsonIgnore
-  public Document getDocument() {
-    Document doc = new Document();
-    if (this.getLuxValue() != null) {
-      doc.add(
-          new TextField(LuceneManager.LuceneConstants.LUX, this.getLuxValue(), Field.Store.YES));
-    }
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.SENSOR_NAME, this.getSensorName(), Field.Store.YES));
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.FORMATTED_DATE,
-            this.getFormattedDate(),
-            Field.Store.YES));
-    //         use a string field for timestamp because we don't want it tokenized
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.TIMESTAMP, this.getTimestamp(), Field.Store.YES));
-    return doc;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getMongoCollectionName() {
-    return "LightSensorData";
-  }
-
-  @Override
-  @BsonIgnore
-  public Class<LightSensorData> getClassObject() {
-    return LightSensorData.class;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getTableName() {
-    return MY_SQL_TABLE_NAME;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getCreateTableQuery() {
-    return "CREATE TABLE "
-        + this.getTableName()
-        + "(timestamp VARCHAR(30) , "
-        + " formatted_date VARCHAR(10) , "
-        + " sensor_name VARCHAR(30) , "
-        + " lux INTEGER) ";
-  }
-
-  @Override
-  @BsonIgnore
-  public String getInsertIntoTableQuery() {
-    return " insert into "
-        + this.getTableName()
-        + " (timestamp, formatted_date, sensor_name,lux)"
-        + " values (?, ?, ?, ?)";
-  }
-
-  @Override
-  @BsonIgnore
-  public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
-    preparedStmt.setString(1, this.getTimestamp());
-    preparedStmt.setString(2, this.getFormattedDate());
-    preparedStmt.setString(3, this.getSensorName());
-    preparedStmt.setInt(4, this.getSensorData().getLux());
-  }
-
-  @Override
-  @BsonIgnore
-  public String getFileName() {
-    return FILE_NAME;
-  }
-
-  @Override
-  @BsonIgnore
-  public File getFile() {
-    return this.file;
-  }
-
-  @Override
-  public void setFile(File file) {
-    this.file = file;
-  }
-
-  public static class SensorData {
-    @SerializedName("lux")
+class LightSensorData : MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
+    @SerializedName("sensor_name")
     @Expose
-    private Integer lux;
+    var sensorName: String? = null
 
-    public Integer getLux() {
-      return lux;
+    @SerializedName("timestamp")
+    @Expose
+    var timestamp: String? = null
+
+    @SerializedName("sensor_data")
+    @Expose
+    var sensorData: SensorData? = null
+    var luxValue: String? = null
+
+    @SerializedName("formatted_date")
+    @Expose
+    var formattedDate: String? = null
+        private set
+
+    @BsonIgnore
+    private var file: File? = null
+    override fun setFormattedDate() {
+        formattedDate = WebAppConstants.inputDateFormat.format(Date(timestamp))
     }
 
-    public void setLux(Integer lux) {
-      this.lux = lux;
+    override fun getStartTime(): String {
+        return timestamp!!
     }
-  }
+
+    @BsonIgnore
+    override fun getDocument(): Document {
+        val doc = Document()
+        if (luxValue != null) {
+            doc.add(
+                TextField(LuceneManager.LuceneConstants.LUX, luxValue, Field.Store.YES)
+            )
+        }
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
+            )
+        )
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.FORMATTED_DATE,
+                formattedDate,
+                Field.Store.YES
+            )
+        )
+        //         use a string field for timestamp because we don't want it tokenized
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.TIMESTAMP, timestamp, Field.Store.YES
+            )
+        )
+        return doc
+    }
+
+    @BsonIgnore
+    override fun getMongoCollectionName(): String {
+        return "LightSensorData"
+    }
+
+    @BsonIgnore
+    override fun getClassObject(): Class<LightSensorData> {
+        return LightSensorData::class.java
+    }
+
+    @BsonIgnore
+    override fun getTableName(): String {
+        return MY_SQL_TABLE_NAME
+    }
+
+    @BsonIgnore
+    override fun getCreateTableQuery(): String {
+        return ("CREATE TABLE "
+                + this.tableName
+                + "(timestamp VARCHAR(30) , "
+                + " formatted_date VARCHAR(10) , "
+                + " sensor_name VARCHAR(30) , "
+                + " lux INTEGER) ")
+    }
+
+    @BsonIgnore
+    override fun getInsertIntoTableQuery(): String {
+        return (" insert into "
+                + this.tableName
+                + " (timestamp, formatted_date, sensor_name,lux)"
+                + " values (?, ?, ?, ?)")
+    }
+
+    @BsonIgnore
+    @Throws(SQLException::class)
+    override fun fillQueryData(preparedStmt: PreparedStatement) {
+        preparedStmt.setString(1, timestamp)
+        preparedStmt.setString(2, formattedDate)
+        preparedStmt.setString(3, sensorName)
+        preparedStmt.setInt(4, sensorData!!.lux!!)
+    }
+
+    @BsonIgnore
+    override fun getFileName(): String {
+        return FILE_NAME
+    }
+
+    @BsonIgnore
+    override fun getFile(): File {
+        return file!!
+    }
+
+    override fun setFile(file: File) {
+        this.file = file
+    }
+
+    class SensorData {
+        @SerializedName("lux")
+        @Expose
+        var lux: Int? = null
+    }
+
+    companion object {
+        @BsonIgnore
+        val MY_SQL_TABLE_NAME = "LightSensorData"
+
+        @BsonIgnore
+        val FILE_NAME = "LightSensor"
+    }
 }

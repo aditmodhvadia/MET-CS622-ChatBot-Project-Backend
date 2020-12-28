@@ -1,46 +1,38 @@
-package sensormodels.battery;
+package sensormodels.battery
 
-public class BatterySensorDataBuilder implements BatterySensorBuilder {
-  private final BatterySensorData batterySensorData;
+class BatterySensorDataBuilder : BatterySensorBuilder {
+    private val batterySensorData: BatterySensorData = BatterySensorData()
+    override fun setSensorName(sensorName: String?): BatterySensorBuilder {
+        batterySensorData.sensorName = sensorName
+        return this
+    }
 
-  public BatterySensorDataBuilder() {
-    this.batterySensorData = new BatterySensorData();
-    this.batterySensorData.setSensorData(new BatterySensorData.SensorData());
-  }
+    override fun setTimeStamp(timeStamp: String?): BatterySensorBuilder {
+        batterySensorData.timestamp = timeStamp
+        batterySensorData.setFormattedDate()
+        return this
+    }
 
-  @Override
-  public BatterySensorBuilder setSensorName(String sensorName) {
-    this.batterySensorData.setSensorName(sensorName);
-    return this;
-  }
+    override fun setSensorData(sensorData: BatterySensorData.SensorData?): BatterySensorBuilder {
+        batterySensorData.sensorData = sensorData
+        return this
+    }
 
-  @Override
-  public BatterySensorBuilder setTimeStamp(String timeStamp) {
-    this.batterySensorData.setTimestamp(timeStamp);
-    this.batterySensorData.setFormattedDate();
-    return this;
-  }
+    override fun setPercent(percent: Int?): BatterySensorBuilder {
+        batterySensorData.sensorData?.percent = percent
+        return this
+    }
 
-  @Override
-  public BatterySensorBuilder setSensorData(BatterySensorData.SensorData sensorData) {
-    this.batterySensorData.setSensorData(sensorData);
-    return this;
-  }
+    override fun setCharging(charging: Boolean?): BatterySensorBuilder {
+        batterySensorData.sensorData?.charging = charging
+        return this
+    }
 
-  @Override
-  public BatterySensorBuilder setPercent(Integer percent) {
-    this.batterySensorData.getSensorData().setPercent(percent);
-    return this;
-  }
+    override fun build(): BatterySensorData {
+        return batterySensorData
+    }
 
-  @Override
-  public BatterySensorBuilder setCharging(Boolean charging) {
-    this.batterySensorData.getSensorData().setCharging(charging);
-    return this;
-  }
-
-  @Override
-  public BatterySensorData build() {
-    return this.batterySensorData;
-  }
+    init {
+        batterySensorData.sensorData = BatterySensorData.SensorData()
+    }
 }

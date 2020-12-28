@@ -1,228 +1,179 @@
-package sensormodels.activity;
+package sensormodels.activity
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import database.LuceneManager;
-import java.io.File;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.IntPoint;
-import org.apache.lucene.document.StringField;
-import org.bson.codecs.pojo.annotations.BsonIgnore;
-import sensormodels.DatabaseModel;
-import sensormodels.store.models.FileStoreModel;
-import sensormodels.store.models.LuceneStoreModel;
-import sensormodels.store.models.MongoStoreModel;
-import sensormodels.store.models.MySqlStoreModel;
-import utils.WebAppConstants;
+import com.google.gson.annotations.Expose
+import com.google.gson.annotations.SerializedName
+import database.LuceneManager
+import org.apache.lucene.document.Document
+import org.apache.lucene.document.Field
+import org.apache.lucene.document.IntPoint
+import org.apache.lucene.document.StringField
+import org.bson.codecs.pojo.annotations.BsonIgnore
+import sensormodels.store.models.FileStoreModel
+import sensormodels.store.models.LuceneStoreModel
+import sensormodels.store.models.MongoStoreModel
+import sensormodels.store.models.MySqlStoreModel
+import utils.WebAppConstants
+import java.io.File
+import java.sql.PreparedStatement
+import java.sql.SQLException
+import java.util.*
 
-public class ActivitySensorData implements MongoStoreModel, LuceneStoreModel, FileStoreModel,
-    MySqlStoreModel {
+class ActivitySensorData : MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
+    @BsonIgnore
+    private var file: File? = null
 
-  @BsonIgnore public static final String MY_SQL_TABLE_NAME = "ActivitySensorData";
-
-  @BsonIgnore public static final String MONGO_COLLECTION_NAME = "ActivitySensorData";
-
-  @BsonIgnore public static final String FILE_NAME = "Activity";
-
-  @BsonIgnore private File file;
-
-  @SerializedName("sensor_name")
-  @Expose
-  private String sensorName;
-
-  @SerializedName("timestamp")
-  @Expose
-  private String timestamp;
-
-  @SerializedName("time_stamp")
-  @Expose
-  private String timeStamp;
-
-  @SerializedName("formatted_date")
-  @Expose
-  private String formattedDate;
-
-  @SerializedName("sensor_data")
-  @Expose
-  private SensorData sensorData;
-
-  @BsonIgnore
-  public static String getMySqlTableName() {
-    return MY_SQL_TABLE_NAME;
-  }
-
-  public String getSensorName() {
-    return sensorName;
-  }
-
-  public void setSensorName(String sensorName) {
-    this.sensorName = sensorName;
-  }
-
-  public String getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(String timestamp) {
-    this.timestamp = timestamp;
-    setFormattedDate();
-  }
-
-  public String getTimeStamp() {
-    return timeStamp;
-  }
-
-  public void setTimeStamp(String timeStamp) {
-    this.timeStamp = timeStamp;
-    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timeStamp));
-  }
-
-  public String getFormattedDate() {
-    return formattedDate;
-  }
-
-  public void setFormattedDate(String formattedDate) {
-    this.formattedDate = formattedDate;
-  }
-
-  public void setFormattedDate() {
-    if (timestamp != null) {
-      this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timestamp));
-    }
-  }
-
-  @Override
-  public String getStartTime() {
-    return this.getTimeStamp();
-  }
-
-  public SensorData getSensorData() {
-    return sensorData;
-  }
-
-  public void setSensorData(SensorData sensorData) {
-    this.sensorData = sensorData;
-  }
-
-  @Override
-  @BsonIgnore
-  public Document getDocument() {
-    Document doc = new Document();
-    doc.add(
-        new IntPoint(
-            LuceneManager.LuceneConstants.STEP_COUNT, this.getSensorData().getStepCounts()));
-    doc.add(
-        new IntPoint(
-            LuceneManager.LuceneConstants.STEP_DELTA, this.getSensorData().getStepDelta()));
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.SENSOR_NAME, this.getSensorName(), Field.Store.YES));
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.FORMATTED_DATE, this.getSensorName(), Field.Store.YES));
-    //         use a string field for timestamp because we don't want it tokenized
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.TIMESTAMP, this.getTimestamp(), Field.Store.YES));
-    return doc;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getMongoCollectionName() {
-    return MONGO_COLLECTION_NAME;
-  }
-
-  @Override
-  @BsonIgnore
-  public Class<ActivitySensorData> getClassObject() {
-    return ActivitySensorData.class;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getTableName() {
-    return MY_SQL_TABLE_NAME;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getCreateTableQuery() {
-    return "CREATE TABLE "
-        + this.getTableName()
-        + "(time_stamp VARCHAR(30) , "
-        + " sensor_name CHAR(25) , "
-        + " formatted_date CHAR(10) , "
-        + " step_counts INTEGER, "
-        + " step_delta INTEGER)";
-  }
-
-  @Override
-  @BsonIgnore
-  public String getInsertIntoTableQuery() {
-    return " insert into "
-        + this.getTableName()
-        + " (time_stamp,formatted_date, sensor_name, step_counts,step_delta)"
-        + " values (?, ?, ?, ?, ?)";
-  }
-
-  @Override
-  @BsonIgnore
-  public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
-    preparedStmt.setString(1, this.getTimestamp());
-    preparedStmt.setString(2, this.getFormattedDate());
-    preparedStmt.setString(3, this.getSensorName());
-    preparedStmt.setInt(4, this.getSensorData().getStepCounts());
-    preparedStmt.setInt(5, this.getSensorData().getStepDelta());
-  }
-
-  @Override
-  @BsonIgnore
-  public String getFileName() {
-    return FILE_NAME;
-  }
-
-  @Override
-  @BsonIgnore
-  public File getFile() {
-    return this.file;
-  }
-
-  @Override
-  @BsonIgnore
-  public void setFile(File file) {
-    this.file = file;
-  }
-
-  public static class SensorData {
-
-    @SerializedName("step_counts")
+    @SerializedName("sensor_name")
     @Expose
-    private Integer stepCounts;
-    @SerializedName("step_delta")
+    var sensorName: String? = null
+
+    @SerializedName("timestamp")
     @Expose
-    private Integer stepDelta;
+    var time_stamp: String? = null
 
-    public SensorData() {}
+    @SerializedName("time_stamp")
+    @Expose
+    var timeStamp: String? = null
+        set(timeStamp) {
+            field = timeStamp
+            formattedDate = WebAppConstants.inputDateFormat.format(Date(timeStamp))
+        }
 
-    public Integer getStepCounts() {
-      return stepCounts;
+    @SerializedName("formatted_date")
+    @Expose
+    var formattedDate: String? = null
+
+    @SerializedName("sensor_data")
+    @Expose
+    var sensorData: SensorData? = null
+    private fun getTimestamp(): String? {
+        return time_stamp
     }
 
-    public void setStepCounts(Integer stepCounts) {
-      this.stepCounts = stepCounts;
+    fun setTimestamp(timestamp: String?) {
+        this.time_stamp = timestamp
+        setFormattedDate()
     }
 
-    public Integer getStepDelta() {
-      return stepDelta;
+    override fun setFormattedDate() {
+        if (time_stamp != null) {
+            formattedDate = WebAppConstants.inputDateFormat.format(Date(time_stamp))
+        }
     }
 
-    public void setStepDelta(Integer stepDelta) {
-      this.stepDelta = stepDelta;
+    override fun getStartTime(): String {
+        return timeStamp!!
     }
-  }
+
+    @BsonIgnore
+    override fun getDocument(): Document {
+        val doc = Document()
+        doc.add(
+            IntPoint(
+                LuceneManager.LuceneConstants.STEP_COUNT, sensorData!!.stepCounts!!
+            )
+        )
+        doc.add(
+            IntPoint(
+                LuceneManager.LuceneConstants.STEP_DELTA, sensorData!!.stepDelta!!
+            )
+        )
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
+            )
+        )
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.FORMATTED_DATE, sensorName, Field.Store.YES
+            )
+        )
+        //         use a string field for timestamp because we don't want it tokenized
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.TIMESTAMP, getTimestamp(), Field.Store.YES
+            )
+        )
+        return doc
+    }
+
+    @BsonIgnore
+    override fun getMongoCollectionName(): String {
+        return MONGO_COLLECTION_NAME
+    }
+
+    @BsonIgnore
+    override fun getClassObject(): Class<ActivitySensorData> {
+        return ActivitySensorData::class.java
+    }
+
+    @BsonIgnore
+    override fun getTableName(): String {
+        return mySqlTableName
+    }
+
+    @BsonIgnore
+    override fun getCreateTableQuery(): String {
+        return ("CREATE TABLE "
+                + this.tableName
+                + "(time_stamp VARCHAR(30) , "
+                + " sensor_name CHAR(25) , "
+                + " formatted_date CHAR(10) , "
+                + " step_counts INTEGER, "
+                + " step_delta INTEGER)")
+    }
+
+    @BsonIgnore
+    override fun getInsertIntoTableQuery(): String {
+        return (" insert into "
+                + this.tableName
+                + " (time_stamp,formatted_date, sensor_name, step_counts,step_delta)"
+                + " values (?, ?, ?, ?, ?)")
+    }
+
+    @BsonIgnore
+    @Throws(SQLException::class)
+    override fun fillQueryData(preparedStmt: PreparedStatement) {
+        preparedStmt.setString(1, getTimestamp())
+        preparedStmt.setString(2, formattedDate)
+        preparedStmt.setString(3, sensorName)
+        preparedStmt.setInt(4, sensorData!!.stepCounts!!)
+        preparedStmt.setInt(5, sensorData!!.stepDelta!!)
+    }
+
+    @BsonIgnore
+    override fun getFileName(): String {
+        return FILE_NAME
+    }
+
+    @BsonIgnore
+    override fun getFile(): File {
+        return file!!
+    }
+
+    @BsonIgnore
+    override fun setFile(file: File) {
+        this.file = file
+    }
+
+    class SensorData {
+        @SerializedName("step_counts")
+        @Expose
+        var stepCounts: Int? = null
+
+        @SerializedName("step_delta")
+        @Expose
+        var stepDelta: Int? = null
+    }
+
+    companion object {
+        @get:BsonIgnore
+        @BsonIgnore
+        val mySqlTableName = "ActivitySensorData"
+
+        @BsonIgnore
+        val MONGO_COLLECTION_NAME = "ActivitySensorData"
+
+        @BsonIgnore
+        val FILE_NAME = "Activity"
+    }
 }

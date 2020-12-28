@@ -1,16 +1,10 @@
-package sensormodels.battery;
+package sensormodels.battery
 
-public interface BatterySensorBuilder {
-
-  BatterySensorBuilder setSensorName(String sensorName);
-
-  BatterySensorBuilder setTimeStamp(String timeStamp);
-
-  BatterySensorBuilder setSensorData(BatterySensorData.SensorData sensorData);
-
-  BatterySensorBuilder setPercent(Integer percent);
-
-  BatterySensorBuilder setCharging(Boolean charging);
-
-  BatterySensorData build();
+interface BatterySensorBuilder {
+    fun setSensorName(sensorName: String?): BatterySensorBuilder
+    fun setTimeStamp(timeStamp: String?): BatterySensorBuilder
+    fun setSensorData(sensorData: BatterySensorData.SensorData?): BatterySensorBuilder
+    fun setPercent(percent: Int?): BatterySensorBuilder
+    fun setCharging(charging: Boolean?): BatterySensorBuilder
+    fun build(): BatterySensorData
 }

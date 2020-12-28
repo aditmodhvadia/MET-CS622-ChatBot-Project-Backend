@@ -1,187 +1,143 @@
-package sensormodels;
+package sensormodels
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import database.LuceneManager;
-import java.io.File;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.IntPoint;
-import org.apache.lucene.document.StringField;
-import org.bson.codecs.pojo.annotations.BsonIgnore;
-import sensormodels.store.models.FileStoreModel;
-import sensormodels.store.models.LuceneStoreModel;
-import sensormodels.store.models.MongoStoreModel;
-import sensormodels.store.models.MySqlStoreModel;
-import utils.WebAppConstants;
+import com.google.gson.annotations.Expose
+import com.google.gson.annotations.SerializedName
+import database.LuceneManager
+import org.apache.lucene.document.Document
+import org.apache.lucene.document.Field
+import org.apache.lucene.document.IntPoint
+import org.apache.lucene.document.StringField
+import org.bson.codecs.pojo.annotations.BsonIgnore
+import sensormodels.HeartRateSensorData
+import sensormodels.store.models.FileStoreModel
+import sensormodels.store.models.LuceneStoreModel
+import sensormodels.store.models.MongoStoreModel
+import sensormodels.store.models.MySqlStoreModel
+import utils.WebAppConstants
+import java.io.File
+import java.sql.PreparedStatement
+import java.sql.SQLException
+import java.util.*
 
-public class HeartRateSensorData
-    implements MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
-
-  @BsonIgnore public static final String MY_SQL_TABLE_NAME = "HeartRateSensorData";
-
-  @BsonIgnore public static final String MONGO_COLLECTION_NAME = "HeartRateSensorData";
-
-  @BsonIgnore public static final String FILE_NAME = "HeartRate";
-
-  @SerializedName("sensor_name")
-  @Expose
-  private String sensorName;
-
-  @SerializedName("timestamp")
-  @Expose
-  private String timestamp;
-
-  @SerializedName("sensor_data")
-  @Expose
-  private SensorData sensorData;
-
-  @SerializedName("formatted_date")
-  @Expose
-  private String formattedDate;
-
-  @BsonIgnore private File file;
-
-  public String getSensorName() {
-    return sensorName;
-  }
-
-  public void setSensorName(String sensorName) {
-    this.sensorName = sensorName;
-  }
-
-  public String getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(String timestamp) {
-    this.timestamp = timestamp;
-  }
-
-  public SensorData getSensorData() {
-    return sensorData;
-  }
-
-  public void setSensorData(SensorData sensorData) {
-    this.sensorData = sensorData;
-  }
-
-  public void setFormattedDate() {
-    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timestamp));
-  }
-
-  @Override
-  public String getStartTime() {
-    return this.getTimestamp();
-  }
-
-  public String getFormattedDate() {
-    return formattedDate;
-  }
-
-  @Override
-  @BsonIgnore
-  public Document getDocument() {
-    Document doc = new Document();
-    //        doc.add(new TextField(LuceneConstants.BPM,
-    // String.valueOf(sensorData.getSensorData().getBpm()), Field.Store.YES));
-    doc.add(new IntPoint(LuceneManager.LuceneConstants.BPM, this.getSensorData().getBpm()));
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.SENSOR_NAME, this.getSensorName(), Field.Store.YES));
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.FORMATTED_DATE,
-            this.getFormattedDate(),
-            Field.Store.YES));
-    //         use a string field for timestamp because we don't want it tokenized
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.TIMESTAMP, this.getTimestamp(), Field.Store.YES));
-    return doc;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getMongoCollectionName() {
-    return MONGO_COLLECTION_NAME;
-  }
-
-  @Override
-  @BsonIgnore
-  public Class<HeartRateSensorData> getClassObject() {
-    return HeartRateSensorData.class;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getTableName() {
-    return MY_SQL_TABLE_NAME;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getCreateTableQuery() {
-    return "CREATE TABLE "
-        + this.getTableName()
-        + "(timestamp VARCHAR(30) , "
-        + " formatted_date VARCHAR(10) , "
-        + " sensor_name CHAR (25), "
-        + " bpm INTEGER)";
-  }
-
-  @Override
-  @BsonIgnore
-  public String getInsertIntoTableQuery() {
-    return " insert into "
-        + this.getTableName()
-        + " (timestamp, formatted_date, sensor_name,bpm)"
-        + " values (?, ?, ?, ?)";
-  }
-
-  @Override
-  @BsonIgnore
-  public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
-    preparedStmt.setString(1, this.getTimestamp());
-    preparedStmt.setString(2, this.getFormattedDate());
-    preparedStmt.setString(3, this.getSensorName());
-    preparedStmt.setInt(4, this.getSensorData().getBpm());
-  }
-
-  @Override
-  @BsonIgnore
-  public String getFileName() {
-    return FILE_NAME;
-  }
-
-  @Override
-  @BsonIgnore
-  public File getFile() {
-    return this.file;
-  }
-
-  @Override
-  public void setFile(File file) {
-    this.file = file;
-  }
-
-  public static class SensorData {
-
-    @SerializedName("bpm")
+class HeartRateSensorData : MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
+    @SerializedName("sensor_name")
     @Expose
-    private Integer bpm;
+    var sensorName: String? = null
 
-    public SensorData() {}
+    @SerializedName("timestamp")
+    @Expose
+    var timestamp: String? = null
 
-    public Integer getBpm() {
-      return bpm;
+    @SerializedName("sensor_data")
+    @Expose
+    var sensorData: SensorData? = null
+
+    @SerializedName("formatted_date")
+    @Expose
+    var formattedDate: String? = null
+        private set
+
+    @BsonIgnore
+    private var file: File? = null
+    override fun setFormattedDate() {
+        formattedDate = WebAppConstants.inputDateFormat.format(Date(timestamp))
     }
 
-    public void setBpm(Integer bpm) {
-      this.bpm = bpm;
+    override fun getStartTime(): String {
+        return timestamp!!
     }
-  }
+
+    @BsonIgnore
+    override fun getDocument(): Document {
+        val doc = Document()
+        //        doc.add(new TextField(LuceneConstants.BPM,
+        // String.valueOf(sensorData.getSensorData().getBpm()), Field.Store.YES));
+        doc.add(IntPoint(LuceneManager.LuceneConstants.BPM, sensorData!!.bpm!!))
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
+            )
+        )
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.FORMATTED_DATE,
+                formattedDate,
+                Field.Store.YES
+            )
+        )
+        //         use a string field for timestamp because we don't want it tokenized
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.TIMESTAMP, timestamp, Field.Store.YES
+            )
+        )
+        return doc
+    }
+
+    @BsonIgnore
+    override fun getMongoCollectionName(): String {
+        return MONGO_COLLECTION_NAME
+    }
+
+    @BsonIgnore
+    override fun getClassObject(): Class<HeartRateSensorData> {
+        return HeartRateSensorData::class.java
+    }
+
+    @BsonIgnore
+    override fun getTableName(): String {
+        return MY_SQL_TABLE_NAME
+    }
+
+    @BsonIgnore
+    override fun getCreateTableQuery(): String {
+        return ("CREATE TABLE ${this.tableName}(timestamp VARCHAR(30) ,  formatted_date VARCHAR(10) ,  sensor_name CHAR (25),  bpm INTEGER)")
+    }
+
+    @BsonIgnore
+    override fun getInsertIntoTableQuery(): String {
+        return (" insert into ${this.tableName} (timestamp, formatted_date, sensor_name,bpm) values (?, ?, ?, ?)")
+    }
+
+    @BsonIgnore
+    @Throws(SQLException::class)
+    override fun fillQueryData(preparedStmt: PreparedStatement) {
+        preparedStmt.apply {
+            setString(1, timestamp)
+            setString(2, formattedDate)
+            setString(3, sensorName)
+            setInt(4, sensorData!!.bpm!!)
+        }
+    }
+
+    @BsonIgnore
+    override fun getFileName(): String {
+        return FILE_NAME
+    }
+
+    @BsonIgnore
+    override fun getFile(): File {
+        return file!!
+    }
+
+    override fun setFile(file: File) {
+        this.file = file
+    }
+
+    class SensorData {
+        @SerializedName("bpm")
+        @Expose
+        var bpm: Int? = null
+    }
+
+    companion object {
+        @BsonIgnore
+        val MY_SQL_TABLE_NAME = "HeartRateSensorData"
+
+        @BsonIgnore
+        val MONGO_COLLECTION_NAME = "HeartRateSensorData"
+
+        @BsonIgnore
+        val FILE_NAME = "HeartRate"
+    }
 }

@@ -1,57 +1,49 @@
-package sensormodels.activity;
+package sensormodels.activity
 
-public class ActivitySensorDataBuilder implements ActivitySensorBuilder {
-  private final ActivitySensorData activitySensorData;
 
-  public ActivitySensorDataBuilder() {
-    this.activitySensorData = new ActivitySensorData();
-    this.activitySensorData.setSensorData(new ActivitySensorData.SensorData());
-  }
+class ActivitySensorDataBuilder : ActivitySensorBuilder {
+    private val activitySensorData: ActivitySensorData = ActivitySensorData()
+    override fun setSensorName(sensorName: String?): ActivitySensorBuilder {
+        activitySensorData.sensorName = sensorName
+        return this
+    }
 
-  @Override
-  public ActivitySensorBuilder setSensorName(String sensorName) {
-    this.activitySensorData.setSensorName(sensorName);
-    return this;
-  }
+    override fun setTimeStamp(timeStamp: String?): ActivitySensorBuilder {
+        activitySensorData.timeStamp = timeStamp
+        activitySensorData.setFormattedDate()
+        return this
+    }
 
-  @Override
-  public ActivitySensorBuilder setTimeStamp(String timeStamp) {
-    this.activitySensorData.setTimeStamp(timeStamp);
-    this.activitySensorData.setFormattedDate();
-    return this;
-  }
+    override fun setTimestamp(timeStamp: String?): ActivitySensorBuilder {
+        activitySensorData.time_stamp = timeStamp
+        activitySensorData.setFormattedDate()
+        return this
+    }
 
-  @Override
-  public ActivitySensorBuilder setTimestamp(String timeStamp) {
-    this.activitySensorData.setTimestamp(timeStamp);
-    this.activitySensorData.setFormattedDate();
-    return this;
-  }
+    override fun setSensorData(sensorData: ActivitySensorData.SensorData?): ActivitySensorBuilder {
+        activitySensorData.sensorData = sensorData
+        return this
+    }
 
-  @Override
-  public ActivitySensorBuilder setSensorData(ActivitySensorData.SensorData sensorData) {
-    this.activitySensorData.setSensorData(sensorData);
-    return this;
-  }
+    override fun setStepCounts(stepCounts: Int?): ActivitySensorBuilder {
+        val sensorData = activitySensorData.sensorData
+        sensorData?.stepCounts = stepCounts
+        activitySensorData.sensorData = sensorData
+        return this
+    }
 
-  @Override
-  public ActivitySensorBuilder setStepCounts(Integer stepCounts) {
-    ActivitySensorData.SensorData sensorData = this.activitySensorData.getSensorData();
-    sensorData.setStepCounts(stepCounts);
-    this.activitySensorData.setSensorData(sensorData);
-    return this;
-  }
+    override fun setStepDelta(stepDelta: Int?): ActivitySensorBuilder {
+        val sensorData = activitySensorData.sensorData
+        sensorData?.stepDelta = stepDelta
+        activitySensorData.sensorData = sensorData
+        return this
+    }
 
-  @Override
-  public ActivitySensorBuilder setStepDelta(Integer stepDelta) {
-    ActivitySensorData.SensorData sensorData = this.activitySensorData.getSensorData();
-    sensorData.setStepDelta(stepDelta);
-    this.activitySensorData.setSensorData(sensorData);
-    return this;
-  }
+    override fun build(): ActivitySensorData {
+        return activitySensorData
+    }
 
-  @Override
-  public ActivitySensorData build() {
-    return this.activitySensorData;
-  }
+    init {
+        activitySensorData.sensorData = ActivitySensorData.SensorData()
+    }
 }

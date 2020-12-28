@@ -99,7 +99,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
         }
     }
 
-    override fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData?>? {
+    override fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData?> {
         return getRunningEventFromActivFitSensorData(date)
     }
 
@@ -107,9 +107,11 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
         return try {
             val maxSensorData = getActivitySensorDataForGivenDate(date).stream()
                 .max(
-                    Comparator.comparingInt { sensorModel: ActivitySensorData -> sensorModel.sensorData.stepCounts })
+                    Comparator.comparingInt { sensorModel: ActivitySensorData ->
+                        sensorModel.sensorData?.stepCounts ?: 0
+                    })
                 .get()
-            maxSensorData.sensorData.stepCounts
+            maxSensorData.sensorData?.stepCounts ?: 0
         } catch (exception: NoSuchElementException) {
             0
         }
@@ -159,7 +161,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
 
     private fun getActivitySensorDataForGivenDate(userDate: Date?): ArrayList<ActivitySensorData> {
         val query = ("SELECT * FROM "
-                + ActivitySensorData.MY_SQL_TABLE_NAME
+                + ActivitySensorData.mySqlTableName
                 + " WHERE formatted_date LIKE '"
                 + WebAppConstants.inputDateFormat.format(userDate)
                 + "' ORDER BY step_counts DESC LIMIT 1")

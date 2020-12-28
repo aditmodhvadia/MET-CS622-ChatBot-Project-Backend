@@ -1,3 +1,3 @@
-package sensormodels;
+package sensormodels
 
-public interface DatabaseModel {}
+interface DatabaseModel 
