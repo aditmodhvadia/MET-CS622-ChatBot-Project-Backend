@@ -1,12 +1,11 @@
-package responsemodels;
+package responsemodels
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nonnull
 
-public interface QueryResponseBuilder {
+interface QueryResponseBuilder {
+    @Nonnull
+    fun setResponseMessage(@Nonnull queryResponseMsg: String?): QueryResponseBuilder
 
-  @Nonnull
-  QueryResponseBuilder setResponseMessage(@Nonnull String queryResponseMsg);
-
-  @Nonnull
-  QueryResponseMessage build();
+    @Nonnull
+    fun build(): QueryResponseMessage
 }

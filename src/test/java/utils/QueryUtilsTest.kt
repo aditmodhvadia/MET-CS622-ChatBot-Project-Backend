@@ -1,99 +1,100 @@
-package utils;
+package utils
 
-import org.junit.Test;
+import org.junit.Assert
+import org.junit.Test
+import utils.QueryUtils.determineQueryType
+import utils.QueryUtils.extractDateFromQuery
+import utils.QueryUtils.getFormattedHeartRatesForTheDays
+import utils.QueryUtils.isMatching
+import utils.WebAppConstants.NO_HEART_RATE_DATA
+import java.util.*
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Objects;
+class QueryUtilsTest {
+    @Test
+    fun isRunningEventMatching() {
+        Assert.assertTrue(isMatching(QueryUtils.RUNNING_EVENT_REGEX, "did I run today?"))
+        Assert.assertTrue(isMatching(QueryUtils.RUNNING_EVENT_REGEX, "did I ran yesterday?"))
+        Assert.assertTrue(isMatching(QueryUtils.RUNNING_EVENT_REGEX, "did I go running today?"))
+        Assert.assertTrue(
+            isMatching(QueryUtils.RUNNING_EVENT_REGEX, "How much did I run yesterday?")
+        )
+        Assert.assertTrue(isMatching(QueryUtils.RUNNING_EVENT_REGEX, "Running yesterday?"))
+        Assert.assertTrue(isMatching(QueryUtils.RUNNING_EVENT_REGEX, "Run was fun yesterday!"))
+    }
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static utils.QueryUtils.getFormattedHeartRatesForTheDays;
-import static utils.WebAppConstants.NO_HEART_RATE_DATA;
+    @Test
+    fun stepCountEventMatching() {
+        Assert.assertTrue(isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "How many steps?"))
+        Assert.assertTrue(isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "How many stepsss?"))
+        Assert.assertTrue(
+            isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "Did I take a step today?")
+        )
+        Assert.assertTrue(isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "Did I walk today?"))
+        Assert.assertTrue(isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "Walk today?"))
+        Assert.assertTrue(isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "How much I walked?"))
+    }
 
-public class QueryUtilsTest {
+    @Test
+    fun heartRateEventRegex() {
+        Assert.assertTrue(isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "Heartrate"))
+        Assert.assertTrue(isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "HeartRate"))
+        Assert.assertTrue(isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "Heart rate"))
+        Assert.assertTrue(isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "Heart Rate"))
+        Assert.assertTrue(isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "Heart"))
+        Assert.assertTrue(isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "heart"))
+    }
 
-  @Test
-  public void isRunningEventMatching() {
-    assertTrue(QueryUtils.isMatching(QueryUtils.RUNNING_EVENT_REGEX, "did I run today?"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.RUNNING_EVENT_REGEX, "did I ran yesterday?"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.RUNNING_EVENT_REGEX, "did I go running today?"));
-    assertTrue(
-        QueryUtils.isMatching(QueryUtils.RUNNING_EVENT_REGEX, "How much did I run yesterday?"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.RUNNING_EVENT_REGEX, "Running yesterday?"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.RUNNING_EVENT_REGEX, "Run was fun yesterday!"));
-  }
+    @Test
+    fun extractsDateFromQuery() {
+        val today = Calendar.getInstance()
+        today[Calendar.HOUR_OF_DAY] = 0
+        today[Calendar.MINUTE] = 0
+        today[Calendar.MILLISECOND] = 0
+        Assert.assertEquals(today.time.date.toLong(), extractDateFromQuery("today")!!.date.toLong())
+        today.add(Calendar.DATE, -1)
+        Assert.assertEquals(
+            today.time.date.toLong(),
+            Objects.requireNonNull(extractDateFromQuery("yesterday"))?.date?.toLong()
+        )
+        val calendar = Calendar.getInstance(Locale.getDefault())
+        calendar[Calendar.YEAR] = 2018
+        calendar[Calendar.MONTH] = 9
+        calendar[Calendar.DAY_OF_MONTH] = 12
+        Assert.assertEquals(
+            calendar.time.date.toLong(),
+            Objects.requireNonNull(extractDateFromQuery("10-12-2018"))?.date?.toLong()
+        )
+    }
 
-  @Test
-  public void stepCountEventMatching() {
-    assertTrue(QueryUtils.isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "How many steps?"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "How many stepsss?"));
-    assertTrue(
-        QueryUtils.isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "Did I take a step today?"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "Did I walk today?"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "Walk today?"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.STEP_COUNT_EVENT_REGEX, "How much I walked?"));
-  }
+    @Test
+    fun determineQueryType() {
+        Assert.assertEquals(
+            QueryUtils.QueryType.HEART_RATE, determineQueryType("what was my heartrate")
+        )
+        Assert.assertEquals(QueryUtils.QueryType.STEP_COUNT, determineQueryType("how many steps?"))
+        Assert.assertEquals(
+            QueryUtils.QueryType.RUNNING, determineQueryType("how much did I run today?")
+        )
+        Assert.assertEquals(
+            QueryUtils.QueryType.UNKNOWN, determineQueryType("what was my temperature?")
+        )
+    }
 
-  @Test
-  public void heartRateEventRegex() {
-    assertTrue(QueryUtils.isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "Heartrate"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "HeartRate"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "Heart rate"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "Heart Rate"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "Heart"));
-    assertTrue(QueryUtils.isMatching(QueryUtils.HEART_RATE_EVENT_REGEX, "heart"));
-  }
-
-  @Test
-  public void extractsDateFromQuery() {
-    Calendar today = Calendar.getInstance();
-    today.set(Calendar.HOUR_OF_DAY, 0);
-    today.set(Calendar.MINUTE, 0);
-    today.set(Calendar.MILLISECOND, 0);
-    assertEquals(today.getTime().getDate(), QueryUtils.extractDateFromQuery("today").getDate());
-
-    today.add(Calendar.DATE, -1);
-    assertEquals(
-        today.getTime().getDate(),
-        Objects.requireNonNull(QueryUtils.extractDateFromQuery("yesterday")).getDate());
-    Calendar calendar = Calendar.getInstance(Locale.getDefault());
-    calendar.set(Calendar.YEAR, 2018);
-    calendar.set(Calendar.MONTH, 9);
-    calendar.set(Calendar.DAY_OF_MONTH, 12);
-    assertEquals(
-        calendar.getTime().getDate(),
-        Objects.requireNonNull(QueryUtils.extractDateFromQuery("10-12-2018")).getDate());
-  }
-
-  @Test
-  public void determineQueryType() {
-    assertEquals(
-        QueryUtils.QueryType.HEART_RATE, QueryUtils.determineQueryType("what was my heartrate"));
-
-    assertEquals(QueryUtils.QueryType.STEP_COUNT, QueryUtils.determineQueryType("how many steps?"));
-
-    assertEquals(
-        QueryUtils.QueryType.RUNNING, QueryUtils.determineQueryType("how much did I run today?"));
-
-    assertEquals(
-        QueryUtils.QueryType.UNKNOWN, QueryUtils.determineQueryType("what was my temperature?"));
-  }
-
-  @Test
-  public void formattedHeartRateCountResult() {
-    //    No heart rate data found
-    assertEquals(getFormattedHeartRatesForTheDays(new Date(), 0), NO_HEART_RATE_DATA);
-
-    assertEquals(
-        getFormattedHeartRatesForTheDays(new Date("11/25/2020"), 10),
-        "You received 10 heart rate notifications on 11/25/2020.");
-    assertEquals(
-        getFormattedHeartRatesForTheDays(new Date("11/25/2020"), 1997),
-        "You received 1997 heart rate notifications on 11/25/2020.");
-    assertEquals(
-        getFormattedHeartRatesForTheDays(new Date("11/25/2020"), 1),
-        "You received 1 heart rate notifications on 11/25/2020.");
-  }
+    @Test
+    fun formattedHeartRateCountResult() {
+        //    No heart rate data found
+        Assert.assertEquals(getFormattedHeartRatesForTheDays(Date(), 0), NO_HEART_RATE_DATA)
+        Assert.assertEquals(
+            getFormattedHeartRatesForTheDays(Date("11/25/2020"), 10),
+            "You received 10 heart rate notifications on 11/25/2020."
+        )
+        Assert.assertEquals(
+            getFormattedHeartRatesForTheDays(Date("11/25/2020"), 1997),
+            "You received 1997 heart rate notifications on 11/25/2020."
+        )
+        Assert.assertEquals(
+            getFormattedHeartRatesForTheDays(Date("11/25/2020"), 1),
+            "You received 1 heart rate notifications on 11/25/2020."
+        )
+    }
 }

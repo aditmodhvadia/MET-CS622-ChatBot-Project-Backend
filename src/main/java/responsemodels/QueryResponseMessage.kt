@@ -1,65 +1,34 @@
-package responsemodels;
+package responsemodels
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import javax.annotation.Nonnull;
+import com.google.gson.annotations.Expose
+import com.google.gson.annotations.SerializedName
+import javax.annotation.Nonnull
 
-public class QueryResponseMessage {
-
-  @SerializedName("data")
-  @Expose
-  private Data data;
-
-  public Data getData() {
-    return data;
-  }
-
-  public void setData(Data data) {
-    this.data = data;
-  }
-
-  public static class Data {
-    public Data(String responseMsg) {
-      this.responseMsg = responseMsg;
-    }
-
-    @SerializedName("responseMsg")
+class QueryResponseMessage {
+    @SerializedName("data")
     @Expose
-    private String responseMsg;
+    var data: Data? = null
 
-    public String getResponseMsg() {
-      return responseMsg;
+    class Data(@field:Expose @field:SerializedName("responseMsg") var responseMsg: String?)
+    class QueryResponseMessageBuilder : QueryResponseBuilder {
+        private val queryResponseMessage: QueryResponseMessage = QueryResponseMessage()
+
+        @Nonnull
+        override fun setResponseMessage(@Nonnull queryResponseMsg: String?): QueryResponseBuilder {
+            var data = queryResponseMessage.data
+            if (data == null) {
+                data = Data(queryResponseMsg)
+            } else {
+                data.responseMsg = queryResponseMsg
+            }
+            queryResponseMessage.data = data
+            return this
+        }
+
+        @Nonnull
+        override fun build(): QueryResponseMessage {
+            return queryResponseMessage
+        }
+
     }
-
-    public void setResponseMsg(String responseMsg) {
-      this.responseMsg = responseMsg;
-    }
-  }
-
-  public static class QueryResponseMessageBuilder implements QueryResponseBuilder {
-    private final QueryResponseMessage queryResponseMessage;
-
-    public QueryResponseMessageBuilder() {
-      this.queryResponseMessage = new QueryResponseMessage();
-    }
-
-    @Nonnull
-    @Override
-    public QueryResponseBuilder setResponseMessage(@Nonnull String queryResponseMsg) {
-      Data data = this.queryResponseMessage.getData();
-      if (data == null) {
-        data = new Data(queryResponseMsg);
-      } else {
-        data.setResponseMsg(queryResponseMsg);
-      }
-      this.queryResponseMessage.setData(data);
-      return this;
-    }
-
-    @Nonnull
-    @Override
-    public QueryResponseMessage build() {
-      return this.queryResponseMessage;
-    }
-  }
 }

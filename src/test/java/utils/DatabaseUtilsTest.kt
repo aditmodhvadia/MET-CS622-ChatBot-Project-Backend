@@ -1,28 +1,26 @@
-package utils;
+package utils
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Assert
+import org.junit.Test
+import utils.DatabaseUtils.isWithinDateRange
+import utils.DatabaseUtils.shouldBeRunningAndNotUnknown
+import java.util.*
 
-import java.util.Date;
-import org.junit.Test;
+class DatabaseUtilsTest {
+    @Test
+    fun dateShouldBeWithinRange() {
+        val today = Date("11/28/2020")
+        val yesterday = Date("11/27/2020")
+        val tomorrow = Date("11/29/2020")
+        Assert.assertTrue(isWithinDateRange(yesterday, tomorrow, today))
+        Assert.assertFalse(isWithinDateRange(yesterday, today, tomorrow))
+    }
 
-public class DatabaseUtilsTest {
-
-  @Test
-  public void isWithinDateRange() {
-    Date today = new Date("11/28/2020");
-    Date yesterday = new Date("11/27/2020");
-    Date tomorrow = new Date("11/29/2020");
-
-    assertTrue(DatabaseUtils.isWithinDateRange(yesterday, tomorrow, today));
-    assertFalse(DatabaseUtils.isWithinDateRange(yesterday, today, tomorrow));
-  }
-
-  @Test
-  public void shouldBeRunningAndNotUnknown() {
-    assertTrue(DatabaseUtils.shouldBeRunningAndNotUnknown("running"));
-    assertTrue(DatabaseUtils.shouldBeRunningAndNotUnknown("RUNNING"));
-    assertFalse(DatabaseUtils.shouldBeRunningAndNotUnknown("unknown"));
-    assertFalse(DatabaseUtils.shouldBeRunningAndNotUnknown("walking"));
-  }
+    @Test
+    fun shouldBeRunningAndNotUnknown() {
+        Assert.assertTrue(shouldBeRunningAndNotUnknown("running"))
+        Assert.assertTrue(shouldBeRunningAndNotUnknown("RUNNING"))
+        Assert.assertFalse(shouldBeRunningAndNotUnknown("unknown"))
+        Assert.assertFalse(shouldBeRunningAndNotUnknown("walking"))
+    }
 }

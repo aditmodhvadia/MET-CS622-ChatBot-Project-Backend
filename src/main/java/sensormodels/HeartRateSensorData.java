@@ -153,23 +153,23 @@ public class HeartRateSensorData extends DatabaseModel {
   }
 
   @Override
-  public void setFile(File file) {
-    this.file = file;
-  }
-
-  @Override
   @BsonIgnore
   public File getFile() {
     return this.file;
   }
 
-  public static class SensorData {
+  @Override
+  public void setFile(File file) {
+    this.file = file;
+  }
 
-    public SensorData() {}
+  public static class SensorData {
 
     @SerializedName("bpm")
     @Expose
     private Integer bpm;
+
+    public SensorData() {}
 
     public Integer getBpm() {
       return bpm;

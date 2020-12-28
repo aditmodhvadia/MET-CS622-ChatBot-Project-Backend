@@ -45,6 +45,11 @@ public class ActivitySensorData extends DatabaseModel {
   @Expose
   private SensorData sensorData;
 
+  @BsonIgnore
+  public static String getMySqlTableName() {
+    return MY_SQL_TABLE_NAME;
+  }
+
   public String getSensorName() {
     return sensorName;
   }
@@ -66,8 +71,17 @@ public class ActivitySensorData extends DatabaseModel {
     return timeStamp;
   }
 
+  public void setTimeStamp(String timeStamp) {
+    this.timeStamp = timeStamp;
+    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timeStamp));
+  }
+
   public String getFormattedDate() {
     return formattedDate;
+  }
+
+  public void setFormattedDate(String formattedDate) {
+    this.formattedDate = formattedDate;
   }
 
   public void setFormattedDate() {
@@ -76,18 +90,9 @@ public class ActivitySensorData extends DatabaseModel {
     }
   }
 
-  public void setFormattedDate(String formattedDate) {
-    this.formattedDate = formattedDate;
-  }
-
   @Override
   public String getStartTime() {
     return this.getTimeStamp();
-  }
-
-  public void setTimeStamp(String timeStamp) {
-    this.timeStamp = timeStamp;
-    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timeStamp));
   }
 
   public SensorData getSensorData() {
@@ -178,32 +183,26 @@ public class ActivitySensorData extends DatabaseModel {
 
   @Override
   @BsonIgnore
-  public void setFile(File file) {
-    this.file = file;
-  }
-
-  @BsonIgnore
-  public static String getMySqlTableName() {
-    return MY_SQL_TABLE_NAME;
-  }
-
-  @Override
-  @BsonIgnore
   public File getFile() {
     return this.file;
   }
 
-  public static class SensorData {
+  @Override
+  @BsonIgnore
+  public void setFile(File file) {
+    this.file = file;
+  }
 
-    public SensorData() {}
+  public static class SensorData {
 
     @SerializedName("step_counts")
     @Expose
     private Integer stepCounts;
-
     @SerializedName("step_delta")
     @Expose
     private Integer stepDelta;
+
+    public SensorData() {}
 
     public Integer getStepCounts() {
       return stepCounts;

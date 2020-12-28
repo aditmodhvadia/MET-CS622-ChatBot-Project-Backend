@@ -131,14 +131,14 @@ public class BatterySensorData extends DatabaseModel {
 
   @Override
   @BsonIgnore
-  public void setFile(File file) {
-    this.file = file;
+  public File getFile() {
+    return this.file;
   }
 
   @Override
   @BsonIgnore
-  public File getFile() {
-    return this.file;
+  public void setFile(File file) {
+    this.file = file;
   }
 
   @Override

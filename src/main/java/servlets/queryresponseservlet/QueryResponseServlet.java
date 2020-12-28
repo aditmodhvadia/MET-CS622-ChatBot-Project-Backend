@@ -18,8 +18,8 @@ import utils.QueryUtils;
 
 public abstract class QueryResponseServlet extends HttpServlet {
 
-  private HttpServletResponse response;
   private final Gson gson = new Gson();
+  private HttpServletResponse response;
   private DatabaseQueryRunner databaseQueryRunner;
 
   public QueryResponseServlet(DatabaseQueryRunner databaseQueryRunner) {
@@ -92,7 +92,9 @@ public abstract class QueryResponseServlet extends HttpServlet {
    */
   private void sendResponse(@Nonnull String queryResponseData) {
     QueryResponseMessage queryResponseMessage =
-        new QueryResponseMessage.QueryResponseMessageBuilder().setResponseMessage(queryResponseData).build();
+        new QueryResponseMessage.QueryResponseMessageBuilder()
+            .setResponseMessage(queryResponseData)
+            .build();
     try {
       response.getOutputStream().print(gson.toJson(queryResponseMessage));
     } catch (IOException e) {

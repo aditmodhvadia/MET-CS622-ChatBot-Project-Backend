@@ -29,8 +29,8 @@ import sensormodels.store.models.MongoStoreModel;
 import utils.WebAppConstants;
 
 public class MongoDbManager implements DbManager<MongoStoreModel>, DatabaseQueryRunner {
-  private static MongoDbManager instance;
   public static final String DATABASE_NAME = "SensorData";
+  private static MongoDbManager instance;
   private static MongoDatabase database;
 
   private MongoDbManager() {

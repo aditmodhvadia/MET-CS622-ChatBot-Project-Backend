@@ -162,14 +162,14 @@ public class LightSensorData extends DatabaseModel {
   }
 
   @Override
-  public void setFile(File file) {
-    this.file = file;
-  }
-
-  @Override
   @BsonIgnore
   public File getFile() {
     return this.file;
+  }
+
+  @Override
+  public void setFile(File file) {
+    this.file = file;
   }
 
   public static class SensorData {

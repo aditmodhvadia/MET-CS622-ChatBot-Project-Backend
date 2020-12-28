@@ -20,14 +20,12 @@ import utils.IoUtility;
 import utils.UnzipUtility;
 
 public class StartUpServlet extends HttpServlet {
-  private final UnzipUtility unZipper = new UnzipUtility(); // unzips zip folder and files
-  private IoUtility ioUtility; // utility class for IO Operations
-  private FileCumulator fileCumulator; // Data cumulator into result files
   private static final String destinationFolder =
       "UncompressedData" + FileSystems.getDefault().getSeparator(); // destination folder
   private static final String sourceFileName =
       "/WEB-INF/classes/SampleUserSmartwatch.zip"; // datasource file
-
+  private final UnzipUtility unZipper = new UnzipUtility(); // unzips zip folder and files
+  private FileCumulator fileCumulator; // Data cumulator into result files
   private DbManager dbManager;
 
   @Override
@@ -36,7 +34,6 @@ public class StartUpServlet extends HttpServlet {
     System.out.println("        Server started      ");
     System.out.println("--------#####--------");
 
-    ioUtility = IoUtility.getInstance();
     fileCumulator = FileCumulator.getInstance();
     dbManager = DatabaseManager.getInstance(getServletContext());
 
@@ -54,7 +51,7 @@ public class StartUpServlet extends HttpServlet {
       //                start unzipping the datasource
       unZipper.unzip(absoluteDiskPath, destinationFolder, new ListenerClass()); // unzip source file
       final File mainFolder = new File(destinationFolder); // get main folder to iterate all files
-      ioUtility.iterateFilesAndFolder(
+      IoUtility.INSTANCE.iterateFilesAndFolder(
           mainFolder, new ListenerClass()); // Listener Class listens for Files and Zip Files
     } catch (FileAlreadyExistsException ignored) {
       System.out.println("File already exists hence ignored");
@@ -113,7 +110,7 @@ public class StartUpServlet extends HttpServlet {
       File destinationFile =
           fileCumulator.determineFileCategoryAndGet(
               file); // determine to which sensor file belongs to
-      ioUtility.appendToFile(destinationFile, file); // append the data to cumulative file
+      IoUtility.INSTANCE.appendToFile(destinationFile, file); // append the data to cumulative file
     }
 
     @Override

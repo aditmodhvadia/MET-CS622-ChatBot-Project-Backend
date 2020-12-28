@@ -5,9 +5,9 @@ import java.io.File;
 public interface FileStoreModel {
   String getFileName();
 
-  void setFile(File file);
-
   File getFile();
+
+  void setFile(File file);
 
   void setFormattedDate();
 
