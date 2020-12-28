@@ -56,10 +56,10 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
         }
     }
 
-    override fun <V : MySqlStoreModel?> insertSensorDataList(@Nonnull sensorDataList: List<V>) {
+    override fun insertSensorDataList(@Nonnull sensorDataList: List<MySqlStoreModel?>) {
         //    sensorDataList.forEach(this::insertSensorData);
         try {
-            sensorDataList.forEach { sensorData: V? ->
+            sensorDataList.forEach { sensorData: MySqlStoreModel? ->
                 try {
                     val preparedStmt = connection!!.prepareStatement(sensorData!!.insertIntoTableQuery)
                     sensorData.fillQueryData(preparedStmt)
@@ -78,7 +78,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
         }
     }
 
-    override fun <V : MySqlStoreModel?> insertSensorData(sensorData: V) {
+    override fun insertSensorData(sensorData: MySqlStoreModel?) {
         // create the mysql insert prepared statement
         val preparedStmt: PreparedStatement
         try {
@@ -103,9 +103,9 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
         return getRunningEventFromActivFitSensorData(date)
     }
 
-    override fun queryForTotalStepsInDay(userDate: Date?): Int {
+    override fun queryForTotalStepsInDay(date: Date?): Int {
         return try {
-            val maxSensorData = getActivitySensorDataForGivenDate(userDate).stream()
+            val maxSensorData = getActivitySensorDataForGivenDate(date).stream()
                 .max(
                     Comparator.comparingInt { sensorModel: ActivitySensorData -> sensorModel.sensorData.stepCounts })
                 .get()

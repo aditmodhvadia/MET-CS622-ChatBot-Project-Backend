@@ -1,77 +1,72 @@
-package database;
+package database
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.ServletContext;
-import sensormodels.DatabaseModel;
+import sensormodels.DatabaseModel
+import java.util.*
+import java.util.function.Consumer
+import javax.annotation.Nonnull
+import javax.servlet.ServletContext
 
-public final class DatabaseManager implements DbManager<DatabaseModel>, DatabasePublisher {
-
-  private static DatabaseManager instance;
-  private final ArrayList<DbManager> databases = new ArrayList<>();
-
-  public DatabaseManager(ServletContext servletContext) {
-    init(servletContext);
-  }
-
-  /**
-   * Get singleton instance of DatabaseManager.
-   *
-   * @param servletContext servlet context
-   * @return singleton instance
-   */
-  public static DatabaseManager getInstance(ServletContext servletContext) {
-    if (instance == null) {
-      instance = new DatabaseManager(servletContext);
+class DatabaseManager(servletContext: ServletContext?) : DbManager<DatabaseModel>,
+    DatabasePublisher {
+    private val databases = ArrayList<DbManager<DatabaseModel>>()
+    override fun init(servletContext: ServletContext?) {
+        databases.add(MongoDbManager.instance as DbManager<DatabaseModel>)
+        databases.add(LuceneManager.getInstance(servletContext!!)!! as DbManager<DatabaseModel>)
+        databases.add(MySqlManager.instance!! as DbManager<DatabaseModel>)
+        databases.forEach(Consumer { database: DbManager<DatabaseModel> -> database.init(servletContext) })
     }
-    return instance;
-  }
 
-  @Override
-  public void init(@Nullable ServletContext servletContext) {
-    databases.add(MongoDbManager.getInstance());
-    databases.add(LuceneManager.getInstance(servletContext));
-    databases.add(MySqlManager.getInstance());
-    databases.forEach(database -> database.init(servletContext));
-  }
-
-  @Override
-  public <V extends DatabaseModel> void insertSensorDataList(
-      @Nonnull List<? extends V> sensorDataList) {
-    for (DbManager dbManager : databases) {
-      try {
-        dbManager.insertSensorDataList(sensorDataList);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+    override fun insertSensorDataList(@Nonnull sensorDataList: List<DatabaseModel>) {
+        for (dbManager in databases) {
+            try {
+                dbManager.insertSensorDataList(sensorDataList)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
-  }
 
-  @Override
-  public <V extends DatabaseModel> void insertSensorData(V sensorData) {
-    for (DbManager dbManager : databases) {
-      try {
-        dbManager.insertSensorData(sensorData);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+    override fun insertSensorData(sensorData: DatabaseModel) {
+        for (dbManager in databases) {
+            try {
+                dbManager.insertSensorData(sensorData)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
-  }
 
-  @Override
-  public void addDatabase(DbManager dbManager) {
-    this.databases.add(dbManager);
-  }
+    override fun addDatabase(dbManager: DbManager<DatabaseModel>) {
+        databases.add(dbManager)
+    }
 
-  @Override
-  public void removeDatabase(DbManager dbManager) {
-    this.databases.remove(dbManager);
-  }
+    override fun removeDatabase(dbManager: DbManager<DatabaseModel>) {
+        databases.remove(dbManager)
+    }
 
-  @Override
-  public boolean hasDatabaseManager(DbManager dbManager) {
-    return this.databases.contains(dbManager);
-  }
+    override fun hasDatabaseManager(dbManager: DbManager<DatabaseModel>): Boolean {
+        return databases.contains(dbManager)
+    }
+
+    companion object {
+        private var instance: DatabaseManager? = null
+
+        /**
+         * Get singleton instance of DatabaseManager.
+         *
+         * @param servletContext servlet context
+         * @return singleton instance
+         */
+        @JvmStatic
+        fun getInstance(servletContext: ServletContext?): DatabaseManager? {
+            if (instance == null) {
+                instance = DatabaseManager(servletContext)
+            }
+            return instance
+        }
+    }
+
+    init {
+        init(servletContext)
+    }
 }

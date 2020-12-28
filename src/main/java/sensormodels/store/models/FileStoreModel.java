@@ -1,8 +1,9 @@
 package sensormodels.store.models;
 
 import java.io.File;
+import sensormodels.DatabaseModel;
 
-public interface FileStoreModel {
+public interface FileStoreModel extends DatabaseModel {
   String getFileName();
 
   File getFile();

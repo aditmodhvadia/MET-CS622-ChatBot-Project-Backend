@@ -63,9 +63,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
             )
         )
 
-    override fun <V : MongoStoreModel?> insertSensorDataList(
-        @Nonnull sensorDataList: List<V>
-    ) {
+    override fun insertSensorDataList(@Nonnull sensorDataList: List<MongoStoreModel?>) {
         try {
             val collection: MongoCollection<Any> = database.getCollection(
                 sensorDataList[0]!!.mongoCollectionName,
@@ -80,7 +78,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
         }
     }
 
-    override fun <V : MongoStoreModel?> insertSensorData(sensorData: V) {
+    override fun insertSensorData(sensorData: MongoStoreModel?) {
         val collection: MongoCollection<Any> =
             database.getCollection(sensorData!!.mongoCollectionName, sensorData.classObject)
         collection.insertOne(sensorData)

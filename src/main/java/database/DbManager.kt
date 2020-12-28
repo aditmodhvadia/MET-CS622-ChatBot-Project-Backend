@@ -16,12 +16,12 @@ interface DbManager<T> {
      *
      * @param sensorDataList given list of sensor data to be inserted
      */
-    fun <V : T?> insertSensorDataList(@Nonnull sensorDataList: List<V>)
+    fun insertSensorDataList(@Nonnull sensorDataList: List<T>)
 
     /**
      * Use to insert given document of the given type into the given target collection.
      *
      * @param sensorData given sensor data to be inserted
      */
-    fun <V : T?> insertSensorData(sensorData: V)
+    fun insertSensorData(sensorData: T)
 }

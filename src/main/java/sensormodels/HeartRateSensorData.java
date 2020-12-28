@@ -12,9 +12,14 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.StringField;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
+import sensormodels.store.models.FileStoreModel;
+import sensormodels.store.models.LuceneStoreModel;
+import sensormodels.store.models.MongoStoreModel;
+import sensormodels.store.models.MySqlStoreModel;
 import utils.WebAppConstants;
 
-public class HeartRateSensorData extends DatabaseModel {
+public class HeartRateSensorData
+    implements MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
 
   @BsonIgnore public static final String MY_SQL_TABLE_NAME = "HeartRateSensorData";
 

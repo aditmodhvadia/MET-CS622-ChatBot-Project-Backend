@@ -12,10 +12,14 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
-import sensormodels.DatabaseModel;
+import sensormodels.store.models.FileStoreModel;
+import sensormodels.store.models.LuceneStoreModel;
+import sensormodels.store.models.MongoStoreModel;
+import sensormodels.store.models.MySqlStoreModel;
 import utils.WebAppConstants;
 
-public class ActivFitSensorData extends DatabaseModel {
+public class ActivFitSensorData
+    implements MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
 
   @BsonIgnore public static final String MY_SQL_TABLE_NAME = "ActivFitSensorData";
 

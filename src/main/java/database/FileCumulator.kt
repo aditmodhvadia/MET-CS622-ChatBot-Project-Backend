@@ -1,284 +1,268 @@
-package database;
+package database
 
-import com.google.gson.Gson;
-import java.io.File;
-import java.lang.reflect.Type;
-import java.nio.file.FileSystems;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.ServletContext;
-import sensormodels.BluetoothSensorData;
-import sensormodels.DatabaseModel;
-import sensormodels.HeartRateSensorData;
-import sensormodels.LightSensorData;
-import sensormodels.ScreenUsageSensorData;
-import sensormodels.activfit.ActivFitSensorData;
-import sensormodels.activity.ActivitySensorData;
-import sensormodels.battery.BatterySensorData;
-import sensormodels.store.models.FileStoreModel;
-import utils.DatabaseUtils;
-import utils.IoUtility;
-import utils.QueryUtils;
-import utils.WebAppConstants;
+import com.google.gson.Gson
+import sensormodels.BluetoothSensorData
+import sensormodels.HeartRateSensorData
+import sensormodels.LightSensorData
+import sensormodels.ScreenUsageSensorData
+import sensormodels.activfit.ActivFitSensorData
+import sensormodels.activity.ActivitySensorData
+import sensormodels.battery.BatterySensorData
+import sensormodels.store.models.FileStoreModel
+import utils.DatabaseUtils.isWithinDateRange
+import utils.DatabaseUtils.shouldBeRunningAndNotUnknown
+import utils.IoUtility.createDirectory
+import utils.IoUtility.createEmptyFile
+import utils.IoUtility.getFileContentsLineByLine
+import utils.QueryUtils.addDayToDate
+import utils.WebAppConstants
+import java.io.File
+import java.lang.reflect.Type
+import java.nio.file.FileSystems
+import java.util.*
+import java.util.function.Consumer
+import java.util.stream.Collectors
+import javax.annotation.Nonnull
+import javax.servlet.ServletContext
+import kotlin.collections.ArrayList
+import kotlin.system.measureTimeMillis
 
-public class FileCumulator implements DbManager<FileStoreModel>, DatabaseQueryRunner {
-  private static final String MISC_FILE_NAME = "Misc";
-  private static final String BASE_ADDRESS = "Result" + FileSystems.getDefault().getSeparator();
-  private static final String DATA_FILE_NAME = "CumulativeData.txt";
-  public static File miscFile;
-  private static FileCumulator instance;
-  private final HashMap<String, DatabaseModel> sensorModelsMap =
-      new HashMap<>(); // <File Name, Sensor Model>
-
-  private FileCumulator() {
-    IoUtility.INSTANCE.createDirectory(BASE_ADDRESS);
-    init(null);
-  }
-
-  /**
-   * Get singleton instance.
-   *
-   * @return instance
-   */
-  public static FileCumulator getInstance() {
-    if (instance == null) {
-      instance = new FileCumulator();
-    }
-    return instance;
-  }
-
-  static <T extends FileStoreModel> List<T> getSensorFileContents(T sensorModel, int numOfDays) {
-    List<T> sensorDataList = new ArrayList<>(); // holds the sensor data
-    List<String> fileContents =
-        IoUtility.getFileContentsLineByLine(
-            sensorModel.getFile()); // holds all lines of the cumulativeFile for the sensor
-    String currentDate = ""; // will hold the value of current date
-    Gson g = new Gson();
-
-    for (String fileLine : fileContents) {
-      try {
-        //                converts JSON string into POJO
-        T sensorData = g.fromJson(fileLine, (Type) sensorModel.getClassObject());
-        sensorData.setFormattedDate();
-        //                get date of current sensor data to compare
-        String sensorFormattedDate = getFormattedDateFromTimeStamp(sensorData.getStartTime());
-
-        if (sensorFormattedDate.equals(currentDate)) {
-          //                    add sensor data to list as date is same as current date
-          sensorDataList.add(sensorData);
-        } else {
-          currentDate = sensorFormattedDate; // update current date
-          numOfDays--; // decrement num of days left
-          if (numOfDays == -1) {
-            //                        found data for the specified number of days so return the
-            // sensor data list
-            return sensorDataList;
-          }
-        }
-      } catch (Exception ignored) {
-      }
-    }
-    return sensorDataList;
-  }
-
-  public static String getFormattedDateFromTimeStamp(String timestamp) {
-    return WebAppConstants.inputDateFormat.format(new Date(timestamp));
-  }
-
-  public HashMap<String, DatabaseModel> getSensorModelsMap() {
-    return sensorModelsMap;
-  }
-
-  @Override
-  public void init(@Nullable ServletContext servletContext) {
-    miscFile =
-        IoUtility.INSTANCE.createEmptyFile(
-            BASE_ADDRESS + MISC_FILE_NAME + FileSystems.getDefault().getSeparator(),
-            DATA_FILE_NAME);
-
-    sensorModelsMap.put(ActivFitSensorData.FILE_NAME, new ActivFitSensorData());
-    sensorModelsMap.put(ActivitySensorData.FILE_NAME, new ActivitySensorData());
-    sensorModelsMap.put(BatterySensorData.FILE_NAME, new BatterySensorData());
-    sensorModelsMap.put(BluetoothSensorData.FILE_NAME, new BluetoothSensorData());
-    sensorModelsMap.put(HeartRateSensorData.FILE_NAME, new HeartRateSensorData());
-    sensorModelsMap.put(LightSensorData.FILE_NAME, new LightSensorData());
-    sensorModelsMap.put(ScreenUsageSensorData.FILE_NAME, new ScreenUsageSensorData());
-
-    sensorModelsMap
-        .values()
-        .forEach(
-            databaseModel ->
-                databaseModel.setFile(
-                    IoUtility.INSTANCE.createEmptyFile(
+class FileCumulator private constructor() : DbManager<FileStoreModel?>, DatabaseQueryRunner {
+    val sensorModelsMap = HashMap<String, FileStoreModel>() // <File Name, Sensor Model>
+    override fun init(servletContext: ServletContext?) {
+        miscFile = createEmptyFile(
+            BASE_ADDRESS + MISC_FILE_NAME + FileSystems.getDefault().separator,
+            DATA_FILE_NAME
+        )
+        sensorModelsMap[ActivFitSensorData.FILE_NAME] = ActivFitSensorData()
+        sensorModelsMap[ActivitySensorData.FILE_NAME] = ActivitySensorData()
+        sensorModelsMap[BatterySensorData.FILE_NAME] = BatterySensorData()
+        sensorModelsMap[BluetoothSensorData.FILE_NAME] = BluetoothSensorData()
+        sensorModelsMap[HeartRateSensorData.FILE_NAME] = HeartRateSensorData()
+        sensorModelsMap[LightSensorData.FILE_NAME] = LightSensorData()
+        sensorModelsMap[ScreenUsageSensorData.FILE_NAME] = ScreenUsageSensorData()
+        sensorModelsMap
+            .values
+            .forEach(
+                Consumer { fileStoreModel: FileStoreModel ->
+                    fileStoreModel.file = createEmptyFile(
                         BASE_ADDRESS
-                            + databaseModel.getFileName()
-                            + FileSystems.getDefault().getSeparator(),
-                        DATA_FILE_NAME)));
-  }
-
-  @Override
-  public <V extends FileStoreModel> void insertSensorDataList(
-      @Nonnull List<? extends V> sensorDataList) {
-    System.out.println("No need to store in the file system again.");
-  }
-
-  @Override
-  public <V extends FileStoreModel> void insertSensorData(V sensorData) {
-    System.out.println("No need to store in the file system again.");
-  }
-
-  @Override
-  public ArrayList<ActivFitSensorData> queryForRunningEvent(Date today) {
-    Date tomorrow = QueryUtils.addDayToDate(today, 1); //        get the next Day Date as well
-    //        fetch all record from the collection
-    List<ActivFitSensorData> allSensorData =
-        getSensorFileContents(
-            (ActivFitSensorData) sensorModelsMap.get(ActivFitSensorData.FILE_NAME), 1000);
-
-    return allSensorData.stream()
-        .filter(
-            sensorData -> {
-              Date sensorDataStartTime = new Date(sensorData.getTimestamp().getStartTime());
-              return DatabaseUtils.isWithinDateRange(today, tomorrow, sensorDataStartTime)
-                  && DatabaseUtils.shouldBeRunningAndNotUnknown(
-                      sensorData.getSensorData().getActivity());
-            })
-        .collect(Collectors.toCollection(ArrayList::new));
-  }
-
-  @Override
-  public int queryHeartRatesForDay(Date date) {
-    List<HeartRateSensorData> sensorDataList = getHeartRateSensorFileContents();
-    String formattedDate = WebAppConstants.inputDateFormat.format(date);
-
-    return (int)
-        sensorDataList.stream()
-            .filter(sensorData -> sensorData.getFormattedDate().equals(formattedDate))
-            .count();
-  }
-
-  @Override
-  public int queryForTotalStepsInDay(Date userDate) {
-    List<ActivitySensorData> activitySensorDataList =
-        getSensorFileContents(
-            (ActivitySensorData) sensorModelsMap.get(ActivitySensorData.FILE_NAME), 1000);
-    String userFormattedDate = WebAppConstants.inputDateFormat.format(userDate);
-
-    return activitySensorDataList.stream()
-        .filter(sensorData -> sensorData.getFormattedDate().equals(userFormattedDate))
-        .max(Comparator.comparingInt(sensorData -> sensorData.getSensorData().getStepCounts()))
-        .get()
-        .getSensorData()
-        .getStepCounts();
-  }
-
-  /**
-   * Use to determine the category of sensor for the given file and returns the cumulative data txt
-   * file.
-   *
-   * @param inputFile given file
-   * @return the cumulative data file
-   */
-  public File determineFileCategoryAndGet(File inputFile) {
-    for (String fileName : sensorModelsMap.keySet()) {
-      if (inputFile.getPath().contains(fileName)) {
-        return sensorModelsMap.get(fileName).getFile();
-      }
-    }
-    return miscFile;
-  }
-
-  List<HeartRateSensorData> getHeartRateSensorFileContents() {
-    List<HeartRateSensorData> sensorDataList = new ArrayList<>(); // holds the sensor data
-    List<String> fileContents =
-        IoUtility.getFileContentsLineByLine(
-            sensorModelsMap
-                .get(HeartRateSensorData.FILE_NAME)
-                .getFile()); // holds all lines of the cumulativeFile for the sensor
-    // will hold the value of current date
-    for (String fileLine : fileContents) {
-      Gson g = new Gson();
-      try {
-        //                converts JSON string into POJO
-        HeartRateSensorData heartRateSensorData = g.fromJson(fileLine, HeartRateSensorData.class);
-        heartRateSensorData.setFormattedDate();
-        sensorDataList.add(heartRateSensorData);
-      } catch (Exception e) {
-        //                e.printStackTrace();
-        //                System.out.println("Incorrect JSON format");    // don't store data in
-        // mongodb
-      }
+                                + fileStoreModel.fileName
+                                + FileSystems.getDefault().separator,
+                        DATA_FILE_NAME
+                    )
+                })
     }
 
-    return sensorDataList;
-  }
-
-  /**
-   * Call to calculate brute force search time for running activity in given number of days.
-   *
-   * @param numOfDays given number of days
-   * @return time taken to search the data through brute force
-   */
-  long searchForRunningActivity(int numOfDays) {
-    long searchTime = System.currentTimeMillis(); // used to calculate search time for brute force
-    for (ActivFitSensorData sensorData :
-        getSensorFileContents(
-            (ActivFitSensorData) sensorModelsMap.get(ActivFitSensorData.FILE_NAME),
-            numOfDays)) { // iterate all sensordata and find the result
-      if (sensorData.getSensorData().getActivity().equalsIgnoreCase("running")) {
-        System.out.println("Running event found " + sensorData.getTimestamp().getStartTime());
-      }
+    override fun insertSensorDataList(@Nonnull sensorDataList: List<FileStoreModel?>) {
+        println("No need to store in the file system again.")
     }
-    //        search complete, calculate search time
-    searchTime = System.currentTimeMillis() - searchTime;
-    System.out.println("Brute force took " + searchTime + "ms for running");
-    return searchTime;
-  }
 
-  /**
-   * Call to search for less bright data in given number of days and calculate brute force search
-   * time.
-   *
-   * @param numOfDays given number of days
-   */
-  long searchForLessBrightData(int numOfDays) {
-    long searchTime = System.currentTimeMillis(); // used to calculate search time for brute force
-    for (LightSensorData sensorData :
-        getSensorFileContents(
-            (LightSensorData) sensorModelsMap.get(LightSensorData.FILE_NAME),
-            numOfDays)) { // iterate all sensordata and find the result
-      if (sensorData.getLuxValue().equalsIgnoreCase("less bright")) {
-        //                System.out.println("less bright found " + sensorData.getTimestamp());
-      }
+    override fun insertSensorData(sensorData: FileStoreModel?) {
+        println("No need to store in the file system again.")
     }
-    //        search complete, calculate search time
-    searchTime = System.currentTimeMillis() - searchTime;
-    System.out.println("Brute force took " + searchTime + "ms for less bright");
-    return searchTime;
-  }
 
-  /**
-   * Call to search for 100 bpm data in given number of days and calculate brute force search time.
-   *
-   * @param numOfDays given number of days
-   */
-  long searchForHundredBpm(int numOfDays) {
-    long searchTime = System.currentTimeMillis(); // used to calculate search time for brute force
-    for (HeartRateSensorData sensorData :
-        getHeartRateSensorFileContents()) { // iterate all sensordata and find the result
-      if (sensorData.getSensorData().getBpm() == 100) {
-        //                System.out.println("100 bpm found " + sensorData.getTimestamp());
-      }
+    override fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData?>? {
+        val tomorrow = addDayToDate(date, 1) //        get the next Day Date as well
+        //        fetch all record from the collection
+        val allSensorData = getSensorFileContents<ActivFitSensorData>(
+            sensorModelsMap[ActivFitSensorData.FILE_NAME], 1000
+        )
+        return allSensorData.stream()
+            .filter { sensorData: ActivFitSensorData ->
+                val sensorDataStartTime = Date(sensorData.timestamp.startTime)
+                (isWithinDateRange(date, tomorrow, sensorDataStartTime)
+                        && shouldBeRunningAndNotUnknown(
+                    sensorData.sensorData.activity
+                ))
+            }
+            .collect(Collectors.toCollection { ArrayList() })
     }
-    //        search complete, calculate search time
-    searchTime = System.currentTimeMillis() - searchTime;
-    System.out.println("Brute force took " + searchTime + "ms for 100 bpm");
-    return searchTime;
-  }
+
+    override fun queryHeartRatesForDay(date: Date?): Int {
+        val sensorDataList = heartRateSensorFileContents
+        val formattedDate = WebAppConstants.inputDateFormat.format(date)
+        return sensorDataList.stream()
+            .filter { sensorData: HeartRateSensorData -> sensorData.formattedDate == formattedDate }
+            .count().toInt()
+    }
+
+    override fun queryForTotalStepsInDay(date: Date?): Int {
+        val activitySensorDataList = getSensorFileContents<ActivitySensorData>(
+            sensorModelsMap[ActivitySensorData.FILE_NAME], 1000
+        )
+        val userFormattedDate = WebAppConstants.inputDateFormat.format(date)
+        return activitySensorDataList
+            .filter { sensorData: ActivitySensorData -> sensorData.formattedDate == userFormattedDate }
+            .maxByOrNull { sensorData: ActivitySensorData -> sensorData.sensorData.stepCounts }
+            ?.sensorData
+            ?.stepCounts ?: 0
+    }
+
+    /**
+     * Use to determine the category of sensor for the given file and returns the cumulative data txt
+     * file.
+     *
+     * @param inputFile given file
+     * @return the cumulative data file
+     */
+    fun determineFileCategoryAndGet(inputFile: File): File? {
+        for (fileName in sensorModelsMap.keys) {
+            if (inputFile.path.contains(fileName)) {
+                return sensorModelsMap[fileName]!!.file
+            }
+        }
+        return miscFile
+    }
+
+    private val heartRateSensorFileContents: List<HeartRateSensorData>
+        get() {
+            val sensorDataList: MutableList<HeartRateSensorData> = java.util.ArrayList() // holds the sensor data
+            val fileContents = getFileContentsLineByLine(
+                sensorModelsMap[HeartRateSensorData.FILE_NAME]
+                    ?.file
+            ) // holds all lines of the cumulativeFile for the sensor
+            // will hold the value of current date
+            for (fileLine in fileContents) {
+                val g = Gson()
+                try {
+                    //                converts JSON string into POJO
+                    val heartRateSensorData = g.fromJson(fileLine, HeartRateSensorData::class.java)
+                    heartRateSensorData.setFormattedDate()
+                    sensorDataList.add(heartRateSensorData)
+                } catch (e: Exception) {
+                    //                e.printStackTrace();
+                    //                System.out.println("Incorrect JSON format");    // don't store data in
+                    // mongodb
+                }
+            }
+            return sensorDataList
+        }
+
+    /**
+     * Call to calculate brute force search time for running activity in given number of days.
+     *
+     * @param numOfDays given number of days
+     * @return time taken to search the data through brute force
+     */
+    fun searchForRunningActivity(numOfDays: Int): Long {
+        val timeTaken = measureTimeMillis {
+            for (sensorData in getSensorFileContents<ActivFitSensorData>(
+                sensorModelsMap[ActivFitSensorData.FILE_NAME] as ActivFitSensorData?,
+                numOfDays
+            )) { // iterate all sensordata and find the result
+                if (sensorData.sensorData.activity.equals("running", ignoreCase = true)) {
+                    println("Running event found " + sensorData.timestamp.startTime)
+                }
+            }
+        }
+        println("Brute force took " + timeTaken + "ms for running")
+        return timeTaken
+    }
+
+    /**
+     * Call to search for less bright data in given number of days and calculate brute force search
+     * time.
+     *
+     * @param numOfDays given number of days
+     */
+    fun searchForLessBrightData(numOfDays: Int): Long {
+        var searchTime = System.currentTimeMillis() // used to calculate search time for brute force
+        for (sensorData in getSensorFileContents<LightSensorData>(
+            sensorModelsMap[LightSensorData.FILE_NAME] as LightSensorData?,
+            numOfDays
+        )) { // iterate all sensordata and find the result
+            if (sensorData.luxValue.equals("less bright", ignoreCase = true)) {
+                //                System.out.println("less bright found " + sensorData.getTimestamp());
+            }
+        }
+        //        search complete, calculate search time
+        searchTime = System.currentTimeMillis() - searchTime
+        println("Brute force took " + searchTime + "ms for less bright")
+        return searchTime
+    }
+
+    /**
+     * Call to search for 100 bpm data in given number of days and calculate brute force search time.
+     *
+     * @param numOfDays given number of days
+     */
+    fun searchForHundredBpm(numOfDays: Int): Long {
+        var searchTime = System.currentTimeMillis() // used to calculate search time for brute force
+        for (sensorData in heartRateSensorFileContents) { // iterate all sensordata and find the result
+            if (sensorData.sensorData.bpm == 100) {
+                //                System.out.println("100 bpm found " + sensorData.getTimestamp());
+            }
+        }
+        //        search complete, calculate search time
+        searchTime = System.currentTimeMillis() - searchTime
+        println("Brute force took " + searchTime + "ms for 100 bpm")
+        return searchTime
+    }
+
+    companion object {
+        private const val MISC_FILE_NAME = "Misc"
+        private val BASE_ADDRESS = "Result" + FileSystems.getDefault().separator
+        private const val DATA_FILE_NAME = "CumulativeData.txt"
+        var miscFile: File? = null
+
+        /**
+         * Get singleton instance.
+         *
+         * @return instance
+         */
+        @JvmStatic
+        var instance: FileCumulator? = null
+            get() {
+                if (field == null) {
+                    field = FileCumulator()
+                }
+                return field
+            }
+            private set
+
+        fun <T : FileStoreModel> getSensorFileContents(sensorModel: FileStoreModel?, numOfDays: Int): List<T> {
+            var numOfDays = numOfDays
+            val sensorDataList: MutableList<T> = java.util.ArrayList() // holds the sensor data
+            val fileContents = getFileContentsLineByLine(
+                sensorModel!!.file
+            ) // holds all lines of the cumulativeFile for the sensor
+            var currentDate = "" // will hold the value of current date
+            val g = Gson()
+            for (fileLine in fileContents) {
+                try {
+                    //                converts JSON string into POJO
+                    val sensorData: T = g.fromJson(fileLine, sensorModel.javaClass as Type)
+                    sensorData.setFormattedDate()
+                    //                get date of current sensor data to compare
+                    val sensorFormattedDate = getFormattedDateFromTimeStamp(
+                        sensorData.startTime
+                    )
+                    if (sensorFormattedDate == currentDate) {
+                        //                    add sensor data to list as date is same as current date
+                        sensorDataList.add(sensorData)
+                    } else {
+                        currentDate = sensorFormattedDate // update current date
+                        numOfDays-- // decrement num of days left
+                        if (numOfDays == -1) {
+                            //                        found data for the specified number of days so return the
+                            // sensor data list
+                            return sensorDataList
+                        }
+                    }
+                } catch (ignored: Exception) {
+                }
+            }
+            return sensorDataList
+        }
+
+        private fun getFormattedDateFromTimeStamp(timestamp: String?): String {
+            return WebAppConstants.inputDateFormat.format(Date(timestamp))
+        }
+    }
+
+    init {
+        createDirectory(BASE_ADDRESS)
+        init(null)
+    }
 }
