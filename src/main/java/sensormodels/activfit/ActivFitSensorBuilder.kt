@@ -1,20 +1,12 @@
-package sensormodels.activfit;
+package sensormodels.activfit
 
-public interface ActivFitSensorBuilder {
-
-  ActivFitSensorBuilder setSensorName(String sensorName);
-
-  ActivFitSensorBuilder setTimeStamp(ActivFitSensorData.Timestamp timeStamp);
-
-  ActivFitSensorBuilder setSensorData(ActivFitSensorData.SensorData sensorData);
-
-  ActivFitSensorBuilder setStartTime(String startTime);
-
-  ActivFitSensorBuilder setEndTime(String endTime);
-
-  ActivFitSensorBuilder setActivity(String activity);
-
-  ActivFitSensorBuilder setDuration(Integer duration);
-
-  ActivFitSensorData build();
+interface ActivFitSensorBuilder {
+    fun setSensorName(sensorName: String?): ActivFitSensorBuilder
+    fun setTimeStamp(timeStamp: ActivFitSensorData.Timestamp?): ActivFitSensorBuilder
+    fun setSensorData(sensorData: ActivFitSensorData.SensorData?): ActivFitSensorBuilder
+    fun setStartTime(startTime: String?): ActivFitSensorBuilder
+    fun setEndTime(endTime: String?): ActivFitSensorBuilder
+    fun setActivity(activity: String?): ActivFitSensorBuilder
+    fun setDuration(duration: Int?): ActivFitSensorBuilder
+    fun build(): ActivFitSensorData
 }

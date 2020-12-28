@@ -1,251 +1,195 @@
-package sensormodels.activfit;
+package sensormodels.activfit
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import database.LuceneManager;
-import java.io.File;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
-import org.bson.codecs.pojo.annotations.BsonIgnore;
-import sensormodels.store.models.FileStoreModel;
-import sensormodels.store.models.LuceneStoreModel;
-import sensormodels.store.models.MongoStoreModel;
-import sensormodels.store.models.MySqlStoreModel;
-import utils.WebAppConstants;
+import com.google.gson.annotations.Expose
+import com.google.gson.annotations.SerializedName
+import database.LuceneManager
+import org.apache.lucene.document.Document
+import org.apache.lucene.document.Field
+import org.apache.lucene.document.StringField
+import org.apache.lucene.document.TextField
+import org.bson.codecs.pojo.annotations.BsonIgnore
+import sensormodels.activfit.ActivFitSensorData
+import sensormodels.store.models.FileStoreModel
+import sensormodels.store.models.LuceneStoreModel
+import sensormodels.store.models.MongoStoreModel
+import sensormodels.store.models.MySqlStoreModel
+import utils.WebAppConstants
+import java.io.File
+import java.sql.PreparedStatement
+import java.sql.SQLException
+import java.util.*
 
-public class ActivFitSensorData
-    implements MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
+class ActivFitSensorData : MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
+    @BsonIgnore
+    private var file: File? = null
 
-  @BsonIgnore public static final String MY_SQL_TABLE_NAME = "ActivFitSensorData";
-
-  @BsonIgnore public static final String MONGO_COLLECTION_NAME = "ActivFitSensorData";
-
-  @BsonIgnore public static final String FILE_NAME = "ActivFit";
-
-  @BsonIgnore private File file;
-
-  @SerializedName("sensor_name")
-  @Expose
-  private String sensorName;
-
-  @SerializedName("timestamp")
-  @Expose
-  private Timestamp timestamp;
-
-  @SerializedName("sensor_data")
-  @Expose
-  private SensorData sensorData;
-
-  @Expose
-  @SerializedName("formatted_date")
-  private String formattedDate;
-
-  public String getFormattedDate() {
-    return formattedDate;
-  }
-
-  public String getSensorName() {
-    return sensorName;
-  }
-
-  public void setSensorName(String sensorName) {
-    this.sensorName = sensorName;
-  }
-
-  public Timestamp getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(Timestamp timestamp) {
-    this.timestamp = timestamp;
-  }
-
-  public SensorData getSensorData() {
-    return sensorData;
-  }
-
-  public void setSensorData(SensorData sensorData) {
-    this.sensorData = sensorData;
-  }
-
-  @Override
-  public void setFormattedDate() {
-    this.formattedDate = WebAppConstants.inputDateFormat.format(new Date(timestamp.getStartTime()));
-  }
-
-  @Override
-  public String getStartTime() {
-    return this.getTimestamp().getStartTime();
-  }
-
-  @Override
-  @BsonIgnore
-  public Document getDocument() {
-    Document doc = new Document();
-    doc.add(
-        new TextField(
-            LuceneManager.LuceneConstants.ACTIVITY,
-            this.getSensorData().getActivity(),
-            Field.Store.YES));
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.SENSOR_NAME, this.getSensorName(), Field.Store.YES));
-    if (this.getFormattedDate() != null) {
-      doc.add(
-          new StringField(
-              LuceneManager.LuceneConstants.FORMATTED_DATE,
-              this.getFormattedDate(),
-              Field.Store.YES));
-    }
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.START_TIME,
-            this.getTimestamp().getStartTime(),
-            Field.Store.YES));
-    if (this.getTimestamp().getEndTime() != null) {
-      doc.add(
-          new StringField(
-              LuceneManager.LuceneConstants.END_TIME,
-              this.getTimestamp().getEndTime(),
-              Field.Store.YES));
-    }
-    //         use a string field for timestamp because we don't want it tokenized
-    doc.add(
-        new StringField(
-            LuceneManager.LuceneConstants.TIMESTAMP,
-            this.getTimestamp().getStartTime(),
-            Field.Store.YES));
-    return doc;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getMongoCollectionName() {
-    return MONGO_COLLECTION_NAME;
-  }
-
-  @Override
-  @BsonIgnore
-  public Class<ActivFitSensorData> getClassObject() {
-    return ActivFitSensorData.class;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getTableName() {
-    return MY_SQL_TABLE_NAME;
-  }
-
-  @Override
-  @BsonIgnore
-  public String getCreateTableQuery() {
-    return "CREATE TABLE "
-        + this.getTableName()
-        + " (start_time VARCHAR(30) , "
-        + " formatted_date VARCHAR(10) , "
-        + " end_time VARCHAR(30) , "
-        + " duration INTEGER , "
-        + " activity VARCHAR(55) ) ";
-  }
-
-  @Override
-  @BsonIgnore
-  public String getInsertIntoTableQuery() {
-    return " insert into "
-        + this.getTableName()
-        + " (start_time, end_time, formatted_date, duration, activity)"
-        + " values (?, ?, ?, ?, ?)";
-  }
-
-  @Override
-  @BsonIgnore
-  public void fillQueryData(PreparedStatement preparedStmt) throws SQLException {
-    preparedStmt.setString(1, this.getTimestamp().getStartTime());
-    preparedStmt.setString(2, this.getTimestamp().getEndTime());
-    preparedStmt.setString(3, this.getFormattedDate());
-    preparedStmt.setInt(4, this.getSensorData().getDuration());
-    preparedStmt.setString(5, this.getSensorData().getActivity());
-  }
-
-  @Override
-  @BsonIgnore
-  public String getFileName() {
-    return FILE_NAME;
-  }
-
-  @Override
-  @BsonIgnore
-  public File getFile() {
-    return this.file;
-  }
-
-  @Override
-  @BsonIgnore
-  public void setFile(File file) {
-    this.file = file;
-  }
-
-  public static class Timestamp {
-    @SerializedName("start_time")
+    @SerializedName("sensor_name")
     @Expose
-    private String startTime;
+    var sensorName: String? = null
 
-    @SerializedName("end_time")
+    @SerializedName("timestamp")
     @Expose
-    private String endTime;
+    var timestamp: Timestamp? = null
 
-    public Timestamp() {}
-
-    public Timestamp(String startTime, String endTime) {
-      this.startTime = startTime;
-      this.endTime = endTime;
-    }
-
-    public String getStartTime() {
-      return startTime;
-    }
-
-    public void setStartTime(String startTime) {
-      this.startTime = startTime;
-    }
-
-    public String getEndTime() {
-      return endTime;
-    }
-
-    public void setEndTime(String endTime) {
-      this.endTime = endTime;
-    }
-  }
-
-  public static class SensorData {
-    @SerializedName("activity")
+    @SerializedName("sensor_data")
     @Expose
-    private String activity;
+    var sensorData: SensorData? = null
 
-    @SerializedName("duration")
     @Expose
-    private Integer duration;
+    @SerializedName("formatted_date")
+    var formattedDate: String? = null
+        private set
 
-    public String getActivity() {
-      return activity;
+    override fun setFormattedDate() {
+        formattedDate = WebAppConstants.inputDateFormat.format(Date(timestamp!!.startTime))
     }
 
-    public void setActivity(String activity) {
-      this.activity = activity;
+    override fun getStartTime(): String {
+        return timestamp!!.startTime!!
     }
 
-    public Integer getDuration() {
-      return duration;
+    @BsonIgnore
+    override fun getDocument(): Document {
+        val doc = Document()
+        doc.add(
+            TextField(
+                LuceneManager.LuceneConstants.ACTIVITY,
+                sensorData!!.activity,
+                Field.Store.YES
+            )
+        )
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
+            )
+        )
+        if (formattedDate != null) {
+            doc.add(
+                StringField(
+                    LuceneManager.LuceneConstants.FORMATTED_DATE,
+                    formattedDate,
+                    Field.Store.YES
+                )
+            )
+        }
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.START_TIME,
+                timestamp!!.startTime,
+                Field.Store.YES
+            )
+        )
+        if (timestamp!!.endTime != null) {
+            doc.add(
+                StringField(
+                    LuceneManager.LuceneConstants.END_TIME,
+                    timestamp!!.endTime,
+                    Field.Store.YES
+                )
+            )
+        }
+        //         use a string field for timestamp because we don't want it tokenized
+        doc.add(
+            StringField(
+                LuceneManager.LuceneConstants.TIMESTAMP,
+                timestamp!!.startTime,
+                Field.Store.YES
+            )
+        )
+        return doc
     }
 
-    public void setDuration(Integer duration) {
-      this.duration = duration;
+    @BsonIgnore
+    override fun getMongoCollectionName() = MONGO_COLLECTION_NAME
+
+    @BsonIgnore
+    override fun getClassObject(): Class<ActivFitSensorData> {
+        return ActivFitSensorData::class.java
     }
-  }
+
+    @BsonIgnore
+    override fun getTableName(): String {
+        return MY_SQL_TABLE_NAME
+    }
+
+    @BsonIgnore
+    override fun getCreateTableQuery(): String {
+        return ("CREATE TABLE "
+                + this.tableName
+                + " (start_time VARCHAR(30) , "
+                + " formatted_date VARCHAR(10) , "
+                + " end_time VARCHAR(30) , "
+                + " duration INTEGER , "
+                + " activity VARCHAR(55) ) ")
+    }
+
+    @BsonIgnore
+    override fun getInsertIntoTableQuery(): String {
+        return (" insert into "
+                + this.tableName
+                + " (start_time, end_time, formatted_date, duration, activity)"
+                + " values (?, ?, ?, ?, ?)")
+    }
+
+    @BsonIgnore
+    @Throws(SQLException::class)
+    override fun fillQueryData(preparedStmt: PreparedStatement) {
+        preparedStmt.setString(1, timestamp!!.startTime)
+        preparedStmt.setString(2, timestamp!!.endTime)
+        preparedStmt.setString(3, formattedDate)
+        preparedStmt.setInt(4, sensorData!!.duration!!)
+        preparedStmt.setString(5, sensorData!!.activity)
+    }
+
+    @BsonIgnore
+    override fun getFileName(): String {
+        return FILE_NAME
+    }
+
+    @BsonIgnore
+    override fun getFile(): File {
+        return file!!
+    }
+
+    @BsonIgnore
+    override fun setFile(file: File) {
+        this.file = file
+    }
+
+    class Timestamp {
+        @SerializedName("start_time")
+        @Expose
+        var startTime: String? = null
+
+        @SerializedName("end_time")
+        @Expose
+        var endTime: String? = null
+
+        constructor()
+        constructor(startTime: String?, endTime: String?) {
+            this.startTime = startTime
+            this.endTime = endTime
+        }
+    }
+
+    class SensorData {
+        @SerializedName("activity")
+        @Expose
+        var activity: String? = null
+
+        @SerializedName("duration")
+        @Expose
+        var duration: Int? = null
+    }
+
+    companion object {
+        @BsonIgnore
+        val MY_SQL_TABLE_NAME = "ActivFitSensorData"
+
+        @BsonIgnore
+        val MONGO_COLLECTION_NAME = "ActivFitSensorData"
+
+        @BsonIgnore
+        val FILE_NAME = "ActivFit"
+    }
 }

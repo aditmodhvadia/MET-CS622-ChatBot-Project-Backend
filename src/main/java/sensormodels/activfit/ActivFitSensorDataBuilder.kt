@@ -1,59 +1,50 @@
-package sensormodels.activfit;
+package sensormodels.activfit
 
-public class ActivFitSensorDataBuilder implements ActivFitSensorBuilder {
-  private final ActivFitSensorData activFitSensorData;
+class ActivFitSensorDataBuilder : ActivFitSensorBuilder {
+    private val activFitSensorData: ActivFitSensorData = ActivFitSensorData()
 
-  public ActivFitSensorDataBuilder() {
-    activFitSensorData = new ActivFitSensorData();
-    activFitSensorData.setTimestamp(new ActivFitSensorData.Timestamp());
-    activFitSensorData.setSensorData(new ActivFitSensorData.SensorData());
-  }
+    override fun setSensorName(sensorName: String?): ActivFitSensorBuilder {
+        activFitSensorData.sensorName = sensorName
+        return this
+    }
 
-  @Override
-  public ActivFitSensorBuilder setSensorName(String sensorName) {
-    this.activFitSensorData.setSensorName(sensorName);
-    return this;
-  }
+    override fun setTimeStamp(timeStamp: ActivFitSensorData.Timestamp?): ActivFitSensorBuilder {
+        activFitSensorData.timestamp = timeStamp
+        return this
+    }
 
-  @Override
-  public ActivFitSensorBuilder setTimeStamp(ActivFitSensorData.Timestamp timeStamp) {
-    this.activFitSensorData.setTimestamp(timeStamp);
-    return this;
-  }
+    override fun setSensorData(sensorData: ActivFitSensorData.SensorData?): ActivFitSensorBuilder {
+        activFitSensorData.sensorData = sensorData
+        return this
+    }
 
-  @Override
-  public ActivFitSensorBuilder setSensorData(ActivFitSensorData.SensorData sensorData) {
-    this.activFitSensorData.setSensorData(sensorData);
-    return this;
-  }
+    override fun setStartTime(startTime: String?): ActivFitSensorBuilder {
+        activFitSensorData.timestamp!!.startTime = startTime
+        activFitSensorData.setFormattedDate()
+        return this
+    }
 
-  @Override
-  public ActivFitSensorBuilder setStartTime(String startTime) {
-    this.activFitSensorData.getTimestamp().setStartTime(startTime);
-    this.activFitSensorData.setFormattedDate();
-    return this;
-  }
+    override fun setEndTime(endTime: String?): ActivFitSensorBuilder {
+        activFitSensorData.timestamp!!.endTime = endTime
+        return this
+    }
 
-  @Override
-  public ActivFitSensorBuilder setEndTime(String endTime) {
-    this.activFitSensorData.getTimestamp().setEndTime(endTime);
-    return this;
-  }
+    override fun setActivity(activity: String?): ActivFitSensorBuilder {
+        activFitSensorData.sensorData!!.activity = activity
+        return this
+    }
 
-  @Override
-  public ActivFitSensorBuilder setActivity(String activity) {
-    this.activFitSensorData.getSensorData().setActivity(activity);
-    return this;
-  }
+    override fun setDuration(duration: Int?): ActivFitSensorBuilder {
+        activFitSensorData.sensorData!!.duration = duration
+        return this
+    }
 
-  @Override
-  public ActivFitSensorBuilder setDuration(Integer duration) {
-    this.activFitSensorData.getSensorData().setDuration(duration);
-    return this;
-  }
+    override fun build(): ActivFitSensorData {
+        return activFitSensorData
+    }
 
-  @Override
-  public ActivFitSensorData build() {
-    return this.activFitSensorData;
-  }
+    init {
+        activFitSensorData.timestamp = ActivFitSensorData.Timestamp()
+        activFitSensorData.sensorData = ActivFitSensorData.SensorData()
+    }
 }
