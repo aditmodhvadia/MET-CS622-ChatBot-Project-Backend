@@ -15,12 +15,12 @@ import sensormodels.store.models.MySqlStoreModel
 import utils.WebAppConstants
 import java.io.File
 import java.sql.PreparedStatement
-import java.sql.SQLException
 import java.util.*
 
-class ActivitySensorData : MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
-    @BsonIgnore
-    private var file: File? = null
+class ActivitySensorData(override var file: File? = null) : MongoStoreModel, LuceneStoreModel, FileStoreModel,
+    MySqlStoreModel {
+    override val fileName: String
+        get() = FILE_NAME
 
     @SerializedName("sensor_name")
     @Expose
@@ -60,100 +60,8 @@ class ActivitySensorData : MongoStoreModel, LuceneStoreModel, FileStoreModel, My
         }
     }
 
-    override fun getStartTime(): String {
-        return timeStamp!!
-    }
-
-    @BsonIgnore
-    override fun getDocument(): Document {
-        val doc = Document()
-        doc.add(
-            IntPoint(
-                LuceneManager.LuceneConstants.STEP_COUNT, sensorData!!.stepCounts!!
-            )
-        )
-        doc.add(
-            IntPoint(
-                LuceneManager.LuceneConstants.STEP_DELTA, sensorData!!.stepDelta!!
-            )
-        )
-        doc.add(
-            StringField(
-                LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
-            )
-        )
-        doc.add(
-            StringField(
-                LuceneManager.LuceneConstants.FORMATTED_DATE, sensorName, Field.Store.YES
-            )
-        )
-        //         use a string field for timestamp because we don't want it tokenized
-        doc.add(
-            StringField(
-                LuceneManager.LuceneConstants.TIMESTAMP, getTimestamp(), Field.Store.YES
-            )
-        )
-        return doc
-    }
-
-    @BsonIgnore
-    override fun getMongoCollectionName(): String {
-        return MONGO_COLLECTION_NAME
-    }
-
-    @BsonIgnore
-    override fun getClassObject(): Class<ActivitySensorData> {
-        return ActivitySensorData::class.java
-    }
-
-    @BsonIgnore
-    override fun getTableName(): String {
-        return mySqlTableName
-    }
-
-    @BsonIgnore
-    override fun getCreateTableQuery(): String {
-        return ("CREATE TABLE "
-                + this.tableName
-                + "(time_stamp VARCHAR(30) , "
-                + " sensor_name CHAR(25) , "
-                + " formatted_date CHAR(10) , "
-                + " step_counts INTEGER, "
-                + " step_delta INTEGER)")
-    }
-
-    @BsonIgnore
-    override fun getInsertIntoTableQuery(): String {
-        return (" insert into "
-                + this.tableName
-                + " (time_stamp,formatted_date, sensor_name, step_counts,step_delta)"
-                + " values (?, ?, ?, ?, ?)")
-    }
-
-    @BsonIgnore
-    @Throws(SQLException::class)
-    override fun fillQueryData(preparedStmt: PreparedStatement) {
-        preparedStmt.setString(1, getTimestamp())
-        preparedStmt.setString(2, formattedDate)
-        preparedStmt.setString(3, sensorName)
-        preparedStmt.setInt(4, sensorData!!.stepCounts!!)
-        preparedStmt.setInt(5, sensorData!!.stepDelta!!)
-    }
-
-    @BsonIgnore
-    override fun getFileName(): String {
-        return FILE_NAME
-    }
-
-    @BsonIgnore
-    override fun getFile(): File {
-        return file!!
-    }
-
-    @BsonIgnore
-    override fun setFile(file: File) {
-        this.file = file
-    }
+    override val startTime: String?
+        get() = TODO("Not yet implemented")
 
     class SensorData {
         @SerializedName("step_counts")
@@ -176,4 +84,65 @@ class ActivitySensorData : MongoStoreModel, LuceneStoreModel, FileStoreModel, My
         @BsonIgnore
         val FILE_NAME = "Activity"
     }
+
+    override val document: Document
+        get() {
+            return Document().apply {
+                add(
+                    IntPoint(
+                        LuceneManager.LuceneConstants.STEP_COUNT, sensorData!!.stepCounts!!
+                    )
+                )
+                add(
+                    IntPoint(
+                        LuceneManager.LuceneConstants.STEP_DELTA, sensorData!!.stepDelta!!
+                    )
+                )
+                add(
+                    StringField(
+                        LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
+                    )
+                )
+                add(
+                    StringField(
+                        LuceneManager.LuceneConstants.FORMATTED_DATE, sensorName, Field.Store.YES
+                    )
+                )
+                //         use a string field for timestamp because we don't want it tokenized
+                add(
+                    StringField(
+                        LuceneManager.LuceneConstants.TIMESTAMP, getTimestamp(), Field.Store.YES
+                    )
+                )
+            }
+        }
+
+    override fun fillQueryData(preparedStmt: PreparedStatement?) {
+        preparedStmt?.apply {
+            setString(1, getTimestamp())
+            setString(2, formattedDate)
+            setString(3, sensorName)
+            setInt(4, sensorData!!.stepCounts!!)
+            setInt(5, sensorData!!.stepDelta!!)
+        }
+    }
+
+    override val mongoCollectionName: String
+        get() = MONGO_COLLECTION_NAME
+    override val tableName: String
+        get() = mySqlTableName
+    override val createTableQuery: String
+        get() = ("CREATE TABLE "
+                + this.tableName
+                + "(time_stamp VARCHAR(30) , "
+                + " sensor_name CHAR(25) , "
+                + " formatted_date CHAR(10) , "
+                + " step_counts INTEGER, "
+                + " step_delta INTEGER)")
+
+    override val insertIntoTableQuery: String?
+        get() = (" insert into "
+                + this.tableName
+                + " (time_stamp,formatted_date, sensor_name, step_counts,step_delta)"
+                + " values (?, ?, ?, ?, ?)")
 }

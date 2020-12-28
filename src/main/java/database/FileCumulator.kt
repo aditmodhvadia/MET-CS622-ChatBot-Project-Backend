@@ -70,10 +70,10 @@ class FileCumulator private constructor() : DbManager<FileStoreModel?>, Database
         )
         return allSensorData.stream()
             .filter { sensorData: ActivFitSensorData ->
-                val sensorDataStartTime = Date(sensorData.timestamp.startTime)
+                val sensorDataStartTime = Date(sensorData.timestamp?.startTime)
                 (isWithinDateRange(date, tomorrow, sensorDataStartTime)
                         && shouldBeRunningAndNotUnknown(
-                    sensorData.sensorData.activity
+                    sensorData.sensorData?.activity ?: ""
                 ))
             }
             .collect(Collectors.toCollection { ArrayList() })
@@ -94,7 +94,7 @@ class FileCumulator private constructor() : DbManager<FileStoreModel?>, Database
         val userFormattedDate = WebAppConstants.inputDateFormat.format(date)
         return activitySensorDataList
             .filter { sensorData: ActivitySensorData -> sensorData.formattedDate == userFormattedDate }
-            .maxByOrNull { sensorData: ActivitySensorData -> sensorData.sensorData.stepCounts }
+            .maxByOrNull { sensorData: ActivitySensorData -> sensorData.sensorData?.stepCounts ?: 0 }
             ?.sensorData
             ?.stepCounts ?: 0
     }
@@ -151,8 +151,8 @@ class FileCumulator private constructor() : DbManager<FileStoreModel?>, Database
                 sensorModelsMap[ActivFitSensorData.FILE_NAME] as ActivFitSensorData?,
                 numOfDays
             )) { // iterate all sensordata and find the result
-                if (sensorData.sensorData.activity.equals("running", ignoreCase = true)) {
-                    println("Running event found " + sensorData.timestamp.startTime)
+                if (sensorData.sensorData?.activity.equals("running", ignoreCase = true)) {
+                    println("Running event found " + sensorData.timestamp?.startTime)
                 }
             }
         }
@@ -190,7 +190,7 @@ class FileCumulator private constructor() : DbManager<FileStoreModel?>, Database
     fun searchForHundredBpm(numOfDays: Int): Long {
         var searchTime = System.currentTimeMillis() // used to calculate search time for brute force
         for (sensorData in heartRateSensorFileContents) { // iterate all sensordata and find the result
-            if (sensorData.sensorData.bpm == 100) {
+            if (sensorData.sensorData?.bpm == 100) {
                 //                System.out.println("100 bpm found " + sensorData.getTimestamp());
             }
         }

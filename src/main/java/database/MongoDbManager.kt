@@ -18,6 +18,7 @@ import utils.WebAppConstants
 import java.util.*
 import javax.annotation.Nonnull
 import javax.servlet.ServletContext
+import kotlin.math.max
 
 class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, DatabaseQueryRunner {
     /**
@@ -67,7 +68,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
         try {
             val collection: MongoCollection<Any> = database.getCollection(
                 sensorDataList[0]!!.mongoCollectionName,
-                sensorDataList[0]!!.classObject
+                sensorDataList[0]!!.javaClass
             )
             collection.insertMany(sensorDataList)
             println(
@@ -80,7 +81,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
 
     override fun insertSensorData(sensorData: MongoStoreModel?) {
         val collection: MongoCollection<Any> =
-            database.getCollection(sensorData!!.mongoCollectionName, sensorData.classObject)
+            database.getCollection(sensorData!!.mongoCollectionName, sensorData.javaClass)
         collection.insertOne(sensorData)
         println("MongoDB Log: Data Inserted")
     }
@@ -113,9 +114,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
         while (cursor.hasNext()) {
             //            get the next Data
             val sensorData = cursor.next()
-            if (sensorData.sensorData.stepCounts > maxStepCount) {
-                maxStepCount = sensorData.sensorData.stepCounts
-            }
+            maxStepCount = max(maxStepCount, sensorData.sensorData?.stepCounts ?: 0)
         }
         return maxStepCount
     }

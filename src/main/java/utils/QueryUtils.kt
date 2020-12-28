@@ -109,19 +109,19 @@ object QueryUtils {
                     .append(" from ")
                     .append(
                         WebAppConstants.outputDateFormat.format(
-                            Date(data.timestamp.startTime)
+                            Date(data.timestamp?.startTime)
                         )
                     )
                     .append(" to ")
                     .append(
-                        WebAppConstants.outputDateFormat.format(Date(data.timestamp.endTime))
+                        WebAppConstants.outputDateFormat.format(Date(data.timestamp?.endTime))
                     )
                     .append(", ")
                 println(
                     "Yes, you ran from "
-                            + data.timestamp.startTime
+                            + data.timestamp?.startTime
                             + " to "
-                            + data.timestamp.endTime
+                            + data.timestamp?.endTime
                 )
             }
             builder.deleteCharAt(builder.length - 1)

@@ -1,8 +1,8 @@
-package sensormodels.store.models;
+package sensormodels.store.models
 
-import org.apache.lucene.document.Document;
-import sensormodels.DatabaseModel;
+import org.apache.lucene.document.Document
+import sensormodels.DatabaseModel
 
-public interface LuceneStoreModel extends DatabaseModel {
-  Document getDocument();
+interface LuceneStoreModel : DatabaseModel {
+    val document: Document?
 }

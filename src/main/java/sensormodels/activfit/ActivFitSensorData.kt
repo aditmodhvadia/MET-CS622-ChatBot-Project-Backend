@@ -8,7 +8,6 @@ import org.apache.lucene.document.Field
 import org.apache.lucene.document.StringField
 import org.apache.lucene.document.TextField
 import org.bson.codecs.pojo.annotations.BsonIgnore
-import sensormodels.activfit.ActivFitSensorData
 import sensormodels.store.models.FileStoreModel
 import sensormodels.store.models.LuceneStoreModel
 import sensormodels.store.models.MongoStoreModel
@@ -16,12 +15,10 @@ import sensormodels.store.models.MySqlStoreModel
 import utils.WebAppConstants
 import java.io.File
 import java.sql.PreparedStatement
-import java.sql.SQLException
 import java.util.*
 
-class ActivFitSensorData : MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
-    @BsonIgnore
-    private var file: File? = null
+class ActivFitSensorData(override var file: File? = null) : MongoStoreModel, LuceneStoreModel, FileStoreModel,
+    MySqlStoreModel {
 
     @SerializedName("sensor_name")
     @Expose
@@ -39,122 +36,14 @@ class ActivFitSensorData : MongoStoreModel, LuceneStoreModel, FileStoreModel, My
     @SerializedName("formatted_date")
     var formattedDate: String? = null
         private set
+    override val fileName: String
+        get() = FILE_NAME
 
     override fun setFormattedDate() {
         formattedDate = WebAppConstants.inputDateFormat.format(Date(timestamp!!.startTime))
     }
 
-    override fun getStartTime(): String {
-        return timestamp!!.startTime!!
-    }
-
-    @BsonIgnore
-    override fun getDocument(): Document {
-        val doc = Document()
-        doc.add(
-            TextField(
-                LuceneManager.LuceneConstants.ACTIVITY,
-                sensorData!!.activity,
-                Field.Store.YES
-            )
-        )
-        doc.add(
-            StringField(
-                LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
-            )
-        )
-        if (formattedDate != null) {
-            doc.add(
-                StringField(
-                    LuceneManager.LuceneConstants.FORMATTED_DATE,
-                    formattedDate,
-                    Field.Store.YES
-                )
-            )
-        }
-        doc.add(
-            StringField(
-                LuceneManager.LuceneConstants.START_TIME,
-                timestamp!!.startTime,
-                Field.Store.YES
-            )
-        )
-        if (timestamp!!.endTime != null) {
-            doc.add(
-                StringField(
-                    LuceneManager.LuceneConstants.END_TIME,
-                    timestamp!!.endTime,
-                    Field.Store.YES
-                )
-            )
-        }
-        //         use a string field for timestamp because we don't want it tokenized
-        doc.add(
-            StringField(
-                LuceneManager.LuceneConstants.TIMESTAMP,
-                timestamp!!.startTime,
-                Field.Store.YES
-            )
-        )
-        return doc
-    }
-
-    @BsonIgnore
-    override fun getMongoCollectionName() = MONGO_COLLECTION_NAME
-
-    @BsonIgnore
-    override fun getClassObject(): Class<ActivFitSensorData> {
-        return ActivFitSensorData::class.java
-    }
-
-    @BsonIgnore
-    override fun getTableName(): String {
-        return MY_SQL_TABLE_NAME
-    }
-
-    @BsonIgnore
-    override fun getCreateTableQuery(): String {
-        return ("CREATE TABLE "
-                + this.tableName
-                + " (start_time VARCHAR(30) , "
-                + " formatted_date VARCHAR(10) , "
-                + " end_time VARCHAR(30) , "
-                + " duration INTEGER , "
-                + " activity VARCHAR(55) ) ")
-    }
-
-    @BsonIgnore
-    override fun getInsertIntoTableQuery(): String {
-        return (" insert into "
-                + this.tableName
-                + " (start_time, end_time, formatted_date, duration, activity)"
-                + " values (?, ?, ?, ?, ?)")
-    }
-
-    @BsonIgnore
-    @Throws(SQLException::class)
-    override fun fillQueryData(preparedStmt: PreparedStatement) {
-        preparedStmt.setString(1, timestamp!!.startTime)
-        preparedStmt.setString(2, timestamp!!.endTime)
-        preparedStmt.setString(3, formattedDate)
-        preparedStmt.setInt(4, sensorData!!.duration!!)
-        preparedStmt.setString(5, sensorData!!.activity)
-    }
-
-    @BsonIgnore
-    override fun getFileName(): String {
-        return FILE_NAME
-    }
-
-    @BsonIgnore
-    override fun getFile(): File {
-        return file!!
-    }
-
-    @BsonIgnore
-    override fun setFile(file: File) {
-        this.file = file
-    }
+    override val startTime: String? = null
 
     class Timestamp {
         @SerializedName("start_time")
@@ -191,5 +80,74 @@ class ActivFitSensorData : MongoStoreModel, LuceneStoreModel, FileStoreModel, My
 
         @BsonIgnore
         val FILE_NAME = "ActivFit"
+    }
+
+    override val document: Document?
+        get() {
+            return Document().apply {
+                add(
+                    TextField(
+                        LuceneManager.LuceneConstants.ACTIVITY,
+                        sensorData!!.activity,
+                        Field.Store.YES
+                    )
+                )
+                add(
+                    StringField(
+                        LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
+                    )
+                )
+                if (formattedDate != null) {
+                    add(
+                        StringField(
+                            LuceneManager.LuceneConstants.FORMATTED_DATE,
+                            formattedDate,
+                            Field.Store.YES
+                        )
+                    )
+                }
+                add(
+                    StringField(
+                        LuceneManager.LuceneConstants.START_TIME,
+                        timestamp!!.startTime,
+                        Field.Store.YES
+                    )
+                )
+                if (timestamp!!.endTime != null) {
+                    add(
+                        StringField(
+                            LuceneManager.LuceneConstants.END_TIME,
+                            timestamp!!.endTime,
+                            Field.Store.YES
+                        )
+                    )
+                }
+                //         use a string field for timestamp because we don't want it tokenized
+                add(
+                    StringField(
+                        LuceneManager.LuceneConstants.TIMESTAMP,
+                        timestamp!!.startTime,
+                        Field.Store.YES
+                    )
+                )
+            }
+        }
+    override val mongoCollectionName: String
+        get() = MONGO_COLLECTION_NAME
+    override val tableName: String
+        get() = MY_SQL_TABLE_NAME
+    override val createTableQuery: String
+        get() = "CREATE TABLE ${this.tableName} (start_time VARCHAR(30) ,  formatted_date VARCHAR(10) ,  end_time VARCHAR(30) ,  duration INTEGER ,  activity VARCHAR(55) ) "
+    override val insertIntoTableQuery: String
+        get() = " insert into ${this.tableName} (start_time, end_time, formatted_date, duration, activity) values (?, ?, ?, ?, ?)"
+
+    override fun fillQueryData(preparedStmt: PreparedStatement?) {
+        preparedStmt?.apply {
+            setString(1, timestamp!!.startTime)
+            setString(2, timestamp!!.endTime)
+            setString(3, formattedDate)
+            setInt(4, sensorData!!.duration!!)
+            setString(5, sensorData!!.activity)
+        }
     }
 }

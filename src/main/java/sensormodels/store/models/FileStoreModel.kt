@@ -1,18 +1,11 @@
-package sensormodels.store.models;
+package sensormodels.store.models
 
-import java.io.File;
-import sensormodels.DatabaseModel;
+import sensormodels.DatabaseModel
+import java.io.File
 
-public interface FileStoreModel extends DatabaseModel {
-  String getFileName();
-
-  File getFile();
-
-  void setFile(File file);
-
-  void setFormattedDate();
-
-  String getStartTime();
-
-  Class getClassObject();
+interface FileStoreModel : DatabaseModel {
+    val fileName: String?
+    var file: File?
+    fun setFormattedDate()
+    val startTime: String?
 }

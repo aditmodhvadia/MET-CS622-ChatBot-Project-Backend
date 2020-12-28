@@ -1,9 +1,7 @@
-package sensormodels.store.models;
+package sensormodels.store.models
 
-import sensormodels.DatabaseModel;
+import sensormodels.DatabaseModel
 
-public interface MongoStoreModel extends DatabaseModel {
-  String getMongoCollectionName();
-
-  Class getClassObject();
+interface MongoStoreModel : DatabaseModel {
+    val mongoCollectionName: String?
 }

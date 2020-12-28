@@ -1,16 +1,15 @@
-package sensormodels.store.models;
+package sensormodels.store.models
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import sensormodels.DatabaseModel;
+import sensormodels.DatabaseModel
+import kotlin.Throws
+import java.sql.SQLException
+import java.sql.PreparedStatement
 
-public interface MySqlStoreModel extends DatabaseModel {
+interface MySqlStoreModel : DatabaseModel {
+    val tableName: String?
+    val createTableQuery: String?
+    val insertIntoTableQuery: String?
 
-  String getTableName();
-
-  String getCreateTableQuery();
-
-  String getInsertIntoTableQuery();
-
-  void fillQueryData(PreparedStatement preparedStmt) throws SQLException;
+    @Throws(SQLException::class)
+    fun fillQueryData(preparedStmt: PreparedStatement?)
 }
