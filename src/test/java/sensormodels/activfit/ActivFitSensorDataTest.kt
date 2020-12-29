@@ -1,80 +1,75 @@
-package sensormodels.activfit;
+package sensormodels.activfit
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
+import java.util.*
+import java.util.stream.Collectors
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
+class ActivFitSensorDataTest {
+    private val sensorName = "ActivFitSensorData"
+    private val activity = "Activity"
+    private val startTime = "12/12/2020"
+    private val endTime = "endTime"
+    private val duration = 100
+    private lateinit var activFitSensorData: ActivFitSensorData
 
-public class ActivFitSensorDataTest {
-  private final String sensorName = "ActivFitSensorData";
-  private final String activity = "Activity";
-  private final String startTime = "12/12/2020";
-  private final String endTime = "endTime";
-  private final Integer duration = 100;
-  private ActivFitSensorData activFitSensorData;
-
-  @Before
-  public void setUp() {
-    activFitSensorData =
-        new ActivFitSensorDataBuilder()
+    @Before
+    fun setUp() {
+        activFitSensorData = ActivFitSensorDataBuilder()
             .setSensorName(sensorName)
             .setActivity(activity)
             .setDuration(duration)
             .setStartTime(startTime)
             .setEndTime(endTime)
-            .build();
-  }
+            .build()
+    }
 
-  @Test
-  public void getSensorName() {
-    assertEquals(sensorName, activFitSensorData.getSensorName());
-  }
+    @Test
+    fun getSensorName() {
+        Assert.assertEquals(sensorName, activFitSensorData.sensorName)
+    }
 
-  @Test
-  public void getActivity() {
-    assertEquals(activity, activFitSensorData.getSensorData().getActivity());
-  }
+    @Test
+    fun getActivity() {
+        Assert.assertEquals(activity, activFitSensorData.sensorData!!.activity)
+    }
 
-  @Test
-  public void getStartTime() {
-    assertEquals(startTime, activFitSensorData.getStartTime());
-  }
+    @Test
+    fun getStartTime() {
+        Assert.assertEquals(startTime, activFitSensorData.timestamp?.startTime)
+    }
 
-  @Test
-  public void getEndTime() {
-    assertEquals(endTime, activFitSensorData.getTimestamp().getEndTime());
-  }
+    @Test
+    fun getEndTime() {
+        Assert.assertEquals(endTime, activFitSensorData.timestamp!!.endTime)
+    }
 
-  @Test
-  public void getDuration() {
-    assertEquals(duration, activFitSensorData.getSensorData().getDuration());
-  }
+    @Test
+    fun getDuration() {
+        Assert.assertEquals(duration, activFitSensorData.sensorData!!.duration)
+    }
 
-  @Test
-  public void getFormattedDate() {
-    assertEquals(startTime, activFitSensorData.getFormattedDate());
-  }
+    @Test
+    fun formattedDate() {
+        Assert.assertEquals(startTime, activFitSensorData.formattedDate)
+    }
 
-  @Test
-  public void filterSensorData() {
-    List<ActivFitSensorData> sensorDataList = new ArrayList<>();
-    sensorDataList.add(activFitSensorData);
-    sensorDataList.add(activFitSensorData);
-    sensorDataList.add(activFitSensorData);
-
-    assertEquals(
-        sensorDataList,
-        sensorDataList.stream()
-            .filter(sensorData -> sensorData.getSensorName().equals(sensorName))
-            .collect(Collectors.toList()));
-
-    assertEquals(
-        new ArrayList<>(),
-        sensorDataList.stream()
-            .filter(sensorData -> !sensorData.getSensorName().equals(sensorName))
-            .collect(Collectors.toList()));
-  }
+    @Test
+    fun filterSensorData() {
+        val sensorDataList: MutableList<ActivFitSensorData?> = ArrayList()
+        sensorDataList.add(activFitSensorData)
+        sensorDataList.add(activFitSensorData)
+        sensorDataList.add(activFitSensorData)
+        Assert.assertEquals(
+            sensorDataList,
+            sensorDataList.stream()
+                .filter { sensorData: ActivFitSensorData? -> sensorData!!.sensorName == sensorName }
+                .collect(Collectors.toList()))
+        Assert.assertEquals(
+            ArrayList<Any>(),
+            sensorDataList.stream()
+                .filter { sensorData: ActivFitSensorData? -> sensorData!!.sensorName != sensorName }
+                .collect(Collectors.toList()))
+    }
 }

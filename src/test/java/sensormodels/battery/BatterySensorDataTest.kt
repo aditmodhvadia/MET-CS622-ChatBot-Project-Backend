@@ -1,56 +1,48 @@
-package sensormodels.battery;
+package sensormodels.battery
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+class BatterySensorDataTest {
+    private val sensorName = "ActivFitSensorData"
+    private val startTime = "12/12/2020"
+    private val percent = 50
+    private val charging = true
+    private lateinit var batterySensorData: BatterySensorData
 
-public class BatterySensorDataTest {
-  private final String sensorName = "ActivFitSensorData";
-  private final String startTime = "12/12/2020";
-  private final Integer percent = 50;
-  private final boolean charging = true;
-  private BatterySensorData batterySensorData;
-
-  @Before
-  public void setUp() {
-    batterySensorData =
-        new BatterySensorDataBuilder()
+    @Before
+    fun setUp() {
+        batterySensorData = BatterySensorDataBuilder()
             .setSensorName(sensorName)
             .setCharging(charging)
             .setPercent(percent)
             .setTimeStamp(startTime)
-            .build();
-  }
+            .build()
+    }
 
-  @Test
-  public void getSensorName() {
-    assertEquals(sensorName, batterySensorData.getSensorName());
-  }
+    @Test
+    fun getSensorName() {
+        Assert.assertEquals(sensorName, batterySensorData.sensorName)
+    }
 
-  @Test
-  public void getStartTime() {
-    assertEquals(startTime, batterySensorData.getTimestamp());
-  }
+    @Test
+    fun getStartTime() {
+        Assert.assertEquals(startTime, batterySensorData.timestamp)
+    }
 
-  @Test
-  public void getCharging() {
-    assertEquals(charging, batterySensorData.getSensorData().getCharging());
-  }
+    @Test
+    fun getCharging() {
+        Assert.assertEquals(charging, batterySensorData.sensorData!!.charging)
+    }
 
-  @Test
-  public void getPercent() {
-    assertEquals(percent, batterySensorData.getSensorData().getPercent());
-  }
+    @Test
+    fun getPercent() {
+        Assert.assertEquals(percent, batterySensorData.sensorData!!.percent)
+    }
 
-  @Test
-  public void getFormattedDate() {
-    assertEquals(startTime, batterySensorData.getFormattedDate());
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    batterySensorData = null;
-  }
+    @Test
+    fun formattedDate() {
+        Assert.assertEquals(startTime, batterySensorData.formattedDate)
+    }
 }

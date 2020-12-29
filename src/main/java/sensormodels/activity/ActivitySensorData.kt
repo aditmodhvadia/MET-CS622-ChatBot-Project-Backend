@@ -8,39 +8,42 @@ import org.apache.lucene.document.Field
 import org.apache.lucene.document.IntPoint
 import org.apache.lucene.document.StringField
 import org.bson.codecs.pojo.annotations.BsonIgnore
-import sensormodels.store.models.*
+import sensormodels.store.models.SuperStoreModel
 import utils.WebAppConstants
 import java.io.File
 import java.sql.PreparedStatement
 import java.util.*
 
-class ActivitySensorData(override var file: File? = null) : SuperStoreModel {
-    override val fileName: String
-        get() = FILE_NAME
-
+data class ActivitySensorData(
+    override var file: File? = null,
     @SerializedName("sensor_name")
     @Expose
-    var sensorName: String? = null
-
+    var sensorName: String? = null,
     @SerializedName("timestamp")
     @Expose
-    var time_stamp: String? = null
+    var time_stamp: String? = null,
+    @SerializedName("formatted_date")
+    @Expose
+    var formattedDate: String? = null,
+    @SerializedName("sensor_data")
+    @Expose
+    var sensorData: SensorData? = null,
+) : SuperStoreModel {
+
+    override val startTime: String?
+        get() = timeStamp
+
+    override val fileName: String
+        get() = FILE_NAME
 
     @SerializedName("time_stamp")
     @Expose
     var timeStamp: String? = null
         set(timeStamp) {
             field = timeStamp
-            formattedDate = WebAppConstants.inputDateFormat.format(Date(timeStamp))
+            formattedDate = utils.WebAppConstants.inputDateFormat.format(java.util.Date(timeStamp))
         }
 
-    @SerializedName("formatted_date")
-    @Expose
-    var formattedDate: String? = null
-
-    @SerializedName("sensor_data")
-    @Expose
-    var sensorData: SensorData? = null
     private fun getTimestamp(): String? {
         return time_stamp
     }
@@ -56,8 +59,6 @@ class ActivitySensorData(override var file: File? = null) : SuperStoreModel {
         }
     }
 
-    override val startTime: String?
-        get() = TODO("Not yet implemented")
 
     class SensorData {
         @SerializedName("step_counts")

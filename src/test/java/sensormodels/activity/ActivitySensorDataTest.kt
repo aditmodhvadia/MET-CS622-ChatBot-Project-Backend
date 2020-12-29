@@ -1,60 +1,60 @@
-package sensormodels.activity;
+package sensormodels.activity
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
 
-import org.junit.Before;
-import org.junit.Test;
+class ActivitySensorDataTest {
+    private lateinit var activitySensorData: ActivitySensorData
+    private val sensorName = "ActivitySensorData"
+    private val startTime = "12/12/2020"
+    private val stepCount = 50
+    private val stepCountDelta = 5000
 
-public class ActivitySensorDataTest {
-  private ActivitySensorData activitySensorData;
-  private final String sensorName = "ActivitySensorData";
-  private final String startTime = "12/12/2020";
-  private final Integer stepCount = 50;
-  private final Integer stepCountDelta = 5000;
-
-  @Before
-  public void setUp() {
-    activitySensorData =
-        new ActivitySensorDataBuilder()
+    @Before
+    fun setUp() {
+        activitySensorData = ActivitySensorDataBuilder()
             .setSensorName(sensorName)
             .setStepCounts(stepCount)
             .setStepDelta(stepCountDelta)
             .setTimeStamp(startTime)
-            .build();
-  }
+            .setTimestamp(startTime)
+            .build()
+    }
 
-  @Test
-  public void getSensorName() {
-    assertEquals(sensorName, this.activitySensorData.getSensorName());
-  }
+    @Test
+    fun getSensorName() {
+        Assert.assertEquals(sensorName, activitySensorData.sensorName)
+    }
 
-  @Test
-  public void getTimeStamp() {
-    assertEquals(startTime, this.activitySensorData.getTimeStamp());
-  }
+    @Test
+    fun timeStamp() {
+        Assert.assertEquals(startTime, activitySensorData.timeStamp)
+    }
 
-  @Test
-  public void getTimestamp() {
-    assertEquals(startTime, this.activitySensorData.getTimeStamp());
-  }
+    @Test
+    fun timestamp() {
+        Assert.assertEquals(startTime, activitySensorData.timeStamp)
+    }
 
-  @Test
-  public void getFormattedDate() {
-    assertEquals(startTime, this.activitySensorData.getFormattedDate());
-  }
+    @Test
+    fun formattedDate() {
+        Assert.assertEquals(startTime, activitySensorData.formattedDate)
+    }
 
-  @Test
-  public void getStartTime() {
-    assertEquals(startTime, this.activitySensorData.getStartTime());
-  }
+    @Test
+    fun getStartTime() {
+        print(activitySensorData)
+        Assert.assertEquals(startTime, activitySensorData.startTime)
+    }
 
-  @Test
-  public void getStepCount() {
-    assertEquals(stepCount, this.activitySensorData.getSensorData().getStepCounts());
-  }
+    @Test
+    fun getStepCount() {
+        Assert.assertEquals(stepCount, activitySensorData.sensorData!!.stepCounts)
+    }
 
-  @Test
-  public void getStepDelta() {
-    assertEquals(stepCountDelta, this.activitySensorData.getSensorData().getStepDelta());
-  }
+    @Test
+    fun stepDelta() {
+        Assert.assertEquals(stepCountDelta, activitySensorData.sensorData!!.stepDelta)
+    }
 }

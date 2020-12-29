@@ -39,7 +39,7 @@ class ActivFitSensorData(override var file: File? = null) : SuperStoreModel {
         formattedDate = WebAppConstants.inputDateFormat.format(Date(timestamp!!.startTime))
     }
 
-    override val startTime: String? = null
+    override val startTime: String? = timestamp?.startTime
 
     class Timestamp {
         @SerializedName("start_time")

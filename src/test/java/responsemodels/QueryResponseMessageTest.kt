@@ -1,24 +1,23 @@
-package responsemodels;
+package responsemodels
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
+import responsemodels.QueryResponseMessage.QueryResponseMessageBuilder
 
-import org.junit.Before;
-import org.junit.Test;
+class QueryResponseMessageTest {
+    private val QUERY_MSG = "This is sample query msg."
+    private lateinit var queryResponseMessage: QueryResponseMessage
 
-public class QueryResponseMessageTest {
-  private static final String QUERY_MSG = "This is sample query msg.";
-  private QueryResponseMessage queryResponseMessage;
-
-  @Before
-  public void setUp() {
-    queryResponseMessage =
-        new QueryResponseMessage.QueryResponseMessageBuilder()
+    @Before
+    fun setUp() {
+        queryResponseMessage = QueryResponseMessageBuilder()
             .setResponseMessage(QUERY_MSG)
-            .build();
-  }
+            .build()
+    }
 
-  @Test
-  public void getResponseMsg() {
-    assertEquals(QUERY_MSG, queryResponseMessage.getData().getResponseMsg());
-  }
+    @Test
+    fun responseMsg() {
+        Assert.assertEquals(QUERY_MSG, queryResponseMessage.data!!.responseMsg)
+    }
 }
