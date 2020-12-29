@@ -1,0 +1,3 @@
+package sensormodels
+
+interface DatabaseModel 
