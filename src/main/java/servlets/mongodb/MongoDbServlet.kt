@@ -1,16 +1,11 @@
-package servlets.mongodb;
+package servlets.mongodb
 
-import database.MongoDbManager;
-import servlets.queryresponseservlet.QueryResponseServlet;
+import database.MongoDbManager.Companion.instance
+import servlets.queryresponseservlet.QueryResponseServlet
+import database.MongoDbManager
 
-public class MongoDbServlet extends QueryResponseServlet {
-
-  public MongoDbServlet() {
-    super(MongoDbManager.getInstance());
-  }
-
-  @Override
-  protected void onPostResponse() {
-    System.out.println("MongoDB ran a query.");
-  }
+class MongoDbServlet : QueryResponseServlet(instance) {
+    override fun onPostResponse() {
+        println("MongoDB ran a query.")
+    }
 }

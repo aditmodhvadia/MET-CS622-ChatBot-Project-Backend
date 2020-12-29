@@ -1,12 +1,10 @@
-package servlets.lucene;
+package servlets.lucene
 
-import database.LuceneManager;
-import servlets.queryresponseservlet.QueryResponseServlet;
+import database.LuceneManager.Companion.getInstance
+import servlets.queryresponseservlet.QueryResponseServlet
 
-public class LuceneServlet extends QueryResponseServlet {
-
-  public LuceneServlet() {
-    super();
-    changeDatabaseQueryRunner(LuceneManager.getInstance(this.getServletContext()));
-  }
+class LuceneServlet : QueryResponseServlet() {
+    init {
+        changeDatabaseQueryRunner(getInstance(this.servletContext))
+    }
 }

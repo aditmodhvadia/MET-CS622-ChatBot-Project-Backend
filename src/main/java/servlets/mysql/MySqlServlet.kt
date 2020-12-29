@@ -1,11 +1,6 @@
-package servlets.mysql;
+package servlets.mysql
 
-import database.MySqlManager;
-import servlets.queryresponseservlet.QueryResponseServlet;
+import database.MySqlManager
+import servlets.queryresponseservlet.QueryResponseServlet
 
-public class MySqlServlet extends QueryResponseServlet {
-
-  public MySqlServlet() {
-    super(MySqlManager.getInstance());
-  }
-}
+class MySqlServlet : QueryResponseServlet(MySqlManager.instance)
