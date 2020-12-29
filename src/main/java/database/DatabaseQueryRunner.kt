@@ -10,7 +10,7 @@ interface DatabaseQueryRunner {
      * @param date given date
      * @return collection of sensor data with running event
      */
-    fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData?>?
+    fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData>
 
     /**
      * Number of steps taken by the user on the given date.

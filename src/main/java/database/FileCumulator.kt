@@ -9,6 +9,7 @@ import sensormodels.activfit.ActivFitSensorData
 import sensormodels.activity.ActivitySensorData
 import sensormodels.battery.BatterySensorData
 import sensormodels.store.models.FileStoreModel
+import sensormodels.store.models.SuperStoreModel
 import utils.DatabaseUtils.isWithinDateRange
 import utils.DatabaseUtils.shouldBeRunningAndNotUnknown
 import utils.IoUtility.createDirectory
@@ -27,8 +28,8 @@ import javax.servlet.ServletContext
 import kotlin.collections.ArrayList
 import kotlin.system.measureTimeMillis
 
-class FileCumulator private constructor() : DbManager<FileStoreModel?>, DatabaseQueryRunner {
-    val sensorModelsMap = HashMap<String, FileStoreModel>() // <File Name, Sensor Model>
+class FileCumulator private constructor() : DbManager<FileStoreModel>, DatabaseQueryRunner {
+    val sensorModelsMap = HashMap<String, SuperStoreModel>() // <File Name, Sensor Model>
     override fun init(servletContext: ServletContext?) {
         miscFile = createEmptyFile(
             BASE_ADDRESS + MISC_FILE_NAME + FileSystems.getDefault().separator,
@@ -54,15 +55,15 @@ class FileCumulator private constructor() : DbManager<FileStoreModel?>, Database
                 })
     }
 
-    override fun insertSensorDataList(@Nonnull sensorDataList: List<FileStoreModel?>) {
+    override fun insertSensorDataList(@Nonnull sensorDataList: List<FileStoreModel>) {
         println("No need to store in the file system again.")
     }
 
-    override fun insertSensorData(sensorData: FileStoreModel?) {
+    override fun insertSensorData(sensorData: FileStoreModel) {
         println("No need to store in the file system again.")
     }
 
-    override fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData?>? {
+    override fun queryForRunningEvent(date: Date?): java.util.ArrayList<ActivFitSensorData> {
         val tomorrow = addDayToDate(date, 1) //        get the next Day Date as well
         //        fetch all record from the collection
         val allSensorData = getSensorFileContents<ActivFitSensorData>(

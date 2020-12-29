@@ -23,7 +23,7 @@ import javax.annotation.Nonnull
 import javax.servlet.ServletContext
 import kotlin.collections.ArrayList
 
-class LuceneManager private constructor(servletContext: ServletContext) : DatabaseQueryRunner,
+class LuceneManager private constructor(servletContext: ServletContext?) : DatabaseQueryRunner,
     DbManager<LuceneStoreModel?> {
     private var indexDir: String? = null
     private var indexWriter: IndexWriter? = null
@@ -32,7 +32,7 @@ class LuceneManager private constructor(servletContext: ServletContext) : Databa
         println(indexDir)
     }
 
-    override fun queryForRunningEvent(userDate: Date?): java.util.ArrayList<ActivFitSensorData?>? {
+    override fun queryForRunningEvent(userDate: Date?): java.util.ArrayList<ActivFitSensorData> {
         val formattedDate = WebAppConstants.inputDateFormat.format(userDate)
         return getLuceneQueryTime("running", LuceneConstants.ACTIVITY).stream()
             .filter { document: Document -> document[LuceneConstants.FORMATTED_DATE] == formattedDate }
@@ -200,7 +200,7 @@ class LuceneManager private constructor(servletContext: ServletContext) : Databa
          * @return singleton instance of the class
          */
         @JvmStatic
-        fun getInstance(@Nonnull servletContext: ServletContext): LuceneManager? {
+        fun getInstance(@Nonnull servletContext: ServletContext?): LuceneManager? {
             if (instance == null) {
                 instance = LuceneManager(servletContext)
             }

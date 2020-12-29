@@ -8,17 +8,13 @@ import org.apache.lucene.document.Field
 import org.apache.lucene.document.IntPoint
 import org.apache.lucene.document.StringField
 import org.bson.codecs.pojo.annotations.BsonIgnore
-import sensormodels.store.models.FileStoreModel
-import sensormodels.store.models.LuceneStoreModel
-import sensormodels.store.models.MongoStoreModel
-import sensormodels.store.models.MySqlStoreModel
+import sensormodels.store.models.*
 import utils.WebAppConstants
 import java.io.File
 import java.sql.PreparedStatement
 import java.util.*
 
-class ActivitySensorData(override var file: File? = null) : MongoStoreModel, LuceneStoreModel, FileStoreModel,
-    MySqlStoreModel {
+class ActivitySensorData(override var file: File? = null) : SuperStoreModel {
     override val fileName: String
         get() = FILE_NAME
 

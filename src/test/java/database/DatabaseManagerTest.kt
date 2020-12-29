@@ -1,29 +1,31 @@
-package database;
+package database
 
-import org.junit.Before;
-import org.junit.Test;
+import database.DatabaseManager.Companion.getInstance
+import database.MongoDbManager.Companion.instance
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
+import sensormodels.DatabaseModel
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+class DatabaseManagerTest {
+    private var dbManager: DatabaseManager? = null
 
-public class DatabaseManagerTest {
-  private DatabaseManager dbManager;
+    @Before
+    @Throws(Exception::class)
+    fun setUp() {
+        dbManager = getInstance(null) as DatabaseManager
+    }
 
-  @Before
-  public void setUp() throws Exception {
-    dbManager = DatabaseManager.getInstance(null);
-  }
+    @Test
+    fun testAddDatabase() {
+        dbManager!!.addDatabase(instance as DbManager<DatabaseModel>)
+        Assert.assertTrue(dbManager!!.hasDatabaseManager(instance as DbManager<DatabaseModel>))
+    }
 
-  @Test
-  public void testAddDatabase() {
-    dbManager.addDatabase(MongoDbManager.getInstance());
-    assertTrue(dbManager.hasDatabaseManager(MongoDbManager.getInstance()));
-  }
-
-  @Test
-  public void testRemoveDatabase() {
-    dbManager.addDatabase(MongoDbManager.getInstance());
-    assertTrue(dbManager.hasDatabaseManager(MongoDbManager.getInstance()));
-    dbManager.removeDatabase(MongoDbManager.getInstance());
-  }
+    @Test
+    fun testRemoveDatabase() {
+        dbManager!!.addDatabase(instance as DbManager<DatabaseModel>)
+        Assert.assertTrue(dbManager!!.hasDatabaseManager(instance as DbManager<DatabaseModel>))
+        dbManager!!.removeDatabase(instance as DbManager<DatabaseModel>)
+    }
 }

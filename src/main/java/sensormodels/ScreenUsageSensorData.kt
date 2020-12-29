@@ -4,16 +4,13 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import org.apache.lucene.document.Document
 import org.bson.codecs.pojo.annotations.BsonIgnore
-import sensormodels.store.models.FileStoreModel
-import sensormodels.store.models.LuceneStoreModel
-import sensormodels.store.models.MongoStoreModel
-import sensormodels.store.models.MySqlStoreModel
+import sensormodels.store.models.*
 import utils.WebAppConstants
 import java.io.File
 import java.sql.PreparedStatement
 import java.util.*
 
-class ScreenUsageSensorData : MongoStoreModel, LuceneStoreModel, FileStoreModel, MySqlStoreModel {
+class ScreenUsageSensorData : SuperStoreModel {
     @SerializedName("start_hour")
     @Expose
     var startHour: String? = null

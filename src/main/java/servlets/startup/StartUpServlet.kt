@@ -1,130 +1,130 @@
-package servlets.startup;
+package servlets.startup
 
-import com.google.gson.Gson;
-import database.DatabaseManager;
-import database.DbManager;
-import database.FileCumulator;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.FileSystems;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServlet;
-import listeners.FileListener;
-import sensormodels.DatabaseModel;
-import utils.IoUtility;
-import utils.UnzipUtility;
+import com.google.gson.Gson
+import database.DatabaseManager
+import database.DatabaseManager.Companion.getInstance
+import database.DbManager
+import database.FileCumulator
+import database.FileCumulator.Companion.instance
+import listeners.FileListener
+import sensormodels.DatabaseModel
+import sensormodels.store.models.FileStoreModel
+import sensormodels.store.models.SuperStoreModel
+import utils.IoUtility.appendToFile
+import utils.IoUtility.getFileContentsLineByLine
+import utils.IoUtility.iterateFilesAndFolder
+import utils.UnzipUtility
+import java.io.File
+import java.io.IOException
+import java.lang.reflect.Type
+import java.nio.file.FileAlreadyExistsException
+import java.nio.file.FileSystems
+import java.util.*
+import java.util.function.Consumer
+import javax.servlet.http.HttpServlet
 
-public class StartUpServlet extends HttpServlet {
-  private static final String destinationFolder =
-      "UncompressedData" + FileSystems.getDefault().getSeparator(); // destination folder
-  private static final String sourceFileName =
-      "/WEB-INF/classes/SampleUserSmartwatch.zip"; // datasource file
-  private final UnzipUtility unZipper = new UnzipUtility(); // unzips zip folder and files
-  private FileCumulator fileCumulator; // Data cumulator into result files
-  private DbManager dbManager;
+class StartUpServlet : HttpServlet() {
+    private val unZipper = UnzipUtility() // unzips zip folder and files
+    private var fileCumulator // Data cumulator into result files
+            : FileCumulator? = null
+    private var dbManager: DbManager<SuperStoreModel>? = null
+    override fun init() {
+        println("--------#####--------")
+        println("        Server started      ")
+        println("--------#####--------")
+        fileCumulator = instance
+        dbManager = getInstance(servletContext)
 
-  @Override
-  public void init() {
-    System.out.println("--------#####--------");
-    System.out.println("        Server started      ");
-    System.out.println("--------#####--------");
+        //    unzipDataSource();
 
-    fileCumulator = FileCumulator.getInstance();
-    dbManager = DatabaseManager.getInstance(getServletContext());
-
-    //    unzipDataSource();
-
-    //        Now store all data into all the databases
-    storeDataInDatabases(
-        fileCumulator.getSensorModelsMap().values()); // store JSON data from file storage
-  }
-
-  /** Call to unzip data source and create file structure to accumulate sensor data. */
-  private void unzipDataSource() {
-    try {
-      String absoluteDiskPath = getServletContext().getRealPath(sourceFileName);
-      //                start unzipping the datasource
-      unZipper.unzip(absoluteDiskPath, destinationFolder, new ListenerClass()); // unzip source file
-      final File mainFolder = new File(destinationFolder); // get main folder to iterate all files
-      IoUtility.INSTANCE.iterateFilesAndFolder(
-          mainFolder, new ListenerClass()); // Listener Class listens for Files and Zip Files
-    } catch (FileAlreadyExistsException ignored) {
-      System.out.println("File already exists hence ignored");
-    } catch (Exception ex) {
-      ex.printStackTrace(); // some error occurred
+        //        Now store all data into all the databases
+        storeDataInDatabases(
+            fileCumulator!!.sensorModelsMap.values
+        ) // store JSON data from file storage
     }
-    System.out.println("\n\n*************** Unzipping complete***************\n\n");
-  }
 
-  /**
-   * Use to store all sensor data into MongoDB using.
-   *
-   * @see DatabaseManager
-   */
-  private void storeDataInDatabases(Collection<DatabaseModel> sensorModels) {
-    System.out.println("*****************Storing data into Databases******************");
-    sensorModels.forEach(
-        databaseModel -> {
-          List<DatabaseModel> sensorData = readSensorData(databaseModel);
-          this.dbManager.insertSensorDataList(sensorData);
-        });
-    System.out.println("*****************Storing data into Databases complete******************");
-  }
+    /** Call to unzip data source and create file structure to accumulate sensor data.  */
+    private fun unzipDataSource() {
+        try {
+            val absoluteDiskPath = servletContext.getRealPath(sourceFileName)
+            //                start unzipping the datasource
+            unZipper.unzip(absoluteDiskPath, destinationFolder, ListenerClass()) // unzip source file
+            val mainFolder = File(destinationFolder) // get main folder to iterate all files
+            iterateFilesAndFolder(
+                mainFolder, ListenerClass()
+            ) // Listener Class listens for Files and Zip Files
+        } catch (ignored: FileAlreadyExistsException) {
+            println("File already exists hence ignored")
+        } catch (ex: Exception) {
+            ex.printStackTrace() // some error occurred
+        }
+        println("\n\n*************** Unzipping complete***************\n\n")
+    }
 
-  /**
-   * Read sensor data from the file location where the cumulative result is stored and return a
-   * list.
-   *
-   * @param sensorModel Sensor Model whose data is to be read
-   * @param <T> Type of the sensor model
-   * @return list of data read from the file
-   */
-  private <T extends DatabaseModel> List<T> readSensorData(T sensorModel) {
-    File file = sensorModel.getFile();
-    Gson gson = new Gson();
-    return IoUtility.getFileContentsLineByLine(file).stream()
-        .map(
-            s -> {
-              try {
-                T sensorData = gson.fromJson(s, (Type) sensorModel.getClassObject());
-                sensorData.setFormattedDate();
-                return sensorData;
-              } catch (Exception ignored) {
-              }
-              return null;
+    /**
+     * Use to store all sensor data into MongoDB using.
+     *
+     * @see DatabaseManager
+     */
+    private fun storeDataInDatabases(sensorModels: Collection<SuperStoreModel>) {
+        println("*****************Storing data into Databases******************")
+        sensorModels.forEach(
+            Consumer { databaseModel: SuperStoreModel ->
+                val sensorData = readSensorData(databaseModel)
+                dbManager!!.insertSensorDataList(sensorData)
             })
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
-  }
-
-  /** Inner Class which listens for Files and Zip Files/folders when found. */
-  class ListenerClass implements FileListener {
-
-    @Override
-    public void fileFound(File file) {
-      File destinationFile =
-          fileCumulator.determineFileCategoryAndGet(
-              file); // determine to which sensor file belongs to
-      IoUtility.INSTANCE.appendToFile(destinationFile, file); // append the data to cumulative file
+        println("*****************Storing data into Databases complete******************")
     }
 
-    @Override
-    public void zipFileFound(String path) {
-      try {
-        unZipper.unzip(
-            path,
-            path.replace(".zip", FileSystems.getDefault().getSeparator()),
-            new ListenerClass()); // unzip the file
-      } catch (FileAlreadyExistsException ignored) {
-        System.out.println("File already exists hence ignored");
-      } catch (IOException e) {
-        e.printStackTrace(); // some error occurred
-      }
+    /**
+     * Read sensor data from the file location where the cumulative result is stored and return a
+     * list.
+     *
+     * @param sensorModel Sensor Model whose data is to be read
+     * @param <T> Type of the sensor model
+     * @return list of data read from the file
+    </T> */
+    private fun <T : FileStoreModel> readSensorData(sensorModel: T): List<T> {
+        val file: File = sensorModel.file!!
+        val gson = Gson()
+
+        return getFileContentsLineByLine(file).map { s ->
+            try {
+                val sensorData: T = gson.fromJson(s, sensorModel.javaClass as Type?)
+                sensorData.setFormattedDate()
+                return@map sensorData
+            } catch (ignored: Exception) {
+            }
+            return@map null
+        }.filterNotNull().toList()
     }
-  }
+
+    /** Inner Class which listens for Files and Zip Files/folders when found.  */
+    internal inner class ListenerClass : FileListener {
+        override fun fileFound(file: File?) {
+            val destinationFile = fileCumulator!!.determineFileCategoryAndGet(
+                file!!
+            ) // determine to which sensor file belongs to
+            appendToFile(destinationFile, file) // append the data to cumulative file
+        }
+
+        override fun zipFileFound(path: String?) {
+            try {
+                unZipper.unzip(
+                    path,
+                    path!!.replace(".zip", FileSystems.getDefault().separator),
+                    ListenerClass()
+                ) // unzip the file
+            } catch (ignored: FileAlreadyExistsException) {
+                println("File already exists hence ignored")
+            } catch (e: IOException) {
+                e.printStackTrace() // some error occurred
+            }
+        }
+    }
+
+    companion object {
+        private val destinationFolder = "UncompressedData" + FileSystems.getDefault().separator // destination folder
+        private const val sourceFileName = "/WEB-INF/classes/SampleUserSmartwatch.zip" // datasource file
+    }
 }

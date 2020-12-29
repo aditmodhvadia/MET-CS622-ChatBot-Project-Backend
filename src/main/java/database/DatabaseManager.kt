@@ -1,6 +1,7 @@
 package database
 
 import sensormodels.DatabaseModel
+import sensormodels.store.models.SuperStoreModel
 import java.util.*
 import java.util.function.Consumer
 import javax.annotation.Nonnull
@@ -11,7 +12,7 @@ class DatabaseManager(servletContext: ServletContext?) : DbManager<DatabaseModel
     private val databases = ArrayList<DbManager<DatabaseModel>>()
     override fun init(servletContext: ServletContext?) {
         databases.add(MongoDbManager.instance as DbManager<DatabaseModel>)
-        databases.add(LuceneManager.getInstance(servletContext!!)!! as DbManager<DatabaseModel>)
+        databases.add(LuceneManager.getInstance(servletContext)!! as DbManager<DatabaseModel>)
         databases.add(MySqlManager.instance!! as DbManager<DatabaseModel>)
         databases.forEach(Consumer { database: DbManager<DatabaseModel> -> database.init(servletContext) })
     }
@@ -58,11 +59,11 @@ class DatabaseManager(servletContext: ServletContext?) : DbManager<DatabaseModel
          * @return singleton instance
          */
         @JvmStatic
-        fun getInstance(servletContext: ServletContext?): DatabaseManager? {
+        fun getInstance(servletContext: ServletContext?): DbManager<SuperStoreModel> {
             if (instance == null) {
                 instance = DatabaseManager(servletContext)
             }
-            return instance
+            return instance as DbManager<SuperStoreModel>
         }
     }
 

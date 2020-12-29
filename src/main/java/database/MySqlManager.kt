@@ -99,7 +99,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
         }
     }
 
-    override fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData?> {
+    override fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData> {
         return getRunningEventFromActivFitSensorData(date)
     }
 
@@ -197,7 +197,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
      * @param date given date
      * @return all instances of running event recorded for the given date
      */
-    private fun getRunningEventFromActivFitSensorData(date: Date?): ArrayList<ActivFitSensorData?> {
+    private fun getRunningEventFromActivFitSensorData(date: Date?): ArrayList<ActivFitSensorData> {
         // if you only need a few columns, specify them by name instead of using "*"
         val query = ("SELECT * FROM "
                 + ActivFitSensorData.MY_SQL_TABLE_NAME
@@ -205,7 +205,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
                 + WebAppConstants.inputDateFormat.format(date)
                 + "' AND activity LIKE "
                 + "'running'")
-        val resultSet = ArrayList<ActivFitSensorData?>()
+        val resultSet = ArrayList<ActivFitSensorData>()
         // create the java statement
         val st: Statement
         try {

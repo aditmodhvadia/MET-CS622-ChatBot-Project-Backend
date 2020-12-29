@@ -86,7 +86,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
         println("MongoDB Log: Data Inserted")
     }
 
-    override fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData?> {
+    override fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData> {
         val cursor = database
             .getCollection(ActivFitSensorData.MONGO_COLLECTION_NAME, ActivFitSensorData::class.java)
             .find(
@@ -96,7 +96,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
                 )
             )
             .cursor()
-        val queryResult = ArrayList<ActivFitSensorData?>() // holds the result from the query
+        val queryResult = ArrayList<ActivFitSensorData>() // holds the result from the query
         while (cursor.hasNext()) {
             val nextData = cursor.next()
             queryResult.add(nextData)
