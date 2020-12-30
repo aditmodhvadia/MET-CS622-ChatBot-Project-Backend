@@ -99,11 +99,11 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
         }
     }
 
-    override fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData> {
+    override fun queryForRunningEvent(date: Date): List<ActivFitSensorData> {
         return getRunningEventFromActivFitSensorData(date)
     }
 
-    override fun queryForTotalStepsInDay(date: Date?): Int {
+    override fun queryForTotalStepsInDay(date: Date): Int {
         return try {
             val maxSensorData = getActivitySensorDataForGivenDate(date).stream()
                 .max(
@@ -117,7 +117,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
         }
     }
 
-    override fun queryHeartRatesForDay(date: Date?): Int {
+    override fun queryHeartRatesForDay(date: Date): Int {
         return getHeartRateSensorDataForGivenDate(date).size
     }
 

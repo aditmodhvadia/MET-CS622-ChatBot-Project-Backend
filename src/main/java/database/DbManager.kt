@@ -1,6 +1,5 @@
 package database
 
-import javax.annotation.Nonnull
 import javax.servlet.ServletContext
 
 interface DbManager<T> {
@@ -16,7 +15,7 @@ interface DbManager<T> {
      *
      * @param sensorDataList given list of sensor data to be inserted
      */
-    fun insertSensorDataList(@Nonnull sensorDataList: List<T>)
+    fun insertSensorDataList(sensorDataList: List<T>)
 
     /**
      * Use to insert given document of the given type into the given target collection.

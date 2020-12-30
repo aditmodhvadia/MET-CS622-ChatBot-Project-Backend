@@ -86,7 +86,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
         println("MongoDB Log: Data Inserted")
     }
 
-    override fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData> {
+    override fun queryForRunningEvent(date: Date): List<ActivFitSensorData> {
         val cursor = database
             .getCollection(ActivFitSensorData.MONGO_COLLECTION_NAME, ActivFitSensorData::class.java)
             .find(
@@ -104,7 +104,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
         return queryResult
     }
 
-    override fun queryForTotalStepsInDay(date: Date?): Int {
+    override fun queryForTotalStepsInDay(date: Date): Int {
         val cursor = database
             .getCollection(ActivitySensorData.MONGO_COLLECTION_NAME, ActivitySensorData::class.java)
             .find(Filters.eq("formatted_date", WebAppConstants.inputDateFormat.format(date)))
@@ -119,7 +119,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
         return maxStepCount
     }
 
-    override fun queryHeartRatesForDay(date: Date?): Int {
+    override fun queryHeartRatesForDay(date: Date): Int {
         val cursor = database
             .getCollection(HeartRateSensorData.MONGO_COLLECTION_NAME, HeartRateSensorData::class.java)
             .find(Filters.eq("formatted_date", WebAppConstants.inputDateFormat.format(date)))

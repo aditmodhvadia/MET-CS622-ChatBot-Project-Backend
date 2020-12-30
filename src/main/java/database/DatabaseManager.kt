@@ -3,7 +3,6 @@ package database
 import sensormodels.DatabaseModel
 import sensormodels.store.models.SuperStoreModel
 import java.util.*
-import java.util.function.Consumer
 import javax.annotation.Nonnull
 import javax.servlet.ServletContext
 
@@ -11,16 +10,18 @@ class DatabaseManager(servletContext: ServletContext?) : DbManager<DatabaseModel
     DatabasePublisher {
     private val databases = ArrayList<DbManager<DatabaseModel>>()
     override fun init(servletContext: ServletContext?) {
-        databases.add(MongoDbManager.instance as DbManager<DatabaseModel>)
-        databases.add(LuceneManager.getInstance(servletContext)!! as DbManager<DatabaseModel>)
-        databases.add(MySqlManager.instance!! as DbManager<DatabaseModel>)
-        databases.forEach(Consumer { database: DbManager<DatabaseModel> -> database.init(servletContext) })
+        databases.apply {
+            add(MongoDbManager.instance as DbManager<DatabaseModel>)
+            add(LuceneManager.getInstance(servletContext)!! as DbManager<DatabaseModel>)
+            add(MySqlManager.instance!! as DbManager<DatabaseModel>)
+            forEach { database -> database.init(servletContext) }
+        }
     }
 
     override fun insertSensorDataList(@Nonnull sensorDataList: List<DatabaseModel>) {
-        for (dbManager in databases) {
+        databases.forEach {
             try {
-                dbManager.insertSensorDataList(sensorDataList)
+                it.insertSensorDataList(sensorDataList)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -28,9 +29,9 @@ class DatabaseManager(servletContext: ServletContext?) : DbManager<DatabaseModel
     }
 
     override fun insertSensorData(sensorData: DatabaseModel) {
-        for (dbManager in databases) {
+        databases.forEach {
             try {
-                dbManager.insertSensorData(sensorData)
+                it.insertSensorData(sensorData)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -46,7 +47,7 @@ class DatabaseManager(servletContext: ServletContext?) : DbManager<DatabaseModel
     }
 
     override fun hasDatabaseManager(dbManager: DbManager<DatabaseModel>): Boolean {
-        return databases.contains(dbManager)
+        return dbManager in databases
     }
 
     companion object {

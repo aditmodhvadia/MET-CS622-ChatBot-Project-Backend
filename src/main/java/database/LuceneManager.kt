@@ -27,13 +27,13 @@ class LuceneManager private constructor(servletContext: ServletContext?) : Datab
     DbManager<LuceneStoreModel?> {
     private var indexDir: String? = null
     private var indexWriter: IndexWriter? = null
-    private fun updateServletContext(@Nonnull servletContext: ServletContext) {
+    private fun updateServletContext(servletContext: ServletContext) {
         indexDir = servletContext.getRealPath(indexDirRelativePath)
         println(indexDir)
     }
 
-    override fun queryForRunningEvent(userDate: Date?): java.util.ArrayList<ActivFitSensorData> {
-        val formattedDate = WebAppConstants.inputDateFormat.format(userDate)
+    override fun queryForRunningEvent(date: Date): List<ActivFitSensorData> {
+        val formattedDate = WebAppConstants.inputDateFormat.format(date)
         return getLuceneQueryTime("running", LuceneConstants.ACTIVITY).stream()
             .filter { document: Document -> document[LuceneConstants.FORMATTED_DATE] == formattedDate }
             .map { doc: Document ->
@@ -46,7 +46,7 @@ class LuceneManager private constructor(servletContext: ServletContext?) : Datab
             .collect(Collectors.toCollection { ArrayList() })
     }
 
-    override fun queryHeartRatesForDay(date: Date?): Int {
+    override fun queryHeartRatesForDay(date: Date): Int {
         val results = getLuceneQueryTime("HeartRate", LuceneConstants.SENSOR_NAME)
         val formattedDate = WebAppConstants.inputDateFormat.format(date)
         return results.stream()
@@ -54,9 +54,9 @@ class LuceneManager private constructor(servletContext: ServletContext?) : Datab
             .count().toInt()
     }
 
-    override fun queryForTotalStepsInDay(userDate: Date?): Int {
+    override fun queryForTotalStepsInDay(date: Date): Int {
         val results = getLuceneQueryTime("Activity", LuceneConstants.SENSOR_NAME)
-        val formattedDate = WebAppConstants.inputDateFormat.format(userDate)
+        val formattedDate = WebAppConstants.inputDateFormat.format(date)
         return results.stream()
             .filter { doc: Document -> doc[LuceneConstants.FORMATTED_DATE] == formattedDate }
             .max(
