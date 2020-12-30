@@ -12,10 +12,9 @@ object IoUtility {
      * @return contents of file from given file path
      */
     private fun readFile(inputFile: File): String {
-        val br: BufferedReader // Buffered reader for faster reads
         val fileTextStringBuilder = StringBuilder() // String builder which will hold the file content
         try {
-            br = BufferedReader(FileReader(inputFile)) // BufferedReader now points to the file
+            val br = BufferedReader(FileReader(inputFile)) // BufferedReader now points to the file
             var readText: String? // holds file content line by line
             while (br.readLine().also { readText = it } != null) { // read file line by line
                 fileTextStringBuilder.append(readText).append("\n") // append file contents
@@ -32,7 +31,7 @@ object IoUtility {
      * @param destinationFile file to append data to
      * @param sourceFile file from which data will be appended
      */
-    fun appendToFile(destinationFile: File?, sourceFile: File) {
+    fun appendToFile(destinationFile: File, sourceFile: File) {
         var fr: FileWriter? = null
         var br: BufferedWriter? = null
         try {
@@ -60,15 +59,19 @@ object IoUtility {
      */
     fun iterateFilesAndFolder(folder: File, fileListener: FileListener) {
         for (fileEntry in Objects.requireNonNull(folder.listFiles())) {
-            if (fileEntry.isDirectory) {
-                println("Found directory: " + fileEntry.path)
-                iterateFilesAndFolder(fileEntry, fileListener)
-            } else if (fileEntry.name.contains(".zip")) {
-                println("Zip file found: " + fileEntry.path)
-                fileListener.zipFileFound(fileEntry.path)
-            } else {
-                println(fileEntry.name)
-                fileListener.fileFound(File(fileEntry.path))
+            when {
+                fileEntry.isDirectory -> {
+                    println("Found directory: " + fileEntry.path)
+                    iterateFilesAndFolder(fileEntry, fileListener)
+                }
+                fileEntry.name.contains(".zip") -> {
+                    println("Zip file found: " + fileEntry.path)
+                    fileListener.zipFileFound(fileEntry.path)
+                }
+                else -> {
+                    println(fileEntry.name)
+                    fileListener.fileFound(File(fileEntry.path))
+                }
             }
         }
     }
@@ -78,11 +81,12 @@ object IoUtility {
      *
      * @param dirName given name
      */
-    fun createDirectory(dirName: String?): Boolean {
-        val dir = File(dirName)
-        return if (!dir.exists()) {
-            dir.mkdir()
-        } else false
+    fun createDirectory(dirName: String): Boolean {
+        File(dirName).let {
+            return if (!it.exists()) {
+                it.mkdir()
+            } else false
+        }
     }
 
     /**
@@ -94,17 +98,18 @@ object IoUtility {
      */
     fun createEmptyFile(path: String, fileName: String): File {
         createDirectory(path)
-        val file = File(path + fileName)
-        if (!file.exists()) {
-            try {
-                file.createNewFile()
-                return file
-            } catch (e: IOException) {
-                println("File not created: " + file.path)
-                e.printStackTrace()
+        File(path + fileName).let {
+            if (!it.exists()) {
+                try {
+                    it.createNewFile()
+                    return it
+                } catch (e: IOException) {
+                    println("File not created: " + it.path)
+                    e.printStackTrace()
+                }
             }
+            return it
         }
-        return file
     }
 
     /**
@@ -114,14 +119,14 @@ object IoUtility {
      * @param query given query
      * @return sensor data entries that match with given file
      */
-    fun findSearchResultsFromFile(file: File?, query: String?): String {
+    fun findSearchResultsFromFile(file: File, query: String): String {
         val br: BufferedReader // Buffered reader for faster reads
         val result = StringBuilder() // String builder which will hold the file content
         try {
             br = BufferedReader(FileReader(file)) // BufferedReader now points to the file
             var line: String // holds file content line by line
             while (br.readLine().also { line = it } != null) { // read file line by line
-                if (line.contains(query!!)) {
+                if (line.contains(query)) {
                     result.append(line).append("\n") // append file contents
                 }
             }
@@ -138,9 +143,9 @@ object IoUtility {
      * @return contents of file from given file path line by line
      */
     @JvmStatic
-    fun getFileContentsLineByLine(inputFile: File?): List<String> {
+    fun getFileContentsLineByLine(inputFile: File): List<String> {
         val br: BufferedReader // Buffered reader for faster reads
-        val fileContents: MutableList<String> = ArrayList() // List which will hold the file contents line by line
+        val fileContents: MutableList<String> = mutableListOf() // List which will hold the file contents line by line
         try {
             br = BufferedReader(FileReader(inputFile)) // BufferedReader now points to the file
             var readText: String // holds file content line by line
