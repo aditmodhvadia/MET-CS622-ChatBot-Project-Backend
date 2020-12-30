@@ -15,7 +15,7 @@ import utils.IoUtility.createDirectory
 import utils.IoUtility.createEmptyFile
 import utils.IoUtility.getFileContentsLineByLine
 import utils.QueryUtils.addDayToDate
-import utils.WebAppConstants
+import utils.WebAppConstants.formatted
 import java.io.File
 import java.lang.reflect.Type
 import java.nio.file.FileSystems
@@ -60,8 +60,9 @@ class FileCumulator private constructor() : DbManager<FileStoreModel>, DatabaseQ
         println("No need to store in the file system again.")
     }
 
-    override fun queryForRunningEvent(date: Date): List<ActivFitSensorData> {
-        val tomorrow = addDayToDate(date, 1) //        get the next Day Date as well
+    override fun queryForRunningEvent(date: String): List<ActivFitSensorData> {
+        val userDate = Date(date)
+        val tomorrow = addDayToDate(userDate, 1) //        get the next Day Date as well
         //        fetch all record from the collection
         val allSensorData = getSensorFileContents<ActivFitSensorData>(
             sensorModelsMap[ActivFitSensorData.FILE_NAME]!!, 1000
@@ -69,25 +70,23 @@ class FileCumulator private constructor() : DbManager<FileStoreModel>, DatabaseQ
 
         return allSensorData.filter {
             val sensorDataStartTime = Date(it.timestamp?.startTime)
-            (isWithinDateRange(date, tomorrow, sensorDataStartTime)
+            (isWithinDateRange(userDate, tomorrow, sensorDataStartTime)
                     && shouldBeRunningAndNotUnknown(
                 it.sensorData?.activity ?: ""
             ))
         }
     }
 
-    override fun queryHeartRatesForDay(date: Date): Int {
-        val formattedDate = WebAppConstants.inputDateFormat.format(date)
-        return heartRateSensorFileContents.filter { it.formattedDate == formattedDate }.count()
+    override fun queryHeartRatesForDay(date: String): Int {
+        return heartRateSensorFileContents.filter { it.formattedDate == date }.count()
     }
 
-    override fun queryForTotalStepsInDay(date: Date): Int {
+    override fun queryForTotalStepsInDay(date: String): Int {
         val activitySensorDataList = getSensorFileContents<ActivitySensorData>(
             sensorModelsMap[ActivitySensorData.FILE_NAME]!!, 1000
         )
-        val userFormattedDate = WebAppConstants.inputDateFormat.format(date)
         return activitySensorDataList
-            .filter { sensorData: ActivitySensorData -> sensorData.formattedDate == userFormattedDate }
+            .filter { sensorData: ActivitySensorData -> sensorData.formattedDate == date }
             .maxByOrNull { sensorData: ActivitySensorData -> sensorData.sensorData?.stepCounts ?: 0 }
             ?.sensorData
             ?.stepCounts ?: 0
@@ -100,13 +99,13 @@ class FileCumulator private constructor() : DbManager<FileStoreModel>, DatabaseQ
      * @param inputFile given file
      * @return the cumulative data file
      */
-    fun determineFileCategoryAndGet(inputFile: File): File? {
+    fun determineFileCategoryAndGet(inputFile: File): File {
         for (fileName in sensorModelsMap.keys) {
             if (inputFile.path.contains(fileName)) {
-                return sensorModelsMap[fileName]!!.file
+                return sensorModelsMap[fileName]!!.file!!
             }
         }
-        return miscFile
+        return miscFile!!
     }
 
     private val heartRateSensorFileContents: List<HeartRateSensorData>
@@ -226,9 +225,7 @@ class FileCumulator private constructor() : DbManager<FileStoreModel>, DatabaseQ
                     val sensorData: T = g.fromJson(fileLine, sensorModel.javaClass as Type)
                     sensorData.setFormattedDate()
                     //                get date of current sensor data to compare
-                    val sensorFormattedDate = getFormattedDateFromTimeStamp(
-                        sensorData.startTime
-                    )
+                    val sensorFormattedDate = Date(sensorData.startTime).formatted()
                     if (sensorFormattedDate == currentDate) {
                         //                    add sensor data to list as date is same as current date
                         sensorDataList.add(sensorData)
@@ -245,10 +242,6 @@ class FileCumulator private constructor() : DbManager<FileStoreModel>, DatabaseQ
                 }
             }
             return sensorDataList
-        }
-
-        private fun getFormattedDateFromTimeStamp(timestamp: String?): String {
-            return WebAppConstants.inputDateFormat.format(Date(timestamp))
         }
     }
 

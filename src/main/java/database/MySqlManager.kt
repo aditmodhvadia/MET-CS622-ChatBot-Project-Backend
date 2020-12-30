@@ -11,10 +11,8 @@ import sensormodels.activity.ActivitySensorDataBuilder
 import sensormodels.battery.BatterySensorData
 import sensormodels.battery.BatterySensorDataBuilder
 import sensormodels.store.models.MySqlStoreModel
-import utils.WebAppConstants
 import java.sql.*
 import java.util.*
-import java.util.Date
 import java.util.function.Consumer
 import javax.annotation.Nonnull
 import javax.servlet.ServletContext
@@ -27,7 +25,6 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
             // STEP 2: Register JDBC driver
             Class.forName("com.mysql.cj.jdbc.Driver")
 
-            // STEP 3: Open a connection
             println("Connecting to database...")
 
             // STEP 4: Execute a query
@@ -57,7 +54,6 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
     }
 
     override fun insertSensorDataList(@Nonnull sensorDataList: List<MySqlStoreModel?>) {
-        //    sensorDataList.forEach(this::insertSensorData);
         try {
             sensorDataList.forEach { sensorData: MySqlStoreModel? ->
                 try {
@@ -99,49 +95,46 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
         }
     }
 
-    override fun queryForRunningEvent(date: Date): List<ActivFitSensorData> {
+    override fun queryForRunningEvent(date: String): List<ActivFitSensorData> {
         return getRunningEventFromActivFitSensorData(date)
     }
 
-    override fun queryForTotalStepsInDay(date: Date): Int {
+    override fun queryForTotalStepsInDay(date: String): Int {
         return try {
-            val maxSensorData = getActivitySensorDataForGivenDate(date).stream()
-                .max(
-                    Comparator.comparingInt { sensorModel: ActivitySensorData ->
-                        sensorModel.sensorData?.stepCounts ?: 0
-                    })
-                .get()
-            maxSensorData.sensorData?.stepCounts ?: 0
+             getActivitySensorDataForGivenDate(date).maxByOrNull{ sensorModel: ActivitySensorData ->
+                 sensorModel.sensorData?.stepCounts?:0
+             }
+                 ?.get()?.sensorData.stepcounts ?:0
         } catch (exception: NoSuchElementException) {
             0
         }
     }
 
-    override fun queryHeartRatesForDay(date: Date): Int {
+    override fun queryHeartRatesForDay(date: String): Int {
         return getHeartRateSensorDataForGivenDate(date).size
     }
 
     private fun initSensorModels() {
-        sensorModels = ArrayList()
-        sensorModels!!.add(ActivFitSensorData())
-        sensorModels!!.add(ActivitySensorData())
-        sensorModels!!.add(BatterySensorData())
-        sensorModels!!.add(BluetoothSensorData())
-        sensorModels!!.add(HeartRateSensorData())
-        sensorModels!!.add(LightSensorData())
-        sensorModels!!.add(ScreenUsageSensorData())
+        sensorModels.apply {
+            add(ActivFitSensorData())
+            add(ActivitySensorData())
+            add(BatterySensorData())
+            add(BluetoothSensorData())
+            add(HeartRateSensorData())
+            add(LightSensorData())
+            add(ScreenUsageSensorData())
+        }
     }
 
     @Throws(SQLException::class)
     private fun createAllTables(stmt: Statement?) {
-        sensorModels!!.forEach(
-            Consumer { sensorModel: MySqlStoreModel ->
-                try {
-                    stmt!!.executeUpdate(sensorModel.createTableQuery)
-                } catch (exception: SQLException) {
-                    println("Table " + sensorModel.tableName + " already exists")
-                }
-            })
+        sensorModels.forEach{ sensorModel: MySqlStoreModel ->
+            try {
+                stmt!!.executeUpdate(sensorModel.createTableQuery)
+            } catch (exception: SQLException) {
+                println("Table " + sensorModel.tableName + " already exists")
+            }
+        }
     }
 
     /**
@@ -159,12 +152,9 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
             return null
         }
 
-    private fun getActivitySensorDataForGivenDate(userDate: Date?): ArrayList<ActivitySensorData> {
-        val query = ("SELECT * FROM "
-                + ActivitySensorData.mySqlTableName
-                + " WHERE formatted_date LIKE '"
-                + WebAppConstants.inputDateFormat.format(userDate)
-                + "' ORDER BY step_counts DESC LIMIT 1")
+    private fun getActivitySensorDataForGivenDate(userDate: String): ArrayList<ActivitySensorData> {
+        val query =
+            "SELECT * FROM ${ActivitySensorData.mySqlTableName} WHERE formatted_date LIKE '$userDate' ORDER BY step_counts DESC LIMIT 1"
         val resultSet = ArrayList<ActivitySensorData>()
         // create the java statement
         val st: Statement
@@ -197,14 +187,10 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
      * @param date given date
      * @return all instances of running event recorded for the given date
      */
-    private fun getRunningEventFromActivFitSensorData(date: Date?): ArrayList<ActivFitSensorData> {
+    private fun getRunningEventFromActivFitSensorData(date: String): ArrayList<ActivFitSensorData> {
         // if you only need a few columns, specify them by name instead of using "*"
-        val query = ("SELECT * FROM "
-                + ActivFitSensorData.MY_SQL_TABLE_NAME
-                + " WHERE formatted_date LIKE '"
-                + WebAppConstants.inputDateFormat.format(date)
-                + "' AND activity LIKE "
-                + "'running'")
+        val query =
+            "SELECT * FROM ${ActivFitSensorData.MY_SQL_TABLE_NAME} WHERE formatted_date LIKE '$date' AND activity LIKE 'running'"
         val resultSet = ArrayList<ActivFitSensorData>()
         // create the java statement
         val st: Statement
@@ -247,13 +233,9 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
         }
     }
 
-    private fun getHeartRateSensorDataForGivenDate(date: Date?): ArrayList<HeartRateSensorData> {
+    private fun getHeartRateSensorDataForGivenDate(date: String): ArrayList<HeartRateSensorData> {
         val results = ArrayList<HeartRateSensorData>()
-        val query = ("SELECT * FROM "
-                + HeartRateSensorData.MY_SQL_TABLE_NAME
-                + " WHERE formatted_date LIKE '"
-                + WebAppConstants.inputDateFormat.format(date)
-                + "'")
+        val query = "SELECT * FROM ${HeartRateSensorData.MY_SQL_TABLE_NAME} WHERE formatted_date LIKE '$date'"
 
         // create the java statement
         val st: Statement
@@ -341,7 +323,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
                 return field
             }
             private set
-        private var sensorModels: ArrayList<MySqlStoreModel>? = null
+        private var sensorModels = mutableListOf<MySqlStoreModel>()
     }
 
     init {

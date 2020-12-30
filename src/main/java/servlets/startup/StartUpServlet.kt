@@ -7,7 +7,6 @@ import database.DbManager
 import database.FileCumulator
 import database.FileCumulator.Companion.instance
 import listeners.FileListener
-import sensormodels.DatabaseModel
 import sensormodels.store.models.FileStoreModel
 import sensormodels.store.models.SuperStoreModel
 import utils.IoUtility.appendToFile
@@ -101,18 +100,18 @@ class StartUpServlet : HttpServlet() {
 
     /** Inner Class which listens for Files and Zip Files/folders when found.  */
     internal inner class ListenerClass : FileListener {
-        override fun fileFound(file: File?) {
+        override fun fileFound(file: File) {
             val destinationFile = fileCumulator!!.determineFileCategoryAndGet(
-                file!!
+                file
             ) // determine to which sensor file belongs to
             appendToFile(destinationFile, file) // append the data to cumulative file
         }
 
-        override fun zipFileFound(path: String?) {
+        override fun zipFileFound(path: String) {
             try {
                 unZipper.unzip(
                     path,
-                    path!!.replace(".zip", FileSystems.getDefault().separator),
+                    path.replace(".zip", FileSystems.getDefault().separator),
                     ListenerClass()
                 ) // unzip the file
             } catch (ignored: FileAlreadyExistsException) {

@@ -14,14 +14,11 @@ import org.apache.lucene.store.FSDirectory
 import sensormodels.activfit.ActivFitSensorData
 import sensormodels.activfit.ActivFitSensorDataBuilder
 import sensormodels.store.models.LuceneStoreModel
-import utils.WebAppConstants
 import java.io.IOException
 import java.nio.file.Paths
-import java.util.*
 import java.util.stream.Collectors
 import javax.annotation.Nonnull
 import javax.servlet.ServletContext
-import kotlin.collections.ArrayList
 
 class LuceneManager private constructor(servletContext: ServletContext?) : DatabaseQueryRunner,
     DbManager<LuceneStoreModel?> {
@@ -32,36 +29,31 @@ class LuceneManager private constructor(servletContext: ServletContext?) : Datab
         println(indexDir)
     }
 
-    override fun queryForRunningEvent(date: Date): List<ActivFitSensorData> {
-        val formattedDate = WebAppConstants.inputDateFormat.format(date)
-        return getLuceneQueryTime("running", LuceneConstants.ACTIVITY).stream()
-            .filter { document: Document -> document[LuceneConstants.FORMATTED_DATE] == formattedDate }
-            .map { doc: Document ->
+    override fun queryForRunningEvent(date: String): List<ActivFitSensorData> {
+        return getLuceneQueryTime("running", LuceneConstants.ACTIVITY)
+            .filter { doc -> doc[LuceneConstants.FORMATTED_DATE] == date }
+            .map { doc ->
                 ActivFitSensorDataBuilder()
                     .setStartTime(doc[LuceneConstants.START_TIME])
                     .setEndTime(doc[LuceneConstants.END_TIME])
                     .setActivity(doc[LuceneConstants.ACTIVITY])
                     .build()
             }
-            .collect(Collectors.toCollection { ArrayList() })
     }
 
-    override fun queryHeartRatesForDay(date: Date): Int {
-        val results = getLuceneQueryTime("HeartRate", LuceneConstants.SENSOR_NAME)
-        val formattedDate = WebAppConstants.inputDateFormat.format(date)
-        return results.stream()
-            .filter { document: Document -> document[LuceneConstants.FORMATTED_DATE] == formattedDate }
-            .count().toInt()
+    override fun queryHeartRatesForDay(date: String): Int {
+        return getLuceneQueryTime("HeartRate", LuceneConstants.SENSOR_NAME)
+            .filter { document -> document[LuceneConstants.FORMATTED_DATE] == date }
+            .count()
     }
 
-    override fun queryForTotalStepsInDay(date: Date): Int {
+    override fun queryForTotalStepsInDay(date: String): Int {
         val results = getLuceneQueryTime("Activity", LuceneConstants.SENSOR_NAME)
-        val formattedDate = WebAppConstants.inputDateFormat.format(date)
-        return results.stream()
-            .filter { doc: Document -> doc[LuceneConstants.FORMATTED_DATE] == formattedDate }
-            .max(
-                Comparator.comparingInt { doc: Document -> doc[LuceneConstants.STEP_COUNT].toInt() })
-            .get()[LuceneConstants.STEP_COUNT].toInt()
+        return results
+            .filter { doc: Document -> doc[LuceneConstants.FORMATTED_DATE] == date }
+            .maxByOrNull { document: Document ->
+                document[LuceneConstants.STEP_COUNT].toInt()
+            }?.get(LuceneConstants.STEP_COUNT)?.toInt() ?: 0
     }
 
     /**
@@ -140,7 +132,7 @@ class LuceneManager private constructor(servletContext: ServletContext?) : Datab
     }
 
     override fun init(servletContext: ServletContext?) {
-        if (servletContext != null) {
+        servletContext?.let {
             updateServletContext(servletContext)
         }
         println("<----Lucene initialized.---->")

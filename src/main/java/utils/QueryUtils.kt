@@ -2,6 +2,7 @@ package utils
 
 import sensormodels.activfit.ActivFitSensorData
 import utils.WebAppConstants.NO_HEART_RATE_DATA
+import utils.WebAppConstants.formatted
 import java.text.ParseException
 import java.util.*
 import java.util.regex.Pattern
@@ -38,7 +39,7 @@ object QueryUtils {
             dateMatcher.find() -> {
                 println("Found date: " + dateMatcher.group(1))
                 try {
-                    WebAppConstants.inputDateFormat.parse(dateMatcher.group(1).replace("-".toRegex(), "/"))
+                    Date(Date(dateMatcher.group(1).replace("-".toRegex(), "/")).formatted())
                 } catch (e: ParseException) {
                     e.printStackTrace()
                     println("Date not parsed")
@@ -101,7 +102,7 @@ object QueryUtils {
      * @param queryResult the given Result from the Query
      */
     @JvmStatic
-    fun getFormattedRunningResultData(queryResult: ArrayList<ActivFitSensorData>): String {
+    fun getFormattedRunningResultData(queryResult: List<ActivFitSensorData>): String {
         return if (queryResult.isEmpty()) {
             "No, there is no running activity."
         } else {
@@ -122,11 +123,11 @@ object QueryUtils {
      * @param userDate given Date of the step count
      */
     @JvmStatic
-    fun getFormattedTotalStepsForTheDay(stepCount: Int, userDate: Date?): String {
+    fun getFormattedTotalStepsForTheDay(stepCount: Int, userDate: String): String {
         return if (stepCount == -1) {
             "No steps record found for the day"
         } else {
-            "You walked $stepCount steps on ${WebAppConstants.inputDateFormat.format(userDate)}"
+            "You walked $stepCount steps on $userDate"
         }
     }
 
@@ -137,11 +138,11 @@ object QueryUtils {
      * @param heartRateCount total heart rate count
      */
     @JvmStatic
-    fun getFormattedHeartRatesForTheDays(date: Date?, heartRateCount: Int): String {
+    fun getFormattedHeartRatesForTheDays(date: String, heartRateCount: Int): String {
         return if (heartRateCount == 0) {
             NO_HEART_RATE_DATA
         } else {
-            "You received $heartRateCount heart rate notifications on ${WebAppConstants.inputDateFormat.format(date)}."
+            "You received $heartRateCount heart rate notifications on $date."
         }
     }
 
