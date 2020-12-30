@@ -19,7 +19,6 @@ import java.lang.reflect.Type
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.FileSystems
 import java.util.*
-import java.util.function.Consumer
 import javax.servlet.http.HttpServlet
 
 class StartUpServlet : HttpServlet() {
@@ -28,9 +27,12 @@ class StartUpServlet : HttpServlet() {
             : FileCumulator? = null
     private var dbManager: DbManager<SuperStoreModel>? = null
     override fun init() {
-        println("--------#####--------")
-        println("        Server started      ")
-        println("--------#####--------")
+        println(
+            """--------#####--------
+            |        Server started      
+            |  --------#####--------    
+        """.trimMargin()
+        )
         fileCumulator = instance
         dbManager = getInstance(servletContext)
 
@@ -67,11 +69,11 @@ class StartUpServlet : HttpServlet() {
      */
     private fun storeDataInDatabases(sensorModels: Collection<SuperStoreModel>) {
         println("*****************Storing data into Databases******************")
-        sensorModels.forEach(
-            Consumer { databaseModel: SuperStoreModel ->
-                val sensorData = readSensorData(databaseModel)
-                dbManager!!.insertSensorDataList(sensorData)
-            })
+        sensorModels.forEach { databaseModel: SuperStoreModel ->
+            readSensorData(databaseModel).let {
+                dbManager?.insertSensorDataList(it)
+            }
+        }
         println("*****************Storing data into Databases complete******************")
     }
 
@@ -87,15 +89,15 @@ class StartUpServlet : HttpServlet() {
         val file: File = sensorModel.file!!
         val gson = Gson()
 
-        return getFileContentsLineByLine(file).map { s ->
+        return getFileContentsLineByLine(file).mapNotNull { s ->
             try {
                 val sensorData: T = gson.fromJson(s, sensorModel.javaClass as Type?)
                 sensorData.setFormattedDate()
-                return@map sensorData
+                return@mapNotNull sensorData
             } catch (ignored: Exception) {
             }
-            return@map null
-        }.filterNotNull().toList()
+            return@mapNotNull null
+        }
     }
 
     /** Inner Class which listens for Files and Zip Files/folders when found.  */
@@ -123,7 +125,7 @@ class StartUpServlet : HttpServlet() {
     }
 
     companion object {
-        private val destinationFolder = "UncompressedData" + FileSystems.getDefault().separator // destination folder
+        private val destinationFolder = "UncompressedData${FileSystems.getDefault().separator}" // destination folder
         private const val sourceFileName = "/WEB-INF/classes/SampleUserSmartwatch.zip" // datasource file
     }
 }
