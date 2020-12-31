@@ -9,7 +9,7 @@ import org.apache.lucene.document.IntPoint
 import org.apache.lucene.document.StringField
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import sensormodels.store.models.SuperStoreModel
-import utils.WebAppConstants
+import utils.WebAppConstants.formatted
 import java.io.File
 import java.sql.PreparedStatement
 import java.util.*
@@ -40,7 +40,7 @@ data class ActivitySensorData(
     var timeStamp: String? = null
         set(timeStamp) {
             field = timeStamp
-            formattedDate = WebAppConstants.inputDateFormat.format(Date(timeStamp))
+            formattedDate = Date(timeStamp).formatted()
         }
 
     fun setTimestamp(timestamp: String?) {
@@ -50,7 +50,7 @@ data class ActivitySensorData(
 
     override fun setFormattedDate() {
         if (time_stamp != null) {
-            formattedDate = WebAppConstants.inputDateFormat.format(Date(time_stamp))
+            formattedDate = Date(time_stamp).formatted()
         }
     }
 

@@ -10,6 +10,7 @@ import org.apache.lucene.document.TextField
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import sensormodels.store.models.SuperStoreModel
 import utils.WebAppConstants
+import utils.WebAppConstants.formatted
 import java.io.File
 import java.sql.PreparedStatement
 import java.util.*
@@ -37,7 +38,7 @@ data class ActivFitSensorData(
 
     override fun setFormattedDate() {
         timestamp?.startTime?.let {
-            formattedDate = WebAppConstants.inputDateFormat.format(Date(it))
+            formattedDate = Date(it).formatted()
         }
     }
 

@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 import org.apache.lucene.document.Document
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import sensormodels.store.models.SuperStoreModel
-import utils.WebAppConstants
+import utils.WebAppConstants.formatted
 import java.io.File
 import java.sql.PreparedStatement
 import java.util.*
@@ -45,7 +45,7 @@ data class ScreenUsageSensorData(
     @BsonIgnore
     override var file: File? = null
     override fun setFormattedDate() {
-        formattedDate = WebAppConstants.inputDateFormat.format(Date(startTimestamp))
+        formattedDate = Date(startTimestamp).formatted()
     }
 
     override val startTime = startTimestamp

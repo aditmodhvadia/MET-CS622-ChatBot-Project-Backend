@@ -13,7 +13,6 @@ import sensormodels.battery.BatterySensorDataBuilder
 import sensormodels.store.models.MySqlStoreModel
 import java.sql.*
 import java.util.*
-import java.util.function.Consumer
 import javax.annotation.Nonnull
 import javax.servlet.ServletContext
 
@@ -101,10 +100,9 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
 
     override fun queryForTotalStepsInDay(date: String): Int {
         return try {
-             getActivitySensorDataForGivenDate(date).maxByOrNull{ sensorModel: ActivitySensorData ->
-                 sensorModel.sensorData?.stepCounts?:0
-             }
-                 ?.get()?.sensorData.stepcounts ?:0
+            getActivitySensorDataForGivenDate(date).maxByOrNull { sensorModel: ActivitySensorData ->
+                sensorModel.sensorData?.stepCounts ?: 0
+            }?.sensorData?.stepCounts ?: 0
         } catch (exception: NoSuchElementException) {
             0
         }
@@ -128,7 +126,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
 
     @Throws(SQLException::class)
     private fun createAllTables(stmt: Statement?) {
-        sensorModels.forEach{ sensorModel: MySqlStoreModel ->
+        sensorModels.forEach { sensorModel: MySqlStoreModel ->
             try {
                 stmt!!.executeUpdate(sensorModel.createTableQuery)
             } catch (exception: SQLException) {

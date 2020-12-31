@@ -9,7 +9,7 @@ import org.apache.lucene.document.IntPoint
 import org.apache.lucene.document.StringField
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import sensormodels.store.models.SuperStoreModel
-import utils.WebAppConstants
+import utils.WebAppConstants.formatted
 import java.io.File
 import java.sql.PreparedStatement
 import java.util.*
@@ -36,7 +36,7 @@ data class HeartRateSensorData(
     override var file: File? = null
 
     override fun setFormattedDate() {
-        formattedDate = WebAppConstants.inputDateFormat.format(Date(timestamp))
+        formattedDate = Date(timestamp).formatted()
     }
 
     override val startTime = timestamp
