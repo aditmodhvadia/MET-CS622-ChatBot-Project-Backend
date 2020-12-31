@@ -3,7 +3,6 @@ package database
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.client.MongoClients
-import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Sorts
@@ -14,7 +13,6 @@ import sensormodels.HeartRateSensorData
 import sensormodels.activfit.ActivFitSensorData
 import sensormodels.activity.ActivitySensorData
 import sensormodels.store.models.MongoStoreModel
-import utils.WebAppConstants
 import java.util.*
 import javax.annotation.Nonnull
 import javax.servlet.ServletContext
@@ -28,8 +26,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
      * @param servletContext servlet context
      */
     override fun init(servletContext: ServletContext?) {
-        val pojoCodecRegistry = codecRegistry
-        val settings = getMongoClientSettings(pojoCodecRegistry)
+        val settings = getMongoClientSettings(codecRegistry)
         //        create a connection to MongoDB Client
         val mongoClient = MongoClients.create(settings)
         println("Connected to edu.bu.aditm.database successfully")
@@ -66,13 +63,14 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
 
     override fun insertSensorDataList(@Nonnull sensorDataList: List<MongoStoreModel?>) {
         try {
-            val collection: MongoCollection<Any> = database.getCollection(
+            database.getCollection(
                 sensorDataList[0]!!.mongoCollectionName,
                 sensorDataList[0]!!.javaClass
-            )
-            collection.insertMany(sensorDataList)
+            ).apply {
+                insertMany(sensorDataList)
+            }
             println(
-                "MongoDB Log: Data Inserted for " + sensorDataList[0]!!.mongoCollectionName
+                "MongoDB Log: Data Inserted for ${sensorDataList[0]!!.mongoCollectionName}"
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -80,18 +78,18 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
     }
 
     override fun insertSensorData(sensorData: MongoStoreModel?) {
-        val collection: MongoCollection<Any> =
-            database.getCollection(sensorData!!.mongoCollectionName, sensorData.javaClass)
-        collection.insertOne(sensorData)
+        database.getCollection(sensorData!!.mongoCollectionName, sensorData.javaClass).apply {
+            insertOne(sensorData)
+        }
         println("MongoDB Log: Data Inserted")
     }
 
-    override fun queryForRunningEvent(date: Date?): ArrayList<ActivFitSensorData> {
+    override fun queryForRunningEvent(date: String): List<ActivFitSensorData> {
         val cursor = database
             .getCollection(ActivFitSensorData.MONGO_COLLECTION_NAME, ActivFitSensorData::class.java)
             .find(
                 Filters.and(
-                    Filters.eq("formatted_date", WebAppConstants.inputDateFormat.format(date)),
+                    Filters.eq("formatted_date", date),
                     Filters.eq("sensorData.activity", "running")
                 )
             )
@@ -104,25 +102,24 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
         return queryResult
     }
 
-    override fun queryForTotalStepsInDay(date: Date?): Int {
+    override fun queryForTotalStepsInDay(date: String): Int {
         val cursor = database
             .getCollection(ActivitySensorData.MONGO_COLLECTION_NAME, ActivitySensorData::class.java)
-            .find(Filters.eq("formatted_date", WebAppConstants.inputDateFormat.format(date)))
+            .find(Filters.eq("formatted_date", date))
             .sort(Sorts.orderBy(Sorts.descending("step_counts")))
             .cursor()
         var maxStepCount = -1 // Max value of step count for the day
         while (cursor.hasNext()) {
-            //            get the next Data
             val sensorData = cursor.next()
             maxStepCount = max(maxStepCount, sensorData.sensorData?.stepCounts ?: 0)
         }
         return maxStepCount
     }
 
-    override fun queryHeartRatesForDay(date: Date?): Int {
+    override fun queryHeartRatesForDay(date: String): Int {
         val cursor = database
             .getCollection(HeartRateSensorData.MONGO_COLLECTION_NAME, HeartRateSensorData::class.java)
-            .find(Filters.eq("formatted_date", WebAppConstants.inputDateFormat.format(date)))
+            .find(Filters.eq("formatted_date", date))
             .cursor()
         var heartRateCounter = 0
         while (cursor.hasNext()) {

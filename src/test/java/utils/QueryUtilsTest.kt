@@ -7,6 +7,7 @@ import utils.QueryUtils.extractDateFromQuery
 import utils.QueryUtils.getFormattedHeartRatesForTheDays
 import utils.QueryUtils.isMatching
 import utils.WebAppConstants.NO_HEART_RATE_DATA
+import utils.WebAppConstants.formatted
 import java.util.*
 
 class QueryUtilsTest {
@@ -83,17 +84,17 @@ class QueryUtilsTest {
     @Test
     fun formattedHeartRateCountResult() {
         //    No heart rate data found
-        Assert.assertEquals(getFormattedHeartRatesForTheDays(Date(), 0), NO_HEART_RATE_DATA)
+        Assert.assertEquals(getFormattedHeartRatesForTheDays(Date().formatted(), 0), NO_HEART_RATE_DATA)
         Assert.assertEquals(
-            getFormattedHeartRatesForTheDays(Date("11/25/2020"), 10),
+            getFormattedHeartRatesForTheDays(Date("11/25/2020").formatted(), 10),
             "You received 10 heart rate notifications on 11/25/2020."
         )
         Assert.assertEquals(
-            getFormattedHeartRatesForTheDays(Date("11/25/2020"), 1997),
+            getFormattedHeartRatesForTheDays(Date("11/25/2020").formatted(), 1997),
             "You received 1997 heart rate notifications on 11/25/2020."
         )
         Assert.assertEquals(
-            getFormattedHeartRatesForTheDays(Date("11/25/2020"), 1),
+            getFormattedHeartRatesForTheDays(Date("11/25/2020").formatted(), 1),
             "You received 1 heart rate notifications on 11/25/2020."
         )
     }

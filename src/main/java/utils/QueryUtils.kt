@@ -2,6 +2,7 @@ package utils
 
 import sensormodels.activfit.ActivFitSensorData
 import utils.WebAppConstants.NO_HEART_RATE_DATA
+import utils.WebAppConstants.formatted
 import java.text.ParseException
 import java.util.*
 import java.util.regex.Pattern
@@ -15,35 +16,38 @@ object QueryUtils {
 
     @JvmStatic
     fun extractDateFromQuery(@Nonnull query: String): Date? {
-        if (query.isEmpty()) {
-            return null
-        }
-        if (query.contains("today")) {
-            val today = Calendar.getInstance()
-            today[Calendar.HOUR_OF_DAY] = 0
-            today[Calendar.MINUTE] = 0
-            today[Calendar.MILLISECOND] = 0
-            return today.time
-        }
-        if (query.contains("yesterday")) {
-            val calendar = Calendar.getInstance(Locale.getDefault())
-            calendar.add(Calendar.DATE, -1)
-            calendar[Calendar.HOUR_OF_DAY] = 0
-            calendar[Calendar.MINUTE] = 0
-            calendar[Calendar.MILLISECOND] = 0
-            return calendar.time
-        }
         val dateMatcher = Pattern.compile(DATE_REGEX).matcher(query)
-        if (dateMatcher.find()) {
-            println("Found date: " + dateMatcher.group(1))
-            try {
-                return WebAppConstants.inputDateFormat.parse(dateMatcher.group(1).replace("-".toRegex(), "/"))
-            } catch (e: ParseException) {
-                e.printStackTrace()
-                println("Date not parsed")
+        return when {
+            query.isEmpty() -> {
+                null
             }
+            query.contains("today") -> {
+                Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.time
+            }
+            query.contains("yesterday") -> {
+                Calendar.getInstance(Locale.getDefault()).apply {
+                    add(Calendar.DATE, -1)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.time
+            }
+            dateMatcher.find() -> {
+                println("Found date: " + dateMatcher.group(1))
+                try {
+                    Date(Date(dateMatcher.group(1).replace("-".toRegex(), "/")).formatted())
+                } catch (e: ParseException) {
+                    e.printStackTrace()
+                    println("Date not parsed")
+                    null
+                }
+            }
+            else -> null
         }
-        return null
     }
 
     /**
@@ -52,15 +56,20 @@ object QueryUtils {
      * @param query given query
      */
     @JvmStatic
-    fun determineQueryType(@Nonnull query: String?): QueryType {
-        return if (isMatching(RUNNING_EVENT_REGEX, query)) {
-            QueryType.RUNNING
-        } else if (isMatching(STEP_COUNT_EVENT_REGEX, query)) {
-            QueryType.STEP_COUNT
-        } else if (isMatching(HEART_RATE_EVENT_REGEX, query)) {
-            QueryType.HEART_RATE
-        } else {
-            QueryType.UNKNOWN
+    fun determineQueryType(query: String): QueryType {
+        return when {
+            isMatching(RUNNING_EVENT_REGEX, query) -> {
+                QueryType.RUNNING
+            }
+            isMatching(STEP_COUNT_EVENT_REGEX, query) -> {
+                QueryType.STEP_COUNT
+            }
+            isMatching(HEART_RATE_EVENT_REGEX, query) -> {
+                QueryType.HEART_RATE
+            }
+            else -> {
+                QueryType.UNKNOWN
+            }
         }
     }
 
@@ -72,10 +81,7 @@ object QueryUtils {
      * @return `true` if the pattern matches, else `false`
      */
     @JvmStatic
-    fun isMatching(pattern: String?, query: String?): Boolean {
-        val m = Pattern.compile(pattern).matcher(query)
-        return m.find()
-    }
+    fun isMatching(pattern: String, query: String): Boolean = Pattern.compile(pattern).matcher(query).find()
 
     /**
      * Use to add given number of days to the given Date.
@@ -85,12 +91,10 @@ object QueryUtils {
      * @return Date after adding given number of days
      */
     @JvmStatic
-    fun addDayToDate(userDate: Date?, days: Int): Date {
-        val cal = Calendar.getInstance() // get Calendar Instance
-        cal.time = userDate // set Time to the given Date@param
-        cal.add(Calendar.DATE, days) // add given number of days@param to the given Date@param
-        return cal.time // return the new Date
-    }
+    fun addDayToDate(userDate: Date, days: Int): Date = Calendar.getInstance().apply {
+        time = userDate
+        add(Calendar.DATE, days)
+    }.time
 
     /**
      * Use to print the Query result data for running activity on the given Date.
@@ -98,34 +102,16 @@ object QueryUtils {
      * @param queryResult the given Result from the Query
      */
     @JvmStatic
-    fun getFormattedRunningResultData(queryResult: ArrayList<ActivFitSensorData>): String {
+    fun getFormattedRunningResultData(queryResult: List<ActivFitSensorData>): String {
         return if (queryResult.isEmpty()) {
             "No, there is no running activity."
         } else {
-            val builder = StringBuilder()
-            builder.append("Yes, you ran")
-            for (data in queryResult) {
-                builder
-                    .append(" from ")
-                    .append(
-                        WebAppConstants.outputDateFormat.format(
-                            Date(data.timestamp?.startTime)
-                        )
-                    )
-                    .append(" to ")
-                    .append(
-                        WebAppConstants.outputDateFormat.format(Date(data.timestamp?.endTime))
-                    )
-                    .append(", ")
-                println(
-                    "Yes, you ran from "
-                            + data.timestamp?.startTime
-                            + " to "
-                            + data.timestamp?.endTime
-                )
+            val builder = StringBuilder("Yes, you ran")
+            queryResult.joinToString {
+                "from ${
+                    WebAppConstants.outputDateFormat.format(Date(it.timestamp?.startTime))
+                } to ${WebAppConstants.outputDateFormat.format(Date(it.timestamp?.endTime))}"
             }
-            builder.deleteCharAt(builder.length - 1)
-            builder.deleteCharAt(builder.length - 1)
             builder.toString()
         }
     }
@@ -137,14 +123,11 @@ object QueryUtils {
      * @param userDate given Date of the step count
      */
     @JvmStatic
-    fun getFormattedTotalStepsForTheDay(stepCount: Int, userDate: Date?): String {
+    fun getFormattedTotalStepsForTheDay(stepCount: Int, userDate: String): String {
         return if (stepCount == -1) {
             "No steps record found for the day"
         } else {
-            ("You walked "
-                    + stepCount
-                    + " steps on "
-                    + WebAppConstants.inputDateFormat.format(userDate))
+            "You walked $stepCount steps on $userDate"
         }
     }
 
@@ -155,14 +138,11 @@ object QueryUtils {
      * @param heartRateCount total heart rate count
      */
     @JvmStatic
-    fun getFormattedHeartRatesForTheDays(date: Date?, heartRateCount: Int): String {
+    fun getFormattedHeartRatesForTheDays(date: String, heartRateCount: Int): String {
         return if (heartRateCount == 0) {
             NO_HEART_RATE_DATA
         } else {
-            val formattedDate = WebAppConstants.inputDateFormat.format(date)
-            String.format(
-                "You received %s heart rate notifications on %s.", heartRateCount, formattedDate
-            )
+            "You received $heartRateCount heart rate notifications on $date."
         }
     }
 

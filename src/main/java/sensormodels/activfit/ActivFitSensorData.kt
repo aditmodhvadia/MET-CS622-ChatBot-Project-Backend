@@ -10,23 +10,24 @@ import org.apache.lucene.document.TextField
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import sensormodels.store.models.SuperStoreModel
 import utils.WebAppConstants
+import utils.WebAppConstants.formatted
 import java.io.File
 import java.sql.PreparedStatement
 import java.util.*
 
-class ActivFitSensorData(override var file: File? = null) : SuperStoreModel {
-
-    @SerializedName("sensor_name")
+data class ActivFitSensorData(
+    override var file: File? = null, @SerializedName("sensor_name")
     @Expose
-    var sensorName: String? = null
+    var sensorName: String? = null,
 
     @SerializedName("timestamp")
     @Expose
-    var timestamp: Timestamp? = null
+    var timestamp: Timestamp? = null,
 
     @SerializedName("sensor_data")
     @Expose
     var sensorData: SensorData? = null
+) : SuperStoreModel {
 
     @Expose
     @SerializedName("formatted_date")
@@ -36,36 +37,30 @@ class ActivFitSensorData(override var file: File? = null) : SuperStoreModel {
         get() = FILE_NAME
 
     override fun setFormattedDate() {
-        formattedDate = WebAppConstants.inputDateFormat.format(Date(timestamp!!.startTime))
+        timestamp?.startTime?.let {
+            formattedDate = Date(it).formatted()
+        }
     }
 
     override val startTime: String? = timestamp?.startTime
 
-    class Timestamp {
+    data class Timestamp(
         @SerializedName("start_time")
         @Expose
-        var startTime: String? = null
-
+        var startTime: String? = null,
         @SerializedName("end_time")
         @Expose
         var endTime: String? = null
+    )
 
-        constructor()
-        constructor(startTime: String?, endTime: String?) {
-            this.startTime = startTime
-            this.endTime = endTime
-        }
-    }
-
-    class SensorData {
+    data class SensorData(
         @SerializedName("activity")
         @Expose
-        var activity: String? = null
-
+        var activity: String? = null,
         @SerializedName("duration")
         @Expose
         var duration: Int? = null
-    }
+    )
 
     companion object {
         @BsonIgnore
@@ -78,7 +73,7 @@ class ActivFitSensorData(override var file: File? = null) : SuperStoreModel {
         val FILE_NAME = "ActivFit"
     }
 
-    override val document: Document?
+    override val document: Document
         get() {
             return Document().apply {
                 add(
@@ -128,17 +123,16 @@ class ActivFitSensorData(override var file: File? = null) : SuperStoreModel {
                 )
             }
         }
-    override val mongoCollectionName: String
-        get() = MONGO_COLLECTION_NAME
-    override val tableName: String
-        get() = MY_SQL_TABLE_NAME
-    override val createTableQuery: String
-        get() = "CREATE TABLE ${this.tableName} (start_time VARCHAR(30) ,  formatted_date VARCHAR(10) ,  end_time VARCHAR(30) ,  duration INTEGER ,  activity VARCHAR(55) ) "
-    override val insertIntoTableQuery: String
-        get() = " insert into ${this.tableName} (start_time, end_time, formatted_date, duration, activity) values (?, ?, ?, ?, ?)"
+    override val mongoCollectionName: String = MONGO_COLLECTION_NAME
+    override val tableName: String = MY_SQL_TABLE_NAME
+    override val createTableQuery: String =
+        "CREATE TABLE ${this.tableName} (start_time VARCHAR(30) ,  formatted_date VARCHAR(10) ,  end_time VARCHAR(30)" +
+                " ,  duration INTEGER ,  activity VARCHAR(55) ) "
+    override val insertIntoTableQuery: String =
+        "INSERT into ${this.tableName} (start_time, end_time, formatted_date, duration, activity) values (?, ?, ?, ?, ?)"
 
-    override fun fillQueryData(preparedStmt: PreparedStatement?) {
-        preparedStmt?.apply {
+    override fun fillQueryData(preparedStmt: PreparedStatement) {
+        preparedStmt.apply {
             setString(1, timestamp!!.startTime)
             setString(2, timestamp!!.endTime)
             setString(3, formattedDate)

@@ -14,10 +14,8 @@ object DatabaseUtils {
      */
     @JvmStatic
     fun isWithinDateRange(
-        @Nonnull startDate: Date?, @Nonnull endDate: Date?, @Nonnull sensorDate: Date
-    ): Boolean {
-        return sensorDate.after(startDate) && sensorDate.before(endDate)
-    }
+        startDate: Date?, endDate: Date?, sensorDate: Date
+    ): Boolean = sensorDate.after(startDate) && sensorDate.before(endDate)
 
     /**
      * Determine if given activity matches with running activity
@@ -26,7 +24,6 @@ object DatabaseUtils {
      * @return `true` if activity matches `running`, else `false`
      */
     @JvmStatic
-    fun shouldBeRunningAndNotUnknown(@Nonnull activity: String): Boolean {
-        return activity != "unknown" && activity.toLowerCase() == "running"
-    }
+    fun shouldBeRunningAndNotUnknown(@Nonnull activity: String): Boolean =
+        activity != "unknown" && activity.toLowerCase() == "running"
 }

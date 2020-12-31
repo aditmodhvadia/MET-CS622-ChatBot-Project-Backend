@@ -9,7 +9,7 @@ import org.apache.lucene.document.IntPoint
 import org.apache.lucene.document.StringField
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import sensormodels.store.models.SuperStoreModel
-import utils.WebAppConstants
+import utils.WebAppConstants.formatted
 import java.io.File
 import java.sql.PreparedStatement
 import java.util.*
@@ -27,26 +27,21 @@ data class ActivitySensorData(
     var formattedDate: String? = null,
     @SerializedName("sensor_data")
     @Expose
-    var sensorData: SensorData? = null,
+    var sensorData: SensorData = SensorData(),
 ) : SuperStoreModel {
 
     override val startTime: String?
         get() = timeStamp
 
-    override val fileName: String
-        get() = FILE_NAME
+    override val fileName: String = FILE_NAME
 
     @SerializedName("time_stamp")
     @Expose
     var timeStamp: String? = null
         set(timeStamp) {
             field = timeStamp
-            formattedDate = utils.WebAppConstants.inputDateFormat.format(java.util.Date(timeStamp))
+            formattedDate = Date(timeStamp).formatted()
         }
-
-    private fun getTimestamp(): String? {
-        return time_stamp
-    }
 
     fun setTimestamp(timestamp: String?) {
         this.time_stamp = timestamp
@@ -55,20 +50,18 @@ data class ActivitySensorData(
 
     override fun setFormattedDate() {
         if (time_stamp != null) {
-            formattedDate = WebAppConstants.inputDateFormat.format(Date(time_stamp))
+            formattedDate = Date(time_stamp).formatted()
         }
     }
 
-
-    class SensorData {
+    data class SensorData(
         @SerializedName("step_counts")
         @Expose
-        var stepCounts: Int? = null
-
+        var stepCounts: Int = 0,
         @SerializedName("step_delta")
         @Expose
-        var stepDelta: Int? = null
-    }
+        var stepDelta: Int = 0
+    )
 
     companion object {
         @get:BsonIgnore
@@ -83,63 +76,51 @@ data class ActivitySensorData(
     }
 
     override val document: Document
-        get() {
-            return Document().apply {
-                add(
-                    IntPoint(
-                        LuceneManager.LuceneConstants.STEP_COUNT, sensorData!!.stepCounts!!
-                    )
+        get() = Document().apply {
+            add(
+                IntPoint(
+                    LuceneManager.LuceneConstants.STEP_COUNT, sensorData.stepCounts
                 )
-                add(
-                    IntPoint(
-                        LuceneManager.LuceneConstants.STEP_DELTA, sensorData!!.stepDelta!!
-                    )
+            )
+            add(
+                IntPoint(
+                    LuceneManager.LuceneConstants.STEP_DELTA, sensorData.stepDelta
                 )
-                add(
-                    StringField(
-                        LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
-                    )
+            )
+            add(
+                StringField(
+                    LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
                 )
-                add(
-                    StringField(
-                        LuceneManager.LuceneConstants.FORMATTED_DATE, sensorName, Field.Store.YES
-                    )
+            )
+            add(
+                StringField(
+                    LuceneManager.LuceneConstants.FORMATTED_DATE, sensorName, Field.Store.YES
                 )
-                //         use a string field for timestamp because we don't want it tokenized
-                add(
-                    StringField(
-                        LuceneManager.LuceneConstants.TIMESTAMP, getTimestamp(), Field.Store.YES
-                    )
+            )
+            //         use a string field for timestamp because we don't want it tokenized
+            add(
+                StringField(
+                    LuceneManager.LuceneConstants.TIMESTAMP, time_stamp, Field.Store.YES
                 )
-            }
+            )
         }
 
-    override fun fillQueryData(preparedStmt: PreparedStatement?) {
-        preparedStmt?.apply {
-            setString(1, getTimestamp())
+    override fun fillQueryData(preparedStmt: PreparedStatement) {
+        preparedStmt.apply {
+            setString(1, time_stamp)
             setString(2, formattedDate)
             setString(3, sensorName)
-            setInt(4, sensorData!!.stepCounts!!)
-            setInt(5, sensorData!!.stepDelta!!)
+            setInt(4, sensorData.stepCounts)
+            setInt(5, sensorData.stepDelta)
         }
     }
 
-    override val mongoCollectionName: String
-        get() = MONGO_COLLECTION_NAME
-    override val tableName: String
-        get() = mySqlTableName
-    override val createTableQuery: String
-        get() = ("CREATE TABLE "
-                + this.tableName
-                + "(time_stamp VARCHAR(30) , "
-                + " sensor_name CHAR(25) , "
-                + " formatted_date CHAR(10) , "
-                + " step_counts INTEGER, "
-                + " step_delta INTEGER)")
-
-    override val insertIntoTableQuery: String?
-        get() = (" insert into "
-                + this.tableName
-                + " (time_stamp,formatted_date, sensor_name, step_counts,step_delta)"
-                + " values (?, ?, ?, ?, ?)")
+    override val mongoCollectionName: String = MONGO_COLLECTION_NAME
+    override val tableName: String = mySqlTableName
+    override val createTableQuery: String =
+        ("CREATE TABLE ${this.tableName}(time_stamp VARCHAR(30) ,  sensor_name CHAR(25) ,  formatted_date CHAR(10) ," +
+                "  step_counts INTEGER,  step_delta INTEGER)")
+    override val insertIntoTableQuery: String =
+        (" insert into ${this.tableName} (time_stamp,formatted_date, sensor_name, step_counts,step_delta)" +
+                " values (?, ?, ?, ?, ?)")
 }

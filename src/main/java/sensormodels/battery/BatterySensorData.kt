@@ -4,24 +4,23 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import org.apache.lucene.document.Document
 import org.bson.codecs.pojo.annotations.BsonIgnore
-import sensormodels.store.models.*
-import utils.WebAppConstants
+import sensormodels.store.models.SuperStoreModel
+import utils.WebAppConstants.formatted
 import java.io.File
 import java.sql.PreparedStatement
 import java.util.*
 
-class BatterySensorData : SuperStoreModel {
+data class BatterySensorData(
     @SerializedName("sensor_name")
     @Expose
-    var sensorName: String? = null
-
+    var sensorName: String? = null,
     @SerializedName("timestamp")
     @Expose
-    var timestamp: String? = null
-
+    var timestamp: String? = null,
     @SerializedName("sensor_data")
     @Expose
     var sensorData: SensorData? = null
+) : SuperStoreModel {
 
     @Expose
     @SerializedName("formatted_date")
@@ -31,7 +30,7 @@ class BatterySensorData : SuperStoreModel {
     override var file: File? = null
 
     override fun setFormattedDate() {
-        formattedDate = WebAppConstants.inputDateFormat.format(Date(timestamp))
+        formattedDate = Date(timestamp).formatted()
     }
 
     override val startTime: String? = timestamp
@@ -54,28 +53,17 @@ class BatterySensorData : SuperStoreModel {
         val FILE_NAME = "BatterySensor"
     }
 
-    override val document: Document = Document()
-    override val mongoCollectionName: String
-        get() = "BatterySensorData"
-    override val tableName: String
-        get() = MY_SQL_TABLE_NAME
-    override val createTableQuery: String
-        get() = ("CREATE TABLE "
-                + this.tableName
-                + "(timestamp VARCHAR(30) , "
-                + " time_stamp VARCHAR(30) , "
-                + " formatted_date VARCHAR(10) , "
-                + " sensor_name CHAR (25), "
-                + " percent INTEGER , "
-                + " charging BIT ) ")
-    override val insertIntoTableQuery: String
-        get() = (" insert into "
-                + this.tableName
-                + " (timestamp,time_stamp, formatted_date, sensor_name,percent,charging)"
-                + " values (?, ?, ?, ?, ?,?)")
+    override val document: Document
+        get() = Document()
+    override val mongoCollectionName: String = "BatterySensorData"
+    override val tableName: String = MY_SQL_TABLE_NAME
+    override val createTableQuery: String =
+        ("CREATE TABLE ${this.tableName}(timestamp VARCHAR(30) ,  time_stamp VARCHAR(30) ,  formatted_date VARCHAR(10) ,  sensor_name CHAR (25),  percent INTEGER ,  charging BIT ) ")
+    override val insertIntoTableQuery: String =
+        (" insert into ${this.tableName} (timestamp,time_stamp, formatted_date, sensor_name,percent,charging) values (?, ?, ?, ?, ?,?)")
 
-    override fun fillQueryData(preparedStmt: PreparedStatement?) {
-        preparedStmt?.apply {
+    override fun fillQueryData(preparedStmt: PreparedStatement) {
+        preparedStmt.apply {
             setString(1, timestamp)
             setString(2, timestamp)
             setString(3, formattedDate)

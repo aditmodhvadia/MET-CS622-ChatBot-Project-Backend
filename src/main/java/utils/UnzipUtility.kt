@@ -5,7 +5,6 @@ import java.io.*
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.util.zip.ZipInputStream
-import javax.annotation.Nonnull
 
 /**
  * This utility extracts files and directories of a standard zip file to a destination directory.
@@ -24,14 +23,12 @@ class UnzipUtility {
      */
     @Throws(IOException::class)
     fun unzip(
-        @Nonnull zipFilePath: String?,
-        @Nonnull destDirectory: String,
+        zipFilePath: String,
+        destDirectory: String,
         fileListener: FileListener?
     ) {
-        val destDir = File(destDirectory) // create destination directory if it does not exist
-        if (!destDir.exists()) {
-            destDir.mkdir()
-        }
+        IoUtility.createDirectory(destDirectory)
+
         val zipIn = ZipInputStream(FileInputStream(zipFilePath))
         var entry = zipIn.nextEntry
         val fileSystem = FileSystems.getDefault()
@@ -75,10 +72,10 @@ class UnzipUtility {
      * @throws IOException standard IOException
      */
     @Throws(IOException::class)
-    private fun extractFile(@Nonnull zipIn: ZipInputStream, @Nonnull filePath: String) {
+    private fun extractFile(zipIn: ZipInputStream, filePath: String) {
         val bos = BufferedOutputStream(FileOutputStream(filePath))
         val bytesIn = ByteArray(BUFFER_SIZE)
-        var read = 0
+        var read: Int
         while (zipIn.read(bytesIn).also { read = it } != -1) {
             bos.write(bytesIn, 0, read)
         }

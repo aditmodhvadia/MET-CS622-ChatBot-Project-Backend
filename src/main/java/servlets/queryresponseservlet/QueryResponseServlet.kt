@@ -10,8 +10,8 @@ import utils.QueryUtils.extractDateFromQuery
 import utils.QueryUtils.getFormattedHeartRatesForTheDays
 import utils.QueryUtils.getFormattedRunningResultData
 import utils.QueryUtils.getFormattedTotalStepsForTheDay
+import utils.WebAppConstants.formatted
 import java.io.IOException
-import java.util.*
 import java.util.stream.Collectors
 import javax.annotation.Nonnull
 import javax.servlet.ServletException
@@ -45,14 +45,15 @@ abstract class QueryResponseServlet : HttpServlet {
         val requestHeaderString = req.reader.lines().collect(Collectors.joining(System.lineSeparator()))
         logPostRequest(requestHeaderString)
         val queryMessage = gson.fromJson(requestHeaderString, MessageQueryRequestModel::class.java)
-        val userDate = extractDateFromQuery(queryMessage.query)
+        val userDate = extractDateFromQuery(queryMessage.query)?.formatted()
         if (userDate == null) {
             onDateNotParsed()
+        } else {
+            handleQuery(queryMessage, userDate)
         }
-        handleQuery(queryMessage, userDate)
     }
 
-    private fun handleQuery(queryMessage: MessageQueryRequestModel, userDate: Date?) {
+    private fun handleQuery(queryMessage: MessageQueryRequestModel, userDate: String) {
         when (determineQueryType(queryMessage.query)) {
             QueryUtils.QueryType.RUNNING -> onDisplayRunningEventSelected(userDate)
             QueryUtils.QueryType.HEART_RATE -> onDisplayHeartRateEventSelected(userDate)
@@ -67,7 +68,7 @@ abstract class QueryResponseServlet : HttpServlet {
         )
     }
 
-    private fun onDisplayRunningEventSelected(date: Date?) {
+    private fun onDisplayRunningEventSelected(date: String) {
         val queryResult = databaseQueryRunner!!.queryForRunningEvent(date)
         val queryResultString = getFormattedRunningResultData(queryResult)
         sendResponse(queryResultString)
@@ -93,14 +94,14 @@ abstract class QueryResponseServlet : HttpServlet {
 
     /** Called after response is sent. Template method.  */
     protected open fun onPostResponse() {}
-    private fun onDisplayHeartRateEventSelected(date: Date?) {
+    private fun onDisplayHeartRateEventSelected(date: String) {
         val queryResult = getFormattedHeartRatesForTheDays(
             date, databaseQueryRunner!!.queryHeartRatesForDay(date)
         )
         sendResponse(queryResult)
     }
 
-    private fun onDisplayTotalStepsInDayEventSelected(date: Date?) {
+    private fun onDisplayTotalStepsInDayEventSelected(date: String) {
         val totalStepsInDay = databaseQueryRunner!!.queryForTotalStepsInDay(date)
         sendResponse(getFormattedTotalStepsForTheDay(totalStepsInDay, date))
     }
