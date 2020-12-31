@@ -55,31 +55,32 @@ data class LightSensorData(
         val FILE_NAME = "LightSensor"
     }
 
-    override val document = Document().apply {
-        if (luxValue != null) {
+    override val document: Document
+        get() = Document().apply {
+            if (luxValue != null) {
+                add(
+                    TextField(LuceneManager.LuceneConstants.LUX, luxValue, Field.Store.YES)
+                )
+            }
             add(
-                TextField(LuceneManager.LuceneConstants.LUX, luxValue, Field.Store.YES)
+                StringField(
+                    LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
+                )
+            )
+            add(
+                StringField(
+                    LuceneManager.LuceneConstants.FORMATTED_DATE,
+                    formattedDate,
+                    Field.Store.YES
+                )
+            )
+            //         use a string field for timestamp because we don't want it tokenized
+            add(
+                StringField(
+                    LuceneManager.LuceneConstants.TIMESTAMP, timestamp, Field.Store.YES
+                )
             )
         }
-        add(
-            StringField(
-                LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
-            )
-        )
-        add(
-            StringField(
-                LuceneManager.LuceneConstants.FORMATTED_DATE,
-                formattedDate,
-                Field.Store.YES
-            )
-        )
-        //         use a string field for timestamp because we don't want it tokenized
-        add(
-            StringField(
-                LuceneManager.LuceneConstants.TIMESTAMP, timestamp, Field.Store.YES
-            )
-        )
-    }
     override val mongoCollectionName = "LightSensorData"
     override val tableName = MY_SQL_TABLE_NAME
     override val createTableQuery =

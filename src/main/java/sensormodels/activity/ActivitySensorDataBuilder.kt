@@ -27,14 +27,14 @@ class ActivitySensorDataBuilder : ActivitySensorBuilder {
 
     override fun setStepCounts(stepCounts: Int): ActivitySensorBuilder {
         val sensorData = activitySensorData.sensorData
-        sensorData?.stepCounts = stepCounts
+        sensorData.stepCounts = stepCounts
         activitySensorData.sensorData = sensorData
         return this
     }
 
     override fun setStepDelta(stepDelta: Int): ActivitySensorBuilder {
         val sensorData = activitySensorData.sensorData
-        sensorData?.stepDelta = stepDelta
+        sensorData.stepDelta = stepDelta
         activitySensorData.sensorData = sensorData
         return this
     }

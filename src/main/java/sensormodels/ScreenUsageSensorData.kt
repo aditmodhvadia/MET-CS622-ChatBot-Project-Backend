@@ -58,7 +58,8 @@ data class ScreenUsageSensorData(
         val FILE_NAME = "ScreenUsage"
     }
 
-    override val document = Document()
+    override val document: Document
+        get() = Document()
     override val mongoCollectionName = "ScreenUsageSensorData"
     override val tableName = MY_SQL_TABLE_NAME
     override val createTableQuery =

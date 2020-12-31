@@ -53,7 +53,8 @@ data class BatterySensorData(
         val FILE_NAME = "BatterySensor"
     }
 
-    override val document: Document = Document()
+    override val document: Document
+        get() = Document()
     override val mongoCollectionName: String = "BatterySensorData"
     override val tableName: String = MY_SQL_TABLE_NAME
     override val createTableQuery: String =

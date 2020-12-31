@@ -27,7 +27,7 @@ data class ActivitySensorData(
     var formattedDate: String? = null,
     @SerializedName("sensor_data")
     @Expose
-    var sensorData: SensorData? = null,
+    var sensorData: SensorData = SensorData(),
 ) : SuperStoreModel {
 
     override val startTime: String?
@@ -57,10 +57,10 @@ data class ActivitySensorData(
     data class SensorData(
         @SerializedName("step_counts")
         @Expose
-        var stepCounts: Int? = null,
+        var stepCounts: Int = 0,
         @SerializedName("step_delta")
         @Expose
-        var stepDelta: Int? = null
+        var stepDelta: Int = 0
     )
 
     companion object {
@@ -75,42 +75,43 @@ data class ActivitySensorData(
         val FILE_NAME = "Activity"
     }
 
-    override val document: Document = Document().apply {
-        add(
-            IntPoint(
-                LuceneManager.LuceneConstants.STEP_COUNT, sensorData!!.stepCounts!!
+    override val document: Document
+        get() = Document().apply {
+            add(
+                IntPoint(
+                    LuceneManager.LuceneConstants.STEP_COUNT, sensorData.stepCounts
+                )
             )
-        )
-        add(
-            IntPoint(
-                LuceneManager.LuceneConstants.STEP_DELTA, sensorData!!.stepDelta!!
+            add(
+                IntPoint(
+                    LuceneManager.LuceneConstants.STEP_DELTA, sensorData.stepDelta
+                )
             )
-        )
-        add(
-            StringField(
-                LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
+            add(
+                StringField(
+                    LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
+                )
             )
-        )
-        add(
-            StringField(
-                LuceneManager.LuceneConstants.FORMATTED_DATE, sensorName, Field.Store.YES
+            add(
+                StringField(
+                    LuceneManager.LuceneConstants.FORMATTED_DATE, sensorName, Field.Store.YES
+                )
             )
-        )
-        //         use a string field for timestamp because we don't want it tokenized
-        add(
-            StringField(
-                LuceneManager.LuceneConstants.TIMESTAMP, time_stamp, Field.Store.YES
+            //         use a string field for timestamp because we don't want it tokenized
+            add(
+                StringField(
+                    LuceneManager.LuceneConstants.TIMESTAMP, time_stamp, Field.Store.YES
+                )
             )
-        )
-    }
+        }
 
     override fun fillQueryData(preparedStmt: PreparedStatement) {
         preparedStmt.apply {
             setString(1, time_stamp)
             setString(2, formattedDate)
             setString(3, sensorName)
-            setInt(4, sensorData!!.stepCounts!!)
-            setInt(5, sensorData!!.stepDelta!!)
+            setInt(4, sensorData.stepCounts)
+            setInt(5, sensorData.stepDelta)
         }
     }
 

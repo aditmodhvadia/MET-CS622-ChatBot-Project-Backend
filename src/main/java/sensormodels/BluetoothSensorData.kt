@@ -49,7 +49,8 @@ data class BluetoothSensorData(
         val FILE_NAME = "Bluetooth"
     }
 
-    override val document = Document()
+    override val document: Document
+        get() = Document()
     override val mongoCollectionName = "BluetoothSensorData"
     override val tableName: String = MY_SQL_TABLE_NAME
     override val createTableQuery =

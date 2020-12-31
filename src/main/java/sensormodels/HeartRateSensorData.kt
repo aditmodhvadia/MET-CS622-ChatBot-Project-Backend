@@ -58,27 +58,28 @@ data class HeartRateSensorData(
         val FILE_NAME = "HeartRate"
     }
 
-    override val document = Document().apply {
-        add(IntPoint(LuceneManager.LuceneConstants.BPM, sensorData!!.bpm!!))
-        add(
-            StringField(
-                LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
+    override val document: Document
+        get() = Document().apply {
+            add(IntPoint(LuceneManager.LuceneConstants.BPM, sensorData!!.bpm!!))
+            add(
+                StringField(
+                    LuceneManager.LuceneConstants.SENSOR_NAME, sensorName, Field.Store.YES
+                )
             )
-        )
-        add(
-            StringField(
-                LuceneManager.LuceneConstants.FORMATTED_DATE,
-                formattedDate,
-                Field.Store.YES
+            add(
+                StringField(
+                    LuceneManager.LuceneConstants.FORMATTED_DATE,
+                    formattedDate,
+                    Field.Store.YES
+                )
             )
-        )
-        //         use a string field for timestamp because we don't want it tokenized
-        add(
-            StringField(
-                LuceneManager.LuceneConstants.TIMESTAMP, timestamp, Field.Store.YES
+            //         use a string field for timestamp because we don't want it tokenized
+            add(
+                StringField(
+                    LuceneManager.LuceneConstants.TIMESTAMP, timestamp, Field.Store.YES
+                )
             )
-        )
-    }
+        }
 
     override val mongoCollectionName = MONGO_COLLECTION_NAME
     override val tableName = MY_SQL_TABLE_NAME
