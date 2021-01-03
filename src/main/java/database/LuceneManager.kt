@@ -12,7 +12,7 @@ import org.apache.lucene.search.IndexSearcher
 import org.apache.lucene.store.Directory
 import org.apache.lucene.store.FSDirectory
 import sensormodels.activfit.ActivFitSensorData
-import sensormodels.activfit.ActivFitSensorDataBuilder
+import sensormodels.activfit.buildActivFitSensor
 import sensormodels.store.models.LuceneStoreModel
 import java.io.IOException
 import java.nio.file.Paths
@@ -33,11 +33,11 @@ class LuceneManager private constructor(servletContext: ServletContext?) : Datab
         return getLuceneQueryTime("running", LuceneConstants.ACTIVITY)
             .filter { doc -> doc[LuceneConstants.FORMATTED_DATE] == date }
             .map { doc ->
-                ActivFitSensorDataBuilder()
-                    .setStartTime(doc[LuceneConstants.START_TIME])
-                    .setEndTime(doc[LuceneConstants.END_TIME])
-                    .setActivity(doc[LuceneConstants.ACTIVITY])
-                    .build()
+                buildActivFitSensor {
+                    setStartTime(doc[LuceneConstants.START_TIME])
+                    setEndTime(doc[LuceneConstants.END_TIME])
+                    setActivity(doc[LuceneConstants.ACTIVITY])
+                }
             }
     }
 

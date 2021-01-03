@@ -14,17 +14,17 @@ class BatterySensorDataTest {
 
     @Before
     fun setUp() {
-        batterySensorData = BatterySensorDataBuilder()
-            .setSensorName(sensorName)
-            .setCharging(charging)
-            .setPercent(percent)
-            .setTimeStamp(startTime)
-            .get()
+        batterySensorData = buildBatterySensor {
+            setSensorName(sensorName)
+            setCharging(charging)
+            setPercent(percent)
+            setTimeStamp(startTime)
+        }
     }
 
     @Test
     fun buildDsl() {
-        val batteryFromDsl = build {
+        val batteryFromDsl = buildBatterySensor {
             setSensorName(sensorName)
             setCharging(charging)
             setPercent(percent)

@@ -1,6 +1,6 @@
 package sensormodels.battery
 
-class BatterySensorDataBuilder : BatterySensorBuilder {
+private class BatterySensorDataBuilder : BatterySensorBuilder {
     private val batterySensorData: BatterySensorData = BatterySensorData()
     override fun setSensorName(sensorName: String): BatterySensorBuilder {
         batterySensorData.sensorName = sensorName
@@ -28,7 +28,7 @@ class BatterySensorDataBuilder : BatterySensorBuilder {
         return this
     }
 
-    override fun get(): BatterySensorData {
+    override fun build(): BatterySensorData {
         return batterySensorData
     }
 
@@ -37,6 +37,6 @@ class BatterySensorDataBuilder : BatterySensorBuilder {
     }
 }
 
-fun build(initializer: BatterySensorBuilder.() -> Unit): BatterySensorData {
-    return BatterySensorDataBuilder().apply(initializer).get()
+fun buildBatterySensor(initializer: BatterySensorBuilder.() -> Unit): BatterySensorData {
+    return BatterySensorDataBuilder().apply(initializer).build()
 }

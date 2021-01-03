@@ -16,13 +16,13 @@ class ActivFitSensorDataTest {
 
     @Before
     fun setUp() {
-        activFitSensorData = ActivFitSensorDataBuilder()
-            .setSensorName(sensorName)
-            .setActivity(activity)
-            .setDuration(duration)
-            .setStartTime(startTime)
-            .setEndTime(endTime)
-            .build()
+        activFitSensorData = buildActivFitSensor {
+            setSensorName(sensorName)
+            setActivity(activity)
+            setDuration(duration)
+            setStartTime(startTime)
+            setEndTime(endTime)
+        }
     }
 
     @Test

@@ -6,5 +6,5 @@ interface BatterySensorBuilder {
     fun setSensorData(sensorData: BatterySensorData.SensorData): BatterySensorBuilder
     fun setPercent(percent: Int): BatterySensorBuilder
     fun setCharging(charging: Boolean): BatterySensorBuilder
-    fun get(): BatterySensorData
+    fun build(): BatterySensorData
 }

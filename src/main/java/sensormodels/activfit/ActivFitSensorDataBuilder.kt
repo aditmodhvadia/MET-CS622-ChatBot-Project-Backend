@@ -1,6 +1,7 @@
 package sensormodels.activfit
 
-class ActivFitSensorDataBuilder : ActivFitSensorBuilder {
+
+private class ActivFitSensorDataBuilder : ActivFitSensorBuilder {
     private val activFitSensorData: ActivFitSensorData = ActivFitSensorData()
 
     override fun setSensorName(sensorName: String): ActivFitSensorBuilder {
@@ -47,4 +48,8 @@ class ActivFitSensorDataBuilder : ActivFitSensorBuilder {
         activFitSensorData.timestamp = ActivFitSensorData.Timestamp()
         activFitSensorData.sensorData = ActivFitSensorData.SensorData()
     }
+}
+
+fun buildActivFitSensor(initializer: ActivFitSensorBuilder.() -> Unit): ActivFitSensorData {
+    return ActivFitSensorDataBuilder().apply(initializer).build()
 }

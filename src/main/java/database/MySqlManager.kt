@@ -5,11 +5,10 @@ import sensormodels.HeartRateSensorData
 import sensormodels.LightSensorData
 import sensormodels.ScreenUsageSensorData
 import sensormodels.activfit.ActivFitSensorData
-import sensormodels.activfit.ActivFitSensorDataBuilder
 import sensormodels.activity.ActivitySensorData
-import sensormodels.activity.ActivitySensorDataBuilder
+import sensormodels.activity.buildActivitySensor
 import sensormodels.battery.BatterySensorData
-import sensormodels.battery.build
+import sensormodels.battery.buildBatterySensor
 import sensormodels.store.models.MySqlStoreModel
 import java.sql.*
 import java.util.*
@@ -160,13 +159,13 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
             st = connection!!.createStatement()
             val rs = st.executeQuery(query)
             while (rs.next()) {
-                val data = ActivitySensorDataBuilder()
-                    .setTimeStamp(rs.getString("time_stamp"))
-                    .setTimestamp(rs.getString("time_stamp"))
-                    .setSensorName(rs.getString("sensor_name"))
-                    .setStepCounts(rs.getInt("step_counts"))
-                    .setStepDelta(rs.getInt("step_delta"))
-                    .build()
+                val data = buildActivitySensor {
+                    setTimeStamp(rs.getString("time_stamp"))
+                    setTimestamp(rs.getString("time_stamp"))
+                    setSensorName(rs.getString("sensor_name"))
+                    setStepCounts(rs.getInt("step_counts"))
+                    setStepDelta(rs.getInt("step_delta"))
+                }
                 resultSet.add(data)
             }
         } catch (e: SQLException) {
@@ -210,12 +209,12 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
 
     @Throws(SQLException::class)
     private fun getActivFitSensorDataFromResultSet(rs: ResultSet): ActivFitSensorData {
-        return ActivFitSensorDataBuilder()
-            .setStartTime(rs.getString("start_time"))
-            .setEndTime(rs.getString("end_time"))
-            .setActivity(rs.getString("activity"))
-            .setDuration(rs.getInt("duration"))
-            .build()
+        return sensormodels.activfit.buildActivFitSensor {
+            setStartTime(rs.getString("start_time"))
+            setEndTime(rs.getString("end_time"))
+            setActivity(rs.getString("activity"))
+            setDuration(rs.getInt("duration"))
+        }
     }
 
     /**
@@ -279,7 +278,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
                 st = connection!!.createStatement()
                 val rs = st.executeQuery(query)
                 while (rs.next()) {
-                    val batterySensor = build {
+                    val batterySensor = buildBatterySensor {
                         setSensorName(rs.getString("sensor_name"))
                         setTimeStamp(rs.getString("timestamp"))
                         setPercent(rs.getInt("percent"))

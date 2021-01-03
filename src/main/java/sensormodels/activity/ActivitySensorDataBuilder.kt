@@ -1,7 +1,7 @@
 package sensormodels.activity
 
 
-class ActivitySensorDataBuilder : ActivitySensorBuilder {
+private class ActivitySensorDataBuilder : ActivitySensorBuilder {
     private val activitySensorData: ActivitySensorData = ActivitySensorData()
     override fun setSensorName(sensorName: String): ActivitySensorBuilder {
         activitySensorData.sensorName = sensorName
@@ -46,4 +46,8 @@ class ActivitySensorDataBuilder : ActivitySensorBuilder {
     init {
         activitySensorData.sensorData = ActivitySensorData.SensorData()
     }
+}
+
+fun buildActivitySensor(initializer: ActivitySensorBuilder.() -> Unit): ActivitySensorData {
+    return ActivitySensorDataBuilder().apply(initializer).build()
 }

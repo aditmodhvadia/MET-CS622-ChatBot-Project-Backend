@@ -13,13 +13,13 @@ class ActivitySensorDataTest {
 
     @Before
     fun setUp() {
-        activitySensorData = ActivitySensorDataBuilder()
-            .setSensorName(sensorName)
-            .setStepCounts(stepCount)
-            .setStepDelta(stepCountDelta)
-            .setTimeStamp(startTime)
-            .setTimestamp(startTime)
-            .build()
+        activitySensorData = buildActivitySensor {
+            setSensorName(sensorName)
+            setStepCounts(stepCount)
+            setStepDelta(stepCountDelta)
+            setTimeStamp(startTime)
+            setTimestamp(startTime)
+        }
     }
 
     @Test
@@ -50,11 +50,11 @@ class ActivitySensorDataTest {
 
     @Test
     fun getStepCount() {
-        Assert.assertEquals(stepCount, activitySensorData.sensorData!!.stepCounts)
+        Assert.assertEquals(stepCount, activitySensorData.sensorData.stepCounts)
     }
 
     @Test
     fun stepDelta() {
-        Assert.assertEquals(stepCountDelta, activitySensorData.sensorData!!.stepDelta)
+        Assert.assertEquals(stepCountDelta, activitySensorData.sensorData.stepDelta)
     }
 }

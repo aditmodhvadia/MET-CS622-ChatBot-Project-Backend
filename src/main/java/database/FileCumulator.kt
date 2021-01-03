@@ -87,7 +87,7 @@ class FileCumulator private constructor() : DbManager<FileStoreModel>, DatabaseQ
         )
         return activitySensorDataList
             .filter { sensorData: ActivitySensorData -> sensorData.formattedDate == date }
-            .maxByOrNull { sensorData: ActivitySensorData -> sensorData.sensorData?.stepCounts ?: 0 }
+            .maxByOrNull { sensorData: ActivitySensorData -> sensorData.sensorData.stepCounts }
             ?.sensorData
             ?.stepCounts ?: 0
     }
@@ -117,8 +117,9 @@ class FileCumulator private constructor() : DbManager<FileStoreModel>, DatabaseQ
             ).mapNotNull {
                 try {
                     //                converts JSON string into POJO
-                    val heartRateSensorData = g.fromJson(it, HeartRateSensorData::class.java)
-                    heartRateSensorData.setFormattedDate()
+                    val heartRateSensorData = g.fromJson(it, HeartRateSensorData::class.java).apply {
+                        setFormattedDate()
+                    }
                     heartRateSensorData
                 } catch (e: Exception) {
                     //                e.printStackTrace();
