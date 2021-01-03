@@ -9,7 +9,7 @@ import sensormodels.activfit.ActivFitSensorDataBuilder
 import sensormodels.activity.ActivitySensorData
 import sensormodels.activity.ActivitySensorDataBuilder
 import sensormodels.battery.BatterySensorData
-import sensormodels.battery.BatterySensorDataBuilder
+import sensormodels.battery.build
 import sensormodels.store.models.MySqlStoreModel
 import java.sql.*
 import java.util.*
@@ -101,7 +101,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
     override fun queryForTotalStepsInDay(date: String): Int {
         return try {
             getActivitySensorDataForGivenDate(date).maxByOrNull { sensorModel: ActivitySensorData ->
-                sensorModel.sensorData?.stepCounts ?: 0
+                sensorModel.sensorData.stepCounts
             }?.sensorData?.stepCounts ?: 0
         } catch (exception: NoSuchElementException) {
             0
@@ -279,12 +279,12 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
                 st = connection!!.createStatement()
                 val rs = st.executeQuery(query)
                 while (rs.next()) {
-                    val batterySensor = BatterySensorDataBuilder()
-                        .setSensorName(rs.getString("sensor_name"))
-                        .setTimeStamp(rs.getString("timestamp"))
-                        .setPercent(rs.getInt("percent"))
-                        .setCharging(rs.getBoolean("charging")) // duration if charging doesn't work
-                        .build()
+                    val batterySensor = build {
+                        setSensorName(rs.getString("sensor_name"))
+                        setTimeStamp(rs.getString("timestamp"))
+                        setPercent(rs.getInt("percent"))
+                        setCharging(rs.getBoolean("charging")) // duration if charging doesn't work
+                    }
                     results.add(batterySensor)
                 }
             } catch (e: SQLException) {
@@ -301,7 +301,7 @@ class MySqlManager private constructor() : DbManager<MySqlStoreModel?>, Database
         // JDBC driver name and database URL TODO: Not using this one in init()
         const val JDBC_DRIVER = "com.mysql.jdbc.Driver"
         const val DB_NAME = "sensordata"
-        const val DB_URL = "jdbc:mysql://localhost:3306/" + DB_NAME
+        const val DB_URL = "jdbc:mysql://localhost:3306/$DB_NAME"
 
         //  Database credentials
         const val USER = "admin"

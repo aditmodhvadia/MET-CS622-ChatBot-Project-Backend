@@ -3,6 +3,7 @@ package sensormodels.battery
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import kotlin.test.assertTrue
 
 class BatterySensorDataTest {
     private val sensorName = "ActivFitSensorData"
@@ -18,7 +19,18 @@ class BatterySensorDataTest {
             .setCharging(charging)
             .setPercent(percent)
             .setTimeStamp(startTime)
-            .build()
+            .get()
+    }
+
+    @Test
+    fun buildDsl() {
+        val batteryFromDsl = build {
+            setSensorName(sensorName)
+            setCharging(charging)
+            setPercent(percent)
+            setTimeStamp(startTime)
+        }
+        assertTrue(batterySensorData == batteryFromDsl)
     }
 
     @Test

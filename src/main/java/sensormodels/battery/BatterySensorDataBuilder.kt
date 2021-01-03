@@ -28,11 +28,15 @@ class BatterySensorDataBuilder : BatterySensorBuilder {
         return this
     }
 
-    override fun build(): BatterySensorData {
+    override fun get(): BatterySensorData {
         return batterySensorData
     }
 
     init {
         batterySensorData.sensorData = BatterySensorData.SensorData()
     }
+}
+
+fun build(initializer: BatterySensorBuilder.() -> Unit): BatterySensorData {
+    return BatterySensorDataBuilder().apply(initializer).get()
 }

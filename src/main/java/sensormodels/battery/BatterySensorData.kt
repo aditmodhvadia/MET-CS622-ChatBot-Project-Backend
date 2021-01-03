@@ -35,15 +35,14 @@ data class BatterySensorData(
 
     override val startTime: String? = timestamp
 
-    class SensorData {
+    data class SensorData(
         @SerializedName("percent")
         @Expose
-        var percent: Int? = null
-
+        var percent: Int? = null,
         @SerializedName("charging")
         @Expose
         var charging: Boolean? = null
-    }
+    )
 
     companion object {
         @BsonIgnore
@@ -53,8 +52,7 @@ data class BatterySensorData(
         val FILE_NAME = "BatterySensor"
     }
 
-    override val document: Document
-        get() = Document()
+    override val document: Document by lazy { Document() }
     override val mongoCollectionName: String = "BatterySensorData"
     override val tableName: String = MY_SQL_TABLE_NAME
     override val createTableQuery: String =

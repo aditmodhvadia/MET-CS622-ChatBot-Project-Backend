@@ -2,6 +2,7 @@ package database
 
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
+import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters
@@ -26,18 +27,24 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
      * @param servletContext servlet context
      */
     override fun init(servletContext: ServletContext?) {
-        val settings = getMongoClientSettings(codecRegistry)
         //        create a connection to MongoDB Client
-        val mongoClient = MongoClients.create(settings)
         println("Connected to edu.bu.aditm.database successfully")
         try {
-            //        fetch the edu.bu.aditm.database for MongoDB
-            database = mongoClient.getDatabase(DATABASE_NAME)
+            // Kotlin DSL
+            database = mongoClient {
+                applyConnectionString("mongodb://localhost:27017".connectionString())
+                codecRegistry(codecRegistry)
+            }.getDatabase(DATABASE_NAME)
             println("MongoDB initialised")
         } catch (e: Exception) {
             e.printStackTrace()
             println("Failed to initialise MongoDB")
         }
+    }
+
+    // Kotlin DSL
+    private fun mongoClient(mongoClientInitializer: MongoClientSettings.Builder.() -> Unit): MongoClient {
+        return MongoClients.create(MongoClientSettings.builder().apply(mongoClientInitializer).build())
     }
 
     @Nonnull
@@ -111,7 +118,7 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
         var maxStepCount = -1 // Max value of step count for the day
         while (cursor.hasNext()) {
             val sensorData = cursor.next()
-            maxStepCount = max(maxStepCount, sensorData.sensorData?.stepCounts ?: 0)
+            maxStepCount = max(maxStepCount, sensorData.sensorData.stepCounts)
         }
         return maxStepCount
     }
@@ -153,3 +160,5 @@ class MongoDbManager private constructor() : DbManager<MongoStoreModel?>, Databa
         init(null)
     }
 }
+
+private fun String.connectionString(): ConnectionString = ConnectionString(this)
